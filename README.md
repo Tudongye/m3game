@@ -22,7 +22,9 @@ Demo: A group of demos includes complete business functions
 
 # m3game
 
-一个基于Golang和Grpc的游戏后端框架。使用标准的protobuf和grpc来生成脚手架代码，业务开发只需要关注于具体的游戏逻辑。框架支持三种常见的服务模型，并发多线程，单线程异步 和 Actor模式（actor内同步）。各服务捅过grpc进行通讯，服务网格支持P2P，Random，Hash，Single路由模式。框架支持插件式开发，可以根据具体使用的基础设施进行定制化开发。
+一个基于Golang和Grpc的游戏后端框架。
+
+使用标准的protobuf和grpc来生成脚手架代码，业务开发只需要关注于具体的游戏逻辑。框架支持三种常见的服务模型，并发多线程，单线程异步 和 Actor模式（actor内同步）。各服务捅过grpc进行通讯，服务网格支持P2P，Random，Hash，Single路由模式。框架支持插件式开发，可以根据具体使用的基础设施进行定制化开发。
 
 Runtime: 框架核心，包括了启动器，插件管理器 和 Grpcser。全部采用单例。
 
@@ -41,3 +43,4 @@ Config: 配置管理
 Demo： 一组Demo，包括了完整的业务功能。
 
 
+![未命名文件 (1)](https://user-images.githubusercontent.com/16680818/220582821-4def39e5-550f-4784-bc40-49779038c71e.png)
