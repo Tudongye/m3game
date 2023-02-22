@@ -44,3 +44,13 @@ Demo： 一组Demo，包括了完整的业务功能。
 
 
 ![未命名文件 (1)](https://user-images.githubusercontent.com/16680818/220582821-4def39e5-550f-4784-bc40-49779038c71e.png)
+
+
+TODO:
+1、Route Support BroadCast, MutilCast
+路由策略支持 广播，多播
+2、Metric, Trace, Distribute Lock Plugin
+增加对监控，追踪，分布式锁的插件支持
+3、Actor automatic cross-program migration
+Actor模式下，Actor自动跨进程迁移
+
