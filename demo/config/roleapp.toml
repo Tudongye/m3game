@@ -1,0 +1,20 @@
+[App]
+[Transport]
+Addr = "127.0.0.1:22103"
+
+[Plugin]
+[[Plugin.Router.router_consul]]
+ConsulHost = "127.0.0.1:8500"
+[[Plugin.DB.db_cache]]
+Test = "1"
+
+[Server]
+[[Server.Actor]]
+ActiveTimeOut = 60  # role 存活时间
+SaveTimeInter = 10  # role自动存储时间
+TickTimeInter = 10  # 定时器轮转时间
+MaxReqChanSize = 10 # 最大接受信道
+MaxReqWaitTime = 30 # 最大等待时间
+
+[Resource]
+CfgPath = "../../resource"

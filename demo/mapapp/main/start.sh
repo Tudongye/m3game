@@ -1,0 +1,1 @@
+./main -idstr dev.world1.map.1 -conf ../../config/mapapp.toml

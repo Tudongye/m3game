@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "proto/pb";
+
+
+import "pkg.proto";
+
+service MapSer {
+    rpc Move(Move.Req) returns (Move.Rsp) ;
+}
+
+message Move {
+    message Req {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+        int32 Distance =3;
+
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+        int32 Location = 3;
+    }
+}

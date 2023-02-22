@@ -1,0 +1,1 @@
+./main -idstr dev.world1.dir.1 -conf ../../config/dirapp.toml

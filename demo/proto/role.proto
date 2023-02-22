@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "proto/pb";
+
+
+import "pkg.proto";
+
+service RoleSer {
+    rpc Register(Register.Req) returns (Register.Rsp);
+    rpc Login(Login.Req) returns (Login.Rsp);
+    rpc ModifyName(ModifyName.Req) returns (ModifyName.Rsp);
+    rpc GetName(GetName.Req) returns (GetName.Rsp);
+    rpc MoveRole(MoveRole.Req) returns (MoveRole.Rsp);
+}
+
+message RoleDB {
+    string RoleID = 1;
+    string name = 2;
+}
+
+
+message Register {
+    message Req {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string RoleID = 2;
+    }
+}
+
+message Login {
+    message Req {
+        RouteHead RouteHead = 1;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+        string Tips = 3;
+    }
+}
+
+
+message ModifyName {
+    message Req {
+        RouteHead RouteHead = 1;
+        string NewName = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+    }
+}
+message GetName {
+    message Req {
+        RouteHead RouteHead = 1;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+    }
+}
+
+message MoveRole {
+    message Req {
+        RouteHead RouteHead = 1;
+        int32 Distance = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        int32 Location = 2;
+        string LocateName = 3;
+    }
+}

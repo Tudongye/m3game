@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "m3game/proto/pb";
+
+// 
+message Meta {
+    string Key = 1;
+    string Value = 2;
+}
+
+message Metas {
+    repeated Meta Metas = 1;
+
+}
+
+
+
+enum RouteType {
+    RT_MIN = 0;
+    RT_P2P = 1;     
+    RT_RAND = 2;
+    RT_HASH = 3;
+    RT_BROAD = 4;
+    RT_MUTIL = 5;
+    RT_SINGLE = 6;
+    RT_DIRECT = 7;
+}
+
+message RouteIns {
+    string EnvID = 1;
+    string WorldID = 2;
+    string FuncID = 3;
+    string InsID = 4;
+    string IDStr = 5;
+}
+
+message RouteSvc {
+    string EnvID = 1;
+    string WorldID = 2;
+    string FuncID = 3;
+    string IDStr = 4;
+}
+
+message RouteWorld {
+    string EnvID = 1;
+    string WorldID = 2;
+}
+
+message RouteP2PHead {
+    RouteIns DstIns = 1;
+}
+
+message RouteRandHead {
+    string Pass = 1;
+}
+
+message RouteHashHead {
+    string HashKey = 1;
+}
+
+message RouteBroadHead {
+    string Pass = 1;
+}
+
+message RouteMutilHead {
+    repeated RouteIns DstInss = 1;
+}
+
+message RouteSingleHead {
+    string Pass = 1;
+}
+
+message RouteDirectHead {
+    string Host = 1;
+    int32 Port = 2;
+}
+
+message RoutePara {
+    repeated RouteP2PHead RouteP2PHead = 1;
+    repeated RouteRandHead RouteRandHead = 2;
+    repeated RouteHashHead RouteHashHead = 3;
+    repeated RouteBroadHead RouteBroadHead = 4;
+    repeated RouteMutilHead RouteMutilHead = 5;
+    repeated RouteSingleHead RouteSingleHead = 6;
+    repeated RouteDirectHead RouteDirectHead = 7;
+}
+
+message RouteHead {
+    RouteIns SrcIns = 1;
+    RouteSvc DstSvc = 2;
+    RouteType RouteType = 3;
+    RoutePara RoutePara = 4;
+    Metas Metas = 5;
+}
+
