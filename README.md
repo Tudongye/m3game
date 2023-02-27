@@ -24,7 +24,7 @@ Demo: A group of demos includes complete business functions
 
 一个基于Golang和Grpc的游戏后端框架。
 
-使用标准的protobuf和grpc来生成脚手架代码，业务开发只需要关注于具体的游戏逻辑。框架支持三种常见的服务模型，并发多线程，单线程异步 和 Actor模式（actor内同步）。各服务捅过grpc进行通讯，服务网格支持P2P，Random，Hash，Single路由模式。框架支持插件式开发，可以根据具体使用的基础设施进行定制化开发。
+使用标准的protobuf和grpc来生成脚手架代码，业务开发只需要关注于具体的游戏逻辑。框架支持三种常见的服务模型，并发多线程，单线程异步 和 Actor模式（actor内同步）。各服务捅过grpc进行通讯，服务网格支持P2P，Random，Hash，Single路由模式。框架支持插件式开发，可以根据具体使用的基础设施进行定制化开发。框架基于Broker实现的Grpc兼容BrokerSer，用于处理BroadCast和MutilCast。可以直接复用Grpc接口代码
 
 Runtime: 框架核心，包括了启动器，插件管理器 和 Grpcser。全部采用单例。
 
@@ -35,6 +35,8 @@ Server: 业务实体，包含实际的游戏逻辑。这里有三种服务基类
 Mesh: 服务网格，包含专用的load_Balance算法 和 一个基于Consul的路由插件
 
 DB: DB插件，包含一个测试用的内存数据库
+
+Broker： Broker插件，包含一个Nats实现
 
 Resource： 资源管理（业务配置管理）
 
@@ -48,7 +50,7 @@ Demo： 一组Demo，包括了完整的业务功能。
 
 TODO:
 
-1、Route Support BroadCast, MutilCast
+1、Route Support BroadCast, MutilCast  Done
 
 路由策略支持 广播，多播
 
