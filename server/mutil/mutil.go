@@ -6,6 +6,8 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/transport"
 	"m3game/server"
+
+	"google.golang.org/grpc"
 )
 
 func CreateServer(name string) *Server {
@@ -57,6 +59,6 @@ func (s *Server) SendInterFunc(sctx *transport.Sender) error {
 	return s.app.SendInterFunc(sctx, runtime.SendInterFunc)
 }
 
-func (s *Server) TransportRegister() func(*transport.Transport) error {
+func (s *Server) TransportRegister() func(grpc.ServiceRegistrar) error {
 	return nil
 }

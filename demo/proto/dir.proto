@@ -7,6 +7,7 @@ option go_package = "proto/pb";
 
 import "pkg.proto";
 
+
 service DirSer {
     rpc Hello(Hello.Req) returns (Hello.Rsp) ;
 }

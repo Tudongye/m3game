@@ -7,10 +7,6 @@
 package pb
 
 import (
-	context "context"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	pb "m3game/proto/pb"
@@ -306,84 +302,4 @@ func file_map_proto_init() {
 	file_map_proto_rawDesc = nil
 	file_map_proto_goTypes = nil
 	file_map_proto_depIdxs = nil
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConnInterface
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
-
-// MapSerClient is the client API for MapSer service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type MapSerClient interface {
-	Move(ctx context.Context, in *Move_Req, opts ...grpc.CallOption) (*Move_Rsp, error)
-}
-
-type mapSerClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewMapSerClient(cc grpc.ClientConnInterface) MapSerClient {
-	return &mapSerClient{cc}
-}
-
-func (c *mapSerClient) Move(ctx context.Context, in *Move_Req, opts ...grpc.CallOption) (*Move_Rsp, error) {
-	out := new(Move_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.MapSer/Move", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// MapSerServer is the server API for MapSer service.
-type MapSerServer interface {
-	Move(context.Context, *Move_Req) (*Move_Rsp, error)
-}
-
-// UnimplementedMapSerServer can be embedded to have forward compatible implementations.
-type UnimplementedMapSerServer struct {
-}
-
-func (*UnimplementedMapSerServer) Move(context.Context, *Move_Req) (*Move_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Move not implemented")
-}
-
-func RegisterMapSerServer(s *grpc.Server, srv MapSerServer) {
-	s.RegisterService(&_MapSer_serviceDesc, srv)
-}
-
-func _MapSer_Move_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Move_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MapSerServer).Move(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.MapSer/Move",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MapSerServer).Move(ctx, req.(*Move_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _MapSer_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.MapSer",
-	HandlerType: (*MapSerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Move",
-			Handler:    _MapSer_Move_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "map.proto",
 }

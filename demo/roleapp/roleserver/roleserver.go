@@ -8,8 +8,11 @@ import (
 	"m3game/demo/loader"
 	"m3game/demo/mapapp/mapclient"
 	dpb "m3game/demo/proto/pb"
-	"m3game/runtime/transport"
+	"m3game/demo/roleapp/rolechclient"
+	"m3game/demo/roleapp/rolechserver"
 	"m3game/server/actor"
+
+	"google.golang.org/grpc"
 )
 
 var (
@@ -34,6 +37,14 @@ func CreateRoleSer() *RoleSer {
 
 type RoleSer struct {
 	*actor.Server
+	dpb.UnimplementedRoleSerServer
+}
+
+func (s *RoleSer) TransportRegister() func(grpc.ServiceRegistrar) error {
+	return func(t grpc.ServiceRegistrar) error {
+		dpb.RegisterRoleSerServer(t, s)
+		return nil
+	}
 }
 
 func (d *RoleSer) Register(ctx context.Context, in *dpb.Register_Req) (*dpb.Register_Rsp, error) {
@@ -109,9 +120,25 @@ func (d *RoleSer) MoveRole(ctx context.Context, in *dpb.MoveRole_Req) (*dpb.Move
 	return out, nil
 }
 
-func (s *RoleSer) TransportRegister() func(*transport.Transport) error {
-	return func(t *transport.Transport) error {
-		dpb.RegisterRoleSerServer(t.GrpcSer(), s)
-		return nil
+func (d *RoleSer) PostChannel(ctx context.Context, in *dpb.PostChannel_Req) (*dpb.PostChannel_Rsp, error) {
+	out := new(dpb.PostChannel_Rsp)
+	role := ParseRoleActor(ctx)
+	if role == nil || !role.ready {
+		return out, _err_actor_notready
 	}
+	if err := rolechclient.RoleChClient().TransChannel(ctx, &dpb.ChannelMsg{Name: role.Name(), Content: in.Content}); err != nil {
+		return out, err
+	} else {
+		return out, nil
+	}
+}
+
+func (d *RoleSer) PullChannel(ctx context.Context, in *dpb.PullChannel_Req) (*dpb.PullChannel_Rsp, error) {
+	out := new(dpb.PullChannel_Rsp)
+	role := ParseRoleActor(ctx)
+	if role == nil || !role.ready {
+		return out, _err_actor_notready
+	}
+	out.Msgs = rolechserver.GetMsg()
+	return out, nil
 }

@@ -2,7 +2,6 @@ package actor
 
 import (
 	"fmt"
-	"log"
 	"m3game/app"
 	"m3game/proto"
 	"m3game/runtime"
@@ -10,6 +9,7 @@ import (
 	"m3game/server"
 
 	"github.com/mitchellh/mapstructure"
+	"google.golang.org/grpc"
 )
 
 func CreateServer(name string, creater ActorCreater) *Server {
@@ -62,7 +62,6 @@ func (s *Server) Init(c map[string]interface{}, app app.App) error {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return err
 	}
-	log.Println(c)
 	if err := _cfg.CheckVaild(); err != nil {
 		return err
 	}
@@ -105,6 +104,6 @@ func (s *Server) SendInterFunc(sctx *transport.Sender) error {
 	return s.app.SendInterFunc(sctx, runtime.SendInterFunc)
 }
 
-func (s *Server) TransportRegister() func(*transport.Transport) error {
+func (s *Server) TransportRegister() func(grpc.ServiceRegistrar) error {
 	return nil
 }

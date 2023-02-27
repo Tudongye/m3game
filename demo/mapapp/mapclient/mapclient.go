@@ -9,7 +9,7 @@ import (
 	"m3game/runtime/transport"
 	"m3game/util"
 
-	"m3game/demo/mapapp"
+	dproto "m3game/demo/proto"
 	dpb "m3game/demo/proto/pb"
 
 	"google.golang.org/grpc"
@@ -32,7 +32,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 			EnvID:   srcins.EnvID,
 			WorldID: srcins.WorldID,
 			FuncID:  srcins.FuncID,
-			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, mapapp.AppFuncID),
+			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.MapAppFuncID),
 		},
 	}
 	for _, opt := range opts {
@@ -40,7 +40,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	}
 	var err error
 	if _instance.conn, err = grpc.Dial(
-		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, mapapp.AppFuncID)),
+		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.MapAppFuncID)),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(transport.SendInteror(SendInterFunc)),
 	); err != nil {

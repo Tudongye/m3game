@@ -4,6 +4,8 @@ import (
 	"context"
 	"m3game/app"
 	"m3game/runtime/transport"
+
+	"google.golang.org/grpc"
 )
 
 type Type string
@@ -44,5 +46,5 @@ type Server interface {
 	RecvInterFunc(*transport.Reciver) (resp interface{}, err error) // RPC ServerInterceptor
 	SendInterFunc(sender *transport.Sender) error                   // RPC ClientInterceptor
 	CreateContext(*transport.Reciver) Context                       //
-	TransportRegister() func(*transport.Transport) error            // register grpcser to conn
+	TransportRegister() func(grpc.ServiceRegistrar) error           // register grpcser to conn
 }

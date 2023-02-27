@@ -2,20 +2,18 @@ package dirapp
 
 import (
 	"m3game/app"
+	"m3game/broker/nats"
 	"m3game/demo/dirapp/dirserver"
+	dproto "m3game/demo/proto"
 	"m3game/mesh/router/consul"
 	"m3game/runtime"
 	"m3game/runtime/plugin"
 	"m3game/server"
 )
 
-const (
-	AppFuncID = "dir"
-)
-
 func CreateDirApp() *DirApp {
 	return &DirApp{
-		DefaultApp: app.CreateDefaultApp(AppFuncID),
+		DefaultApp: app.CreateDefaultApp(dproto.DirAppFuncID),
 	}
 }
 
@@ -37,6 +35,7 @@ func (d *DirApp) HealthCheck() bool {
 }
 func Run() error {
 	plugin.RegisterPluginFactory(&consul.Factory{})
+	plugin.RegisterPluginFactory(&nats.Factory{})
 	runtime.Run(CreateDirApp(), []server.Server{dirserver.CreateDirSer()})
 	return nil
 }

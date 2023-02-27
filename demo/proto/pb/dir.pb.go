@@ -7,10 +7,6 @@
 package pb
 
 import (
-	context "context"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	pb "m3game/proto/pb"
@@ -287,84 +283,4 @@ func file_dir_proto_init() {
 	file_dir_proto_rawDesc = nil
 	file_dir_proto_goTypes = nil
 	file_dir_proto_depIdxs = nil
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConnInterface
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
-
-// DirSerClient is the client API for DirSer service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type DirSerClient interface {
-	Hello(ctx context.Context, in *Hello_Req, opts ...grpc.CallOption) (*Hello_Rsp, error)
-}
-
-type dirSerClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewDirSerClient(cc grpc.ClientConnInterface) DirSerClient {
-	return &dirSerClient{cc}
-}
-
-func (c *dirSerClient) Hello(ctx context.Context, in *Hello_Req, opts ...grpc.CallOption) (*Hello_Rsp, error) {
-	out := new(Hello_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.DirSer/Hello", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// DirSerServer is the server API for DirSer service.
-type DirSerServer interface {
-	Hello(context.Context, *Hello_Req) (*Hello_Rsp, error)
-}
-
-// UnimplementedDirSerServer can be embedded to have forward compatible implementations.
-type UnimplementedDirSerServer struct {
-}
-
-func (*UnimplementedDirSerServer) Hello(context.Context, *Hello_Req) (*Hello_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Hello not implemented")
-}
-
-func RegisterDirSerServer(s *grpc.Server, srv DirSerServer) {
-	s.RegisterService(&_DirSer_serviceDesc, srv)
-}
-
-func _DirSer_Hello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Hello_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DirSerServer).Hello(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.DirSer/Hello",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DirSerServer).Hello(ctx, req.(*Hello_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _DirSer_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.DirSer",
-	HandlerType: (*DirSerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Hello",
-			Handler:    _DirSer_Hello_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "dir.proto",
 }

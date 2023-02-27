@@ -12,6 +12,9 @@ type Type string
 const (
 	DB     Type = "db"
 	Router Type = "router" // 只可以有一个
+	Trace  Type = "trace"
+	Metric Type = "metric"
+	Broker Type = "broker"
 )
 
 const (

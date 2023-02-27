@@ -25,7 +25,6 @@ enum RouteType {
     RT_BROAD = 4;
     RT_MUTIL = 5;
     RT_SINGLE = 6;
-    RT_DIRECT = 7;
 }
 
 message RouteIns {
@@ -65,17 +64,13 @@ message RouteBroadHead {
 }
 
 message RouteMutilHead {
-    repeated RouteIns DstInss = 1;
+    string Topic = 1;
 }
 
 message RouteSingleHead {
     string Pass = 1;
 }
 
-message RouteDirectHead {
-    string Host = 1;
-    int32 Port = 2;
-}
 
 message RoutePara {
     repeated RouteP2PHead RouteP2PHead = 1;
@@ -84,7 +79,6 @@ message RoutePara {
     repeated RouteBroadHead RouteBroadHead = 4;
     repeated RouteMutilHead RouteMutilHead = 5;
     repeated RouteSingleHead RouteSingleHead = 6;
-    repeated RouteDirectHead RouteDirectHead = 7;
 }
 
 message RouteHead {
@@ -95,3 +89,8 @@ message RouteHead {
     Metas Metas = 5;
 }
 
+
+message BrokerPkg {
+    string FullMethod = 1;
+    bytes Content = 2;
+}

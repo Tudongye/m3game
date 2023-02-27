@@ -75,3 +75,32 @@ func CreateRouteHead_Single(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteH
 	}
 	return &routehead
 }
+
+func CreateRouteHead_Mutil(srcins *pb.RouteIns, topic string) *pb.RouteHead {
+	var routehead pb.RouteHead
+	routehead.SrcIns = srcins
+	routehead.RouteType = pb.RouteType_RT_MUTIL
+	routehead.RoutePara = &pb.RoutePara{
+		RouteMutilHead: []*pb.RouteMutilHead{
+			{
+				Topic: topic,
+			},
+		},
+	}
+	return &routehead
+}
+
+func CreateRouteHead_Broad(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
+	var routehead pb.RouteHead
+	routehead.SrcIns = srcins
+	routehead.DstSvc = dstsvc
+	routehead.RouteType = pb.RouteType_RT_BROAD
+	routehead.RoutePara = &pb.RoutePara{
+		RouteBroadHead: []*pb.RouteBroadHead{
+			{
+				Pass: "",
+			},
+		},
+	}
+	return &routehead
+}

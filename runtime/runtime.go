@@ -41,8 +41,8 @@ func (r *Runtime) HealthCheck(idstr string) bool {
 		return false
 	}
 	return r.app.HealthCheck()
-
 }
+
 func (r *Runtime) RecvInterFunc(recv *transport.Reciver) (resp interface{}, err error) {
 	for _, server := range r.servers {
 		if server == recv.Info().Server {

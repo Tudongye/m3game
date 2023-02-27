@@ -3,12 +3,14 @@ package transport
 import (
 	"context"
 	"log"
+	"m3game/broker"
 	"net"
 	"regexp"
 
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -31,7 +33,8 @@ type RuntimeReciver interface {
 }
 
 type TransportCfg struct {
-	Addr string `mapstructure:"Addr"`
+	Addr         string `mapstructure:"Addr"`
+	BroadTimeOut int    `mapstructure:"BroadTimeOut"`
 }
 
 func (t *TransportCfg) CheckVaild() error {
@@ -42,9 +45,10 @@ func (t *TransportCfg) CheckVaild() error {
 }
 
 type Transport struct {
-	gser    *grpc.Server
-	cancel  context.CancelFunc
-	runtime RuntimeReciver
+	gser      *grpc.Server
+	brokerser *BrokerSer
+	cancel    context.CancelFunc
+	runtime   RuntimeReciver
 }
 
 func (t *Transport) GrpcSer() *grpc.Server {
@@ -111,6 +115,7 @@ func Init(c map[string]interface{}, runtime RuntimeReciver) error {
 			grpc.UnaryServerInterceptor(RecvInteror()),
 		),
 	)
+	_instance.brokerser = CreateBrokerSer(grpc.UnaryServerInterceptor(RecvInteror()))
 	return nil
 }
 
@@ -172,6 +177,20 @@ func TCPAddr() *net.TCPAddr {
 	return _tcpAddr
 }
 
-func RegistServer(f func(*Transport) error) error {
-	return f(_instance)
+func RegistServer(f func(grpc.ServiceRegistrar) error) error {
+	if err := f(_instance.gser); err != nil {
+		return err
+	}
+	if err := f(_instance.brokerser); err != nil {
+		return err
+	}
+	return nil
+}
+
+func RegisterBroker(broker broker.Broker) {
+	_instance.brokerser.registerBroker(broker)
+}
+
+func SendToBroker(sender *Sender, topic string) error {
+	return _instance.brokerser.SendToBroker(topic, sender.Method(), sender.req.(proto.Message))
 }

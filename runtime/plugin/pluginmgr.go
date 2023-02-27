@@ -2,8 +2,10 @@ package plugin
 
 import (
 	"fmt"
+	"m3game/broker"
 	"m3game/db"
 	"m3game/mesh/router"
+	"m3game/runtime/transport"
 )
 
 func init() {
@@ -23,8 +25,8 @@ var (
 func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 	if _, ok := _pluginMgr.insMap[typ]; !ok {
 		_pluginMgr.insMap[typ] = make(map[string]map[string]PluginIns)
-	} else if typ == Router {
-		return fmt.Errorf("Plugin Router only one")
+	} else if typ == Router || typ == Broker {
+		return fmt.Errorf("Plugin %s only one", string(typ))
 	}
 	if _, ok := _pluginMgr.insMap[typ][name]; !ok {
 		_pluginMgr.insMap[typ][name] = make(map[string]PluginIns)
@@ -33,6 +35,9 @@ func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 		return fmt.Errorf("Plugin repeated type %s name %s tag %s", typ, name, tag)
 	}
 	_pluginMgr.insMap[typ][name][tag] = p
+	if typ == Broker {
+		transport.RegisterBroker(p.(broker.Broker))
+	}
 	return nil
 }
 

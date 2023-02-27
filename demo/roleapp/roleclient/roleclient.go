@@ -10,7 +10,8 @@ import (
 	"m3game/util"
 
 	dpb "m3game/demo/proto/pb"
-	"m3game/demo/roleapp"
+
+	dproto "m3game/demo/proto"
 
 	"google.golang.org/grpc"
 )
@@ -33,7 +34,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 			EnvID:   srcins.EnvID,
 			WorldID: srcins.WorldID,
 			FuncID:  srcins.FuncID,
-			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, roleapp.AppFuncID),
+			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID),
 		},
 	}
 	for _, opt := range opts {
@@ -41,7 +42,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	}
 	var err error
 	if _instance.conn, err = grpc.Dial(
-		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, roleapp.AppFuncID)),
+		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID)),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(transport.SendInteror(SendInterFunc)),
 	); err != nil {
@@ -139,5 +140,32 @@ func (c *Client) MoveRole(ctx context.Context, roleid string, distance int32) (i
 		return 0, "", err
 	} else {
 		return out.Location, out.LocateName, nil
+	}
+}
+
+func (c *Client) PostChannel(ctx context.Context, roleid string, content string) error {
+	var in dpb.PostChannel_Req
+	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.Content = content
+	metas := make(map[string]string)
+	metas[proto.META_ACTORID] = roleid
+	ctx = context.WithValue(ctx, _rolemetaskey, metas)
+	if _, err := c.client.PostChannel(ctx, &in); err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
+
+func (c *Client) PullChannel(ctx context.Context, roleid string) ([]*dpb.ChannelMsg, error) {
+	var in dpb.PullChannel_Req
+	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	metas := make(map[string]string)
+	metas[proto.META_ACTORID] = roleid
+	ctx = context.WithValue(ctx, _rolemetaskey, metas)
+	if out, err := c.client.PullChannel(ctx, &in); err != nil {
+		return nil, err
+	} else {
+		return out.Msgs, nil
 	}
 }

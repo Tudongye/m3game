@@ -5,9 +5,10 @@ import (
 	"fmt"
 	dpb "m3game/demo/proto/pb"
 	"m3game/proto"
-	"m3game/runtime/transport"
 	"m3game/server"
 	"m3game/server/mutil"
+
+	"google.golang.org/grpc"
 )
 
 func CreateDirSer() *DirSer {
@@ -18,6 +19,7 @@ func CreateDirSer() *DirSer {
 
 type DirSer struct {
 	*mutil.Server
+	dpb.UnimplementedDirSerServer
 }
 
 func (d *DirSer) Hello(ctx context.Context, in *dpb.Hello_Req) (*dpb.Hello_Rsp, error) {
@@ -32,9 +34,9 @@ func (d *DirSer) Hello(ctx context.Context, in *dpb.Hello_Req) (*dpb.Hello_Rsp, 
 	return out, nil
 }
 
-func (s *DirSer) TransportRegister() func(*transport.Transport) error {
-	return func(t *transport.Transport) error {
-		dpb.RegisterDirSerServer(t.GrpcSer(), s)
+func (s *DirSer) TransportRegister() func(grpc.ServiceRegistrar) error {
+	return func(t grpc.ServiceRegistrar) error {
+		dpb.RegisterDirSerServer(t, s)
 		return nil
 	}
 }

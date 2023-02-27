@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "proto/pb";
 
+option go_package = "proto/pb";
 
 import "pkg.proto";
 
@@ -13,13 +13,18 @@ service RoleSer {
     rpc ModifyName(ModifyName.Req) returns (ModifyName.Rsp);
     rpc GetName(GetName.Req) returns (GetName.Rsp);
     rpc MoveRole(MoveRole.Req) returns (MoveRole.Rsp);
+    rpc PostChannel(PostChannel.Req) returns (PostChannel.Rsp);
+    rpc PullChannel(PullChannel.Req) returns (PullChannel.Rsp);
+}
+
+service RoleChSer {
+    rpc TransChannel(TransChannel.Req) returns (TransChannel.Rsp);
 }
 
 message RoleDB {
     string RoleID = 1;
     string name = 2;
 }
-
 
 message Register {
     message Req {
@@ -43,7 +48,6 @@ message Login {
     }
 }
 
-
 message ModifyName {
     message Req {
         RouteHead RouteHead = 1;
@@ -54,6 +58,7 @@ message ModifyName {
         string Name = 2;
     }
 }
+
 message GetName {
     message Req {
         RouteHead RouteHead = 1;
@@ -73,5 +78,39 @@ message MoveRole {
         RouteHead RouteHead = 1;
         int32 Location = 2;
         string LocateName = 3;
+    }
+}
+message ChannelMsg {
+    string Name = 1;
+    string Content = 2;
+}
+
+message TransChannel {
+    message Req {
+        RouteHead RouteHead = 1;
+        ChannelMsg Msg = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+    }
+}
+
+message PostChannel {
+    message Req {
+        RouteHead RouteHead = 1;
+        string Content = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+    }
+}
+
+message PullChannel {
+    message Req {
+        RouteHead RouteHead = 1;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        repeated ChannelMsg Msgs = 2;
     }
 }

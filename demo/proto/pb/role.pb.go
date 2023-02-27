@@ -7,10 +7,6 @@
 package pb
 
 import (
-	context "context"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	pb "m3game/proto/pb"
@@ -270,6 +266,175 @@ func (*MoveRole) Descriptor() ([]byte, []int) {
 	return file_role_proto_rawDescGZIP(), []int{5}
 }
 
+type ChannelMsg struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name    string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	Content string `protobuf:"bytes,2,opt,name=Content,proto3" json:"Content,omitempty"`
+}
+
+func (x *ChannelMsg) Reset() {
+	*x = ChannelMsg{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ChannelMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChannelMsg) ProtoMessage() {}
+
+func (x *ChannelMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChannelMsg.ProtoReflect.Descriptor instead.
+func (*ChannelMsg) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ChannelMsg) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ChannelMsg) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+type TransChannel struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *TransChannel) Reset() {
+	*x = TransChannel{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TransChannel) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransChannel) ProtoMessage() {}
+
+func (x *TransChannel) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransChannel.ProtoReflect.Descriptor instead.
+func (*TransChannel) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{7}
+}
+
+type PostChannel struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *PostChannel) Reset() {
+	*x = PostChannel{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PostChannel) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostChannel) ProtoMessage() {}
+
+func (x *PostChannel) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostChannel.ProtoReflect.Descriptor instead.
+func (*PostChannel) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{8}
+}
+
+type PullChannel struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *PullChannel) Reset() {
+	*x = PullChannel{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PullChannel) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PullChannel) ProtoMessage() {}
+
+func (x *PullChannel) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PullChannel.ProtoReflect.Descriptor instead.
+func (*PullChannel) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{9}
+}
+
 type Register_Req struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -282,7 +447,7 @@ type Register_Req struct {
 func (x *Register_Req) Reset() {
 	*x = Register_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[6]
+		mi := &file_role_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -295,7 +460,7 @@ func (x *Register_Req) String() string {
 func (*Register_Req) ProtoMessage() {}
 
 func (x *Register_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[6]
+	mi := &file_role_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -337,7 +502,7 @@ type Register_Rsp struct {
 func (x *Register_Rsp) Reset() {
 	*x = Register_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[7]
+		mi := &file_role_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -350,7 +515,7 @@ func (x *Register_Rsp) String() string {
 func (*Register_Rsp) ProtoMessage() {}
 
 func (x *Register_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[7]
+	mi := &file_role_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -391,7 +556,7 @@ type Login_Req struct {
 func (x *Login_Req) Reset() {
 	*x = Login_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[8]
+		mi := &file_role_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -404,7 +569,7 @@ func (x *Login_Req) String() string {
 func (*Login_Req) ProtoMessage() {}
 
 func (x *Login_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[8]
+	mi := &file_role_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -440,7 +605,7 @@ type Login_Rsp struct {
 func (x *Login_Rsp) Reset() {
 	*x = Login_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[9]
+		mi := &file_role_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -453,7 +618,7 @@ func (x *Login_Rsp) String() string {
 func (*Login_Rsp) ProtoMessage() {}
 
 func (x *Login_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[9]
+	mi := &file_role_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -502,7 +667,7 @@ type ModifyName_Req struct {
 func (x *ModifyName_Req) Reset() {
 	*x = ModifyName_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[10]
+		mi := &file_role_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -515,7 +680,7 @@ func (x *ModifyName_Req) String() string {
 func (*ModifyName_Req) ProtoMessage() {}
 
 func (x *ModifyName_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[10]
+	mi := &file_role_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,7 +722,7 @@ type ModifyName_Rsp struct {
 func (x *ModifyName_Rsp) Reset() {
 	*x = ModifyName_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[11]
+		mi := &file_role_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -570,7 +735,7 @@ func (x *ModifyName_Rsp) String() string {
 func (*ModifyName_Rsp) ProtoMessage() {}
 
 func (x *ModifyName_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[11]
+	mi := &file_role_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -611,7 +776,7 @@ type GetName_Req struct {
 func (x *GetName_Req) Reset() {
 	*x = GetName_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[12]
+		mi := &file_role_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -624,7 +789,7 @@ func (x *GetName_Req) String() string {
 func (*GetName_Req) ProtoMessage() {}
 
 func (x *GetName_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[12]
+	mi := &file_role_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -659,7 +824,7 @@ type GetName_Rsp struct {
 func (x *GetName_Rsp) Reset() {
 	*x = GetName_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[13]
+		mi := &file_role_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -672,7 +837,7 @@ func (x *GetName_Rsp) String() string {
 func (*GetName_Rsp) ProtoMessage() {}
 
 func (x *GetName_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[13]
+	mi := &file_role_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -714,7 +879,7 @@ type MoveRole_Req struct {
 func (x *MoveRole_Req) Reset() {
 	*x = MoveRole_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[14]
+		mi := &file_role_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -727,7 +892,7 @@ func (x *MoveRole_Req) String() string {
 func (*MoveRole_Req) ProtoMessage() {}
 
 func (x *MoveRole_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[14]
+	mi := &file_role_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -770,7 +935,7 @@ type MoveRole_Rsp struct {
 func (x *MoveRole_Rsp) Reset() {
 	*x = MoveRole_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[15]
+		mi := &file_role_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -783,7 +948,7 @@ func (x *MoveRole_Rsp) String() string {
 func (*MoveRole_Rsp) ProtoMessage() {}
 
 func (x *MoveRole_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[15]
+	mi := &file_role_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -818,6 +983,312 @@ func (x *MoveRole_Rsp) GetLocateName() string {
 		return x.LocateName
 	}
 	return ""
+}
+
+type TransChannel_Req struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RouteHead *pb.RouteHead `protobuf:"bytes,1,opt,name=RouteHead,proto3" json:"RouteHead,omitempty"`
+	Msg       *ChannelMsg   `protobuf:"bytes,2,opt,name=Msg,proto3" json:"Msg,omitempty"`
+}
+
+func (x *TransChannel_Req) Reset() {
+	*x = TransChannel_Req{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TransChannel_Req) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransChannel_Req) ProtoMessage() {}
+
+func (x *TransChannel_Req) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransChannel_Req.ProtoReflect.Descriptor instead.
+func (*TransChannel_Req) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{7, 0}
+}
+
+func (x *TransChannel_Req) GetRouteHead() *pb.RouteHead {
+	if x != nil {
+		return x.RouteHead
+	}
+	return nil
+}
+
+func (x *TransChannel_Req) GetMsg() *ChannelMsg {
+	if x != nil {
+		return x.Msg
+	}
+	return nil
+}
+
+type TransChannel_Rsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RouteHead *pb.RouteHead `protobuf:"bytes,1,opt,name=RouteHead,proto3" json:"RouteHead,omitempty"`
+}
+
+func (x *TransChannel_Rsp) Reset() {
+	*x = TransChannel_Rsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *TransChannel_Rsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransChannel_Rsp) ProtoMessage() {}
+
+func (x *TransChannel_Rsp) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransChannel_Rsp.ProtoReflect.Descriptor instead.
+func (*TransChannel_Rsp) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{7, 1}
+}
+
+func (x *TransChannel_Rsp) GetRouteHead() *pb.RouteHead {
+	if x != nil {
+		return x.RouteHead
+	}
+	return nil
+}
+
+type PostChannel_Req struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RouteHead *pb.RouteHead `protobuf:"bytes,1,opt,name=RouteHead,proto3" json:"RouteHead,omitempty"`
+	Content   string        `protobuf:"bytes,2,opt,name=Content,proto3" json:"Content,omitempty"`
+}
+
+func (x *PostChannel_Req) Reset() {
+	*x = PostChannel_Req{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[22]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PostChannel_Req) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostChannel_Req) ProtoMessage() {}
+
+func (x *PostChannel_Req) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[22]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostChannel_Req.ProtoReflect.Descriptor instead.
+func (*PostChannel_Req) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{8, 0}
+}
+
+func (x *PostChannel_Req) GetRouteHead() *pb.RouteHead {
+	if x != nil {
+		return x.RouteHead
+	}
+	return nil
+}
+
+func (x *PostChannel_Req) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+type PostChannel_Rsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RouteHead *pb.RouteHead `protobuf:"bytes,1,opt,name=RouteHead,proto3" json:"RouteHead,omitempty"`
+}
+
+func (x *PostChannel_Rsp) Reset() {
+	*x = PostChannel_Rsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[23]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PostChannel_Rsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostChannel_Rsp) ProtoMessage() {}
+
+func (x *PostChannel_Rsp) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[23]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostChannel_Rsp.ProtoReflect.Descriptor instead.
+func (*PostChannel_Rsp) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{8, 1}
+}
+
+func (x *PostChannel_Rsp) GetRouteHead() *pb.RouteHead {
+	if x != nil {
+		return x.RouteHead
+	}
+	return nil
+}
+
+type PullChannel_Req struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RouteHead *pb.RouteHead `protobuf:"bytes,1,opt,name=RouteHead,proto3" json:"RouteHead,omitempty"`
+}
+
+func (x *PullChannel_Req) Reset() {
+	*x = PullChannel_Req{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[24]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PullChannel_Req) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PullChannel_Req) ProtoMessage() {}
+
+func (x *PullChannel_Req) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[24]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PullChannel_Req.ProtoReflect.Descriptor instead.
+func (*PullChannel_Req) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{9, 0}
+}
+
+func (x *PullChannel_Req) GetRouteHead() *pb.RouteHead {
+	if x != nil {
+		return x.RouteHead
+	}
+	return nil
+}
+
+type PullChannel_Rsp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RouteHead *pb.RouteHead `protobuf:"bytes,1,opt,name=RouteHead,proto3" json:"RouteHead,omitempty"`
+	Msgs      []*ChannelMsg `protobuf:"bytes,2,rep,name=Msgs,proto3" json:"Msgs,omitempty"`
+}
+
+func (x *PullChannel_Rsp) Reset() {
+	*x = PullChannel_Rsp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[25]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PullChannel_Rsp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PullChannel_Rsp) ProtoMessage() {}
+
+func (x *PullChannel_Rsp) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[25]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PullChannel_Rsp.ProtoReflect.Descriptor instead.
+func (*PullChannel_Rsp) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{9, 1}
+}
+
+func (x *PullChannel_Rsp) GetRouteHead() *pb.RouteHead {
+	if x != nil {
+		return x.RouteHead
+	}
+	return nil
+}
+
+func (x *PullChannel_Rsp) GetMsgs() []*ChannelMsg {
+	if x != nil {
+		return x.Msgs
+	}
+	return nil
 }
 
 var File_role_proto protoreflect.FileDescriptor
@@ -881,25 +1352,72 @@ var file_role_proto_rawDesc = []byte{
 	0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x4c,
 	0x6f, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1e, 0x0a, 0x0a, 0x4c, 0x6f, 0x63, 0x61, 0x74,
 	0x65, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x4c, 0x6f, 0x63,
-	0x61, 0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x32, 0x91, 0x02, 0x0a, 0x07, 0x52, 0x6f, 0x6c, 0x65,
-	0x53, 0x65, 0x72, 0x12, 0x34, 0x0a, 0x08, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x12,
-	0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72,
-	0x2e, 0x52, 0x65, 0x71, 0x1a, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x67,
-	0x69, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x2b, 0x0a, 0x05, 0x4c, 0x6f, 0x67,
-	0x69, 0x6e, 0x12, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e,
-	0x2e, 0x52, 0x65, 0x71, 0x1a, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4c, 0x6f, 0x67,
-	0x69, 0x6e, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x3a, 0x0a, 0x0a, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79,
-	0x4e, 0x61, 0x6d, 0x65, 0x12, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x6f, 0x64,
-	0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x15, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52,
-	0x73, 0x70, 0x12, 0x31, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x2e,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x47, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x65,
-	0x71, 0x1a, 0x12, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x47, 0x65, 0x74, 0x4e, 0x61, 0x6d,
-	0x65, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x34, 0x0a, 0x08, 0x4d, 0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c,
-	0x65, 0x12, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x6f, 0x76, 0x65, 0x52, 0x6f,
-	0x6c, 0x65, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d,
-	0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x2e, 0x52, 0x73, 0x70, 0x42, 0x0a, 0x5a, 0x08, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x74, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x3a, 0x0a, 0x0a, 0x43, 0x68, 0x61, 0x6e, 0x6e,
+	0x65, 0x6c, 0x4d, 0x73, 0x67, 0x12, 0x12, 0x0a, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x43, 0x6f, 0x6e,
+	0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x43, 0x6f, 0x6e, 0x74,
+	0x65, 0x6e, 0x74, 0x22, 0xa1, 0x01, 0x0a, 0x0c, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x43, 0x68, 0x61,
+	0x6e, 0x6e, 0x65, 0x6c, 0x1a, 0x5a, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x2e, 0x0a, 0x09, 0x52,
+	0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64,
+	0x52, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x12, 0x23, 0x0a, 0x03, 0x4d,
+	0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x4d, 0x73, 0x67, 0x52, 0x03, 0x4d, 0x73, 0x67,
+	0x1a, 0x35, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x2e, 0x0a, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65,
+	0x48, 0x65, 0x61, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x52, 0x09, 0x52, 0x6f,
+	0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x22, 0x95, 0x01, 0x0a, 0x0b, 0x50, 0x6f, 0x73, 0x74,
+	0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x1a, 0x4f, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x2e,
+	0x0a, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48,
+	0x65, 0x61, 0x64, 0x52, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x12, 0x18,
+	0x0a, 0x07, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x07, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x1a, 0x35, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12,
+	0x2e, 0x0a, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65,
+	0x48, 0x65, 0x61, 0x64, 0x52, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x22,
+	0xa2, 0x01, 0x0a, 0x0b, 0x50, 0x75, 0x6c, 0x6c, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x1a,
+	0x35, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x2e, 0x0a, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48,
+	0x65, 0x61, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x52, 0x09, 0x52, 0x6f, 0x75,
+	0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x1a, 0x5c, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x2e, 0x0a,
+	0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65,
+	0x61, 0x64, 0x52, 0x09, 0x52, 0x6f, 0x75, 0x74, 0x65, 0x48, 0x65, 0x61, 0x64, 0x12, 0x25, 0x0a,
+	0x04, 0x4d, 0x73, 0x67, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x4d, 0x73, 0x67, 0x52, 0x04,
+	0x4d, 0x73, 0x67, 0x73, 0x32, 0x8f, 0x03, 0x0a, 0x07, 0x52, 0x6f, 0x6c, 0x65, 0x53, 0x65, 0x72,
+	0x12, 0x34, 0x0a, 0x08, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x12, 0x13, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x2e, 0x52, 0x65,
+	0x71, 0x1a, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74,
+	0x65, 0x72, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x2b, 0x0a, 0x05, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12,
+	0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x2e, 0x52, 0x65,
+	0x71, 0x1a, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x2e,
+	0x52, 0x73, 0x70, 0x12, 0x3a, 0x0a, 0x0a, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d,
+	0x65, 0x12, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79,
+	0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x15, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x73, 0x70, 0x12,
+	0x31, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2e, 0x47, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x12,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x47, 0x65, 0x74, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52,
+	0x73, 0x70, 0x12, 0x34, 0x0a, 0x08, 0x4d, 0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x12, 0x13,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x2e,
+	0x52, 0x65, 0x71, 0x1a, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4d, 0x6f, 0x76, 0x65,
+	0x52, 0x6f, 0x6c, 0x65, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x3d, 0x0a, 0x0b, 0x50, 0x6f, 0x73, 0x74,
+	0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x50, 0x6f, 0x73, 0x74, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x2e, 0x52, 0x65, 0x71, 0x1a,
+	0x16, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x43, 0x68, 0x61, 0x6e,
+	0x6e, 0x65, 0x6c, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x3d, 0x0a, 0x0b, 0x50, 0x75, 0x6c, 0x6c, 0x43,
+	0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x12, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50,
+	0x75, 0x6c, 0x6c, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x16,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x50, 0x75, 0x6c, 0x6c, 0x43, 0x68, 0x61, 0x6e, 0x6e,
+	0x65, 0x6c, 0x2e, 0x52, 0x73, 0x70, 0x32, 0x4d, 0x0a, 0x09, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x68,
+	0x53, 0x65, 0x72, 0x12, 0x40, 0x0a, 0x0c, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x43, 0x68, 0x61, 0x6e,
+	0x6e, 0x65, 0x6c, 0x12, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x54, 0x72, 0x61, 0x6e,
+	0x73, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65, 0x6c, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x43, 0x68, 0x61, 0x6e, 0x6e, 0x65,
+	0x6c, 0x2e, 0x52, 0x73, 0x70, 0x42, 0x0a, 0x5a, 0x08, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x70,
+	0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -914,52 +1432,76 @@ func file_role_proto_rawDescGZIP() []byte {
 	return file_role_proto_rawDescData
 }
 
-var file_role_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_role_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_role_proto_goTypes = []interface{}{
-	(*RoleDB)(nil),         // 0: proto.RoleDB
-	(*Register)(nil),       // 1: proto.Register
-	(*Login)(nil),          // 2: proto.Login
-	(*ModifyName)(nil),     // 3: proto.ModifyName
-	(*GetName)(nil),        // 4: proto.GetName
-	(*MoveRole)(nil),       // 5: proto.MoveRole
-	(*Register_Req)(nil),   // 6: proto.Register.Req
-	(*Register_Rsp)(nil),   // 7: proto.Register.Rsp
-	(*Login_Req)(nil),      // 8: proto.Login.Req
-	(*Login_Rsp)(nil),      // 9: proto.Login.Rsp
-	(*ModifyName_Req)(nil), // 10: proto.ModifyName.Req
-	(*ModifyName_Rsp)(nil), // 11: proto.ModifyName.Rsp
-	(*GetName_Req)(nil),    // 12: proto.GetName.Req
-	(*GetName_Rsp)(nil),    // 13: proto.GetName.Rsp
-	(*MoveRole_Req)(nil),   // 14: proto.MoveRole.Req
-	(*MoveRole_Rsp)(nil),   // 15: proto.MoveRole.Rsp
-	(*pb.RouteHead)(nil),   // 16: proto.RouteHead
+	(*RoleDB)(nil),           // 0: proto.RoleDB
+	(*Register)(nil),         // 1: proto.Register
+	(*Login)(nil),            // 2: proto.Login
+	(*ModifyName)(nil),       // 3: proto.ModifyName
+	(*GetName)(nil),          // 4: proto.GetName
+	(*MoveRole)(nil),         // 5: proto.MoveRole
+	(*ChannelMsg)(nil),       // 6: proto.ChannelMsg
+	(*TransChannel)(nil),     // 7: proto.TransChannel
+	(*PostChannel)(nil),      // 8: proto.PostChannel
+	(*PullChannel)(nil),      // 9: proto.PullChannel
+	(*Register_Req)(nil),     // 10: proto.Register.Req
+	(*Register_Rsp)(nil),     // 11: proto.Register.Rsp
+	(*Login_Req)(nil),        // 12: proto.Login.Req
+	(*Login_Rsp)(nil),        // 13: proto.Login.Rsp
+	(*ModifyName_Req)(nil),   // 14: proto.ModifyName.Req
+	(*ModifyName_Rsp)(nil),   // 15: proto.ModifyName.Rsp
+	(*GetName_Req)(nil),      // 16: proto.GetName.Req
+	(*GetName_Rsp)(nil),      // 17: proto.GetName.Rsp
+	(*MoveRole_Req)(nil),     // 18: proto.MoveRole.Req
+	(*MoveRole_Rsp)(nil),     // 19: proto.MoveRole.Rsp
+	(*TransChannel_Req)(nil), // 20: proto.TransChannel.Req
+	(*TransChannel_Rsp)(nil), // 21: proto.TransChannel.Rsp
+	(*PostChannel_Req)(nil),  // 22: proto.PostChannel.Req
+	(*PostChannel_Rsp)(nil),  // 23: proto.PostChannel.Rsp
+	(*PullChannel_Req)(nil),  // 24: proto.PullChannel.Req
+	(*PullChannel_Rsp)(nil),  // 25: proto.PullChannel.Rsp
+	(*pb.RouteHead)(nil),     // 26: proto.RouteHead
 }
 var file_role_proto_depIdxs = []int32{
-	16, // 0: proto.Register.Req.RouteHead:type_name -> proto.RouteHead
-	16, // 1: proto.Register.Rsp.RouteHead:type_name -> proto.RouteHead
-	16, // 2: proto.Login.Req.RouteHead:type_name -> proto.RouteHead
-	16, // 3: proto.Login.Rsp.RouteHead:type_name -> proto.RouteHead
-	16, // 4: proto.ModifyName.Req.RouteHead:type_name -> proto.RouteHead
-	16, // 5: proto.ModifyName.Rsp.RouteHead:type_name -> proto.RouteHead
-	16, // 6: proto.GetName.Req.RouteHead:type_name -> proto.RouteHead
-	16, // 7: proto.GetName.Rsp.RouteHead:type_name -> proto.RouteHead
-	16, // 8: proto.MoveRole.Req.RouteHead:type_name -> proto.RouteHead
-	16, // 9: proto.MoveRole.Rsp.RouteHead:type_name -> proto.RouteHead
-	6,  // 10: proto.RoleSer.Register:input_type -> proto.Register.Req
-	8,  // 11: proto.RoleSer.Login:input_type -> proto.Login.Req
-	10, // 12: proto.RoleSer.ModifyName:input_type -> proto.ModifyName.Req
-	12, // 13: proto.RoleSer.GetName:input_type -> proto.GetName.Req
-	14, // 14: proto.RoleSer.MoveRole:input_type -> proto.MoveRole.Req
-	7,  // 15: proto.RoleSer.Register:output_type -> proto.Register.Rsp
-	9,  // 16: proto.RoleSer.Login:output_type -> proto.Login.Rsp
-	11, // 17: proto.RoleSer.ModifyName:output_type -> proto.ModifyName.Rsp
-	13, // 18: proto.RoleSer.GetName:output_type -> proto.GetName.Rsp
-	15, // 19: proto.RoleSer.MoveRole:output_type -> proto.MoveRole.Rsp
-	15, // [15:20] is the sub-list for method output_type
-	10, // [10:15] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	26, // 0: proto.Register.Req.RouteHead:type_name -> proto.RouteHead
+	26, // 1: proto.Register.Rsp.RouteHead:type_name -> proto.RouteHead
+	26, // 2: proto.Login.Req.RouteHead:type_name -> proto.RouteHead
+	26, // 3: proto.Login.Rsp.RouteHead:type_name -> proto.RouteHead
+	26, // 4: proto.ModifyName.Req.RouteHead:type_name -> proto.RouteHead
+	26, // 5: proto.ModifyName.Rsp.RouteHead:type_name -> proto.RouteHead
+	26, // 6: proto.GetName.Req.RouteHead:type_name -> proto.RouteHead
+	26, // 7: proto.GetName.Rsp.RouteHead:type_name -> proto.RouteHead
+	26, // 8: proto.MoveRole.Req.RouteHead:type_name -> proto.RouteHead
+	26, // 9: proto.MoveRole.Rsp.RouteHead:type_name -> proto.RouteHead
+	26, // 10: proto.TransChannel.Req.RouteHead:type_name -> proto.RouteHead
+	6,  // 11: proto.TransChannel.Req.Msg:type_name -> proto.ChannelMsg
+	26, // 12: proto.TransChannel.Rsp.RouteHead:type_name -> proto.RouteHead
+	26, // 13: proto.PostChannel.Req.RouteHead:type_name -> proto.RouteHead
+	26, // 14: proto.PostChannel.Rsp.RouteHead:type_name -> proto.RouteHead
+	26, // 15: proto.PullChannel.Req.RouteHead:type_name -> proto.RouteHead
+	26, // 16: proto.PullChannel.Rsp.RouteHead:type_name -> proto.RouteHead
+	6,  // 17: proto.PullChannel.Rsp.Msgs:type_name -> proto.ChannelMsg
+	10, // 18: proto.RoleSer.Register:input_type -> proto.Register.Req
+	12, // 19: proto.RoleSer.Login:input_type -> proto.Login.Req
+	14, // 20: proto.RoleSer.ModifyName:input_type -> proto.ModifyName.Req
+	16, // 21: proto.RoleSer.GetName:input_type -> proto.GetName.Req
+	18, // 22: proto.RoleSer.MoveRole:input_type -> proto.MoveRole.Req
+	22, // 23: proto.RoleSer.PostChannel:input_type -> proto.PostChannel.Req
+	24, // 24: proto.RoleSer.PullChannel:input_type -> proto.PullChannel.Req
+	20, // 25: proto.RoleChSer.TransChannel:input_type -> proto.TransChannel.Req
+	11, // 26: proto.RoleSer.Register:output_type -> proto.Register.Rsp
+	13, // 27: proto.RoleSer.Login:output_type -> proto.Login.Rsp
+	15, // 28: proto.RoleSer.ModifyName:output_type -> proto.ModifyName.Rsp
+	17, // 29: proto.RoleSer.GetName:output_type -> proto.GetName.Rsp
+	19, // 30: proto.RoleSer.MoveRole:output_type -> proto.MoveRole.Rsp
+	23, // 31: proto.RoleSer.PostChannel:output_type -> proto.PostChannel.Rsp
+	25, // 32: proto.RoleSer.PullChannel:output_type -> proto.PullChannel.Rsp
+	21, // 33: proto.RoleChSer.TransChannel:output_type -> proto.TransChannel.Rsp
+	26, // [26:34] is the sub-list for method output_type
+	18, // [18:26] is the sub-list for method input_type
+	18, // [18:18] is the sub-list for extension type_name
+	18, // [18:18] is the sub-list for extension extendee
+	0,  // [0:18] is the sub-list for field type_name
 }
 
 func init() { file_role_proto_init() }
@@ -1041,7 +1583,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Register_Req); i {
+			switch v := v.(*ChannelMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1053,7 +1595,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Register_Rsp); i {
+			switch v := v.(*TransChannel); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1065,7 +1607,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Login_Req); i {
+			switch v := v.(*PostChannel); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1077,7 +1619,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Login_Rsp); i {
+			switch v := v.(*PullChannel); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1089,7 +1631,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ModifyName_Req); i {
+			switch v := v.(*Register_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1101,7 +1643,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ModifyName_Rsp); i {
+			switch v := v.(*Register_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1113,7 +1655,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetName_Req); i {
+			switch v := v.(*Login_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1125,7 +1667,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetName_Rsp); i {
+			switch v := v.(*Login_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1137,7 +1679,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*MoveRole_Req); i {
+			switch v := v.(*ModifyName_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1149,7 +1691,127 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ModifyName_Rsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetName_Req); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetName_Rsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MoveRole_Req); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*MoveRole_Rsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*TransChannel_Req); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*TransChannel_Rsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PostChannel_Req); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PostChannel_Rsp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PullChannel_Req); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PullChannel_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1167,9 +1829,9 @@ func file_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_role_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   26,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   2,
 		},
 		GoTypes:           file_role_proto_goTypes,
 		DependencyIndexes: file_role_proto_depIdxs,
@@ -1179,228 +1841,4 @@ func file_role_proto_init() {
 	file_role_proto_rawDesc = nil
 	file_role_proto_goTypes = nil
 	file_role_proto_depIdxs = nil
-}
-
-// Reference imports to suppress errors if they are not otherwise used.
-var _ context.Context
-var _ grpc.ClientConnInterface
-
-// This is a compile-time assertion to ensure that this generated file
-// is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion6
-
-// RoleSerClient is the client API for RoleSer service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type RoleSerClient interface {
-	Register(ctx context.Context, in *Register_Req, opts ...grpc.CallOption) (*Register_Rsp, error)
-	Login(ctx context.Context, in *Login_Req, opts ...grpc.CallOption) (*Login_Rsp, error)
-	ModifyName(ctx context.Context, in *ModifyName_Req, opts ...grpc.CallOption) (*ModifyName_Rsp, error)
-	GetName(ctx context.Context, in *GetName_Req, opts ...grpc.CallOption) (*GetName_Rsp, error)
-	MoveRole(ctx context.Context, in *MoveRole_Req, opts ...grpc.CallOption) (*MoveRole_Rsp, error)
-}
-
-type roleSerClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewRoleSerClient(cc grpc.ClientConnInterface) RoleSerClient {
-	return &roleSerClient{cc}
-}
-
-func (c *roleSerClient) Register(ctx context.Context, in *Register_Req, opts ...grpc.CallOption) (*Register_Rsp, error) {
-	out := new(Register_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleSer/Register", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *roleSerClient) Login(ctx context.Context, in *Login_Req, opts ...grpc.CallOption) (*Login_Rsp, error) {
-	out := new(Login_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleSer/Login", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *roleSerClient) ModifyName(ctx context.Context, in *ModifyName_Req, opts ...grpc.CallOption) (*ModifyName_Rsp, error) {
-	out := new(ModifyName_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleSer/ModifyName", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *roleSerClient) GetName(ctx context.Context, in *GetName_Req, opts ...grpc.CallOption) (*GetName_Rsp, error) {
-	out := new(GetName_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleSer/GetName", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *roleSerClient) MoveRole(ctx context.Context, in *MoveRole_Req, opts ...grpc.CallOption) (*MoveRole_Rsp, error) {
-	out := new(MoveRole_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleSer/MoveRole", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// RoleSerServer is the server API for RoleSer service.
-type RoleSerServer interface {
-	Register(context.Context, *Register_Req) (*Register_Rsp, error)
-	Login(context.Context, *Login_Req) (*Login_Rsp, error)
-	ModifyName(context.Context, *ModifyName_Req) (*ModifyName_Rsp, error)
-	GetName(context.Context, *GetName_Req) (*GetName_Rsp, error)
-	MoveRole(context.Context, *MoveRole_Req) (*MoveRole_Rsp, error)
-}
-
-// UnimplementedRoleSerServer can be embedded to have forward compatible implementations.
-type UnimplementedRoleSerServer struct {
-}
-
-func (*UnimplementedRoleSerServer) Register(context.Context, *Register_Req) (*Register_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
-}
-func (*UnimplementedRoleSerServer) Login(context.Context, *Login_Req) (*Login_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
-}
-func (*UnimplementedRoleSerServer) ModifyName(context.Context, *ModifyName_Req) (*ModifyName_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ModifyName not implemented")
-}
-func (*UnimplementedRoleSerServer) GetName(context.Context, *GetName_Req) (*GetName_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetName not implemented")
-}
-func (*UnimplementedRoleSerServer) MoveRole(context.Context, *MoveRole_Req) (*MoveRole_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MoveRole not implemented")
-}
-
-func RegisterRoleSerServer(s *grpc.Server, srv RoleSerServer) {
-	s.RegisterService(&_RoleSer_serviceDesc, srv)
-}
-
-func _RoleSer_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Register_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RoleSerServer).Register(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.RoleSer/Register",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleSerServer).Register(ctx, req.(*Register_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RoleSer_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Login_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RoleSerServer).Login(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.RoleSer/Login",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleSerServer).Login(ctx, req.(*Login_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RoleSer_ModifyName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ModifyName_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RoleSerServer).ModifyName(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.RoleSer/ModifyName",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleSerServer).ModifyName(ctx, req.(*ModifyName_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RoleSer_GetName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetName_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RoleSerServer).GetName(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.RoleSer/GetName",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleSerServer).GetName(ctx, req.(*GetName_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RoleSer_MoveRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MoveRole_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RoleSerServer).MoveRole(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.RoleSer/MoveRole",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleSerServer).MoveRole(ctx, req.(*MoveRole_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _RoleSer_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.RoleSer",
-	HandlerType: (*RoleSerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Register",
-			Handler:    _RoleSer_Register_Handler,
-		},
-		{
-			MethodName: "Login",
-			Handler:    _RoleSer_Login_Handler,
-		},
-		{
-			MethodName: "ModifyName",
-			Handler:    _RoleSer_ModifyName_Handler,
-		},
-		{
-			MethodName: "GetName",
-			Handler:    _RoleSer_GetName_Handler,
-		},
-		{
-			MethodName: "MoveRole",
-			Handler:    _RoleSer_MoveRole_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "role.proto",
 }

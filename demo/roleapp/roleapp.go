@@ -2,10 +2,14 @@ package roleapp
 
 import (
 	"m3game/app"
+	"m3game/broker/nats"
 	"m3game/db/cache"
 	"m3game/demo/dirapp/dirclient"
 	"m3game/demo/loader"
 	"m3game/demo/mapapp/mapclient"
+	dproto "m3game/demo/proto"
+	"m3game/demo/roleapp/rolechclient"
+	"m3game/demo/roleapp/rolechserver"
 	"m3game/demo/roleapp/roleserver"
 	"m3game/mesh/router/consul"
 	"m3game/proto"
@@ -14,13 +18,9 @@ import (
 	"m3game/server"
 )
 
-const (
-	AppFuncID = "role"
-)
-
 func CreateRoleApp() *RoleApp {
 	return &RoleApp{
-		DefaultApp: app.CreateDefaultApp(AppFuncID),
+		DefaultApp: app.CreateDefaultApp(dproto.RoleAppFuncID),
 	}
 }
 
@@ -41,6 +41,9 @@ func (d *RoleApp) Start() error {
 	if err := mapclient.Init(d.RouteIns(), func(c *mapclient.Client) { c.Client = proto.META_FLAG_FALSE }); err != nil {
 		return err
 	}
+	if err := rolechclient.Init(d.RouteIns(), func(c *rolechclient.Client) { c.Client = proto.META_FLAG_FALSE }); err != nil {
+		return err
+	}
 	return nil
 }
 func (d *RoleApp) HealthCheck() bool {
@@ -49,9 +52,10 @@ func (d *RoleApp) HealthCheck() bool {
 func Run() error {
 	plugin.RegisterPluginFactory(&consul.Factory{})
 	plugin.RegisterPluginFactory(&cache.Factory{})
+	plugin.RegisterPluginFactory(&nats.Factory{})
 
 	loader.RegisterLocationCfg()
 
-	runtime.Run(CreateRoleApp(), []server.Server{roleserver.CreateRoleSer()})
+	runtime.Run(CreateRoleApp(), []server.Server{roleserver.CreateRoleSer(), rolechserver.CreateRoleChSer()})
 	return nil
 }

@@ -3,9 +3,10 @@ package mapserver
 import (
 	"context"
 	dpb "m3game/demo/proto/pb"
-	"m3game/runtime/transport"
 	"m3game/server/async"
 	"time"
+
+	"google.golang.org/grpc"
 )
 
 var (
@@ -24,6 +25,7 @@ func CreateMapSer() *MapSer {
 
 type MapSer struct {
 	*async.Server
+	dpb.UnimplementedMapSerServer
 }
 
 func (d *MapSer) Move(ctx context.Context, in *dpb.Move_Req) (*dpb.Move_Rsp, error) {
@@ -40,9 +42,9 @@ func (d *MapSer) Move(ctx context.Context, in *dpb.Move_Req) (*dpb.Move_Rsp, err
 	return out, nil
 }
 
-func (s *MapSer) TransportRegister() func(*transport.Transport) error {
-	return func(t *transport.Transport) error {
-		dpb.RegisterMapSerServer(t.GrpcSer(), s)
+func (s *MapSer) TransportRegister() func(grpc.ServiceRegistrar) error {
+	return func(t grpc.ServiceRegistrar) error {
+		dpb.RegisterMapSerServer(t, s)
 		return nil
 	}
 }

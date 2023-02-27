@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"m3game/proto"
 	"m3game/proto/pb"
+	"m3game/util"
 
 	"google.golang.org/grpc"
 )
@@ -85,6 +86,13 @@ func (s *Sender) SendMsg() error {
 	} else {
 		return fmt.Errorf("Req cant trans to M3Pkg")
 	}
+
+	if s.RouteHead().RouteType == pb.RouteType_RT_BROAD {
+		return SendToBroker(s, util.GenTopic(s.RouteHead().DstSvc.IDStr))
+	} else if s.RouteHead().RouteType == pb.RouteType_RT_MUTIL {
+		return SendToBroker(s, s.RouteHead().RoutePara.RouteMutilHead[0].Topic)
+	}
+
 	ctx := WithSender(s.ctx, s)
 	return s.invoker(ctx, s.method, s.req, s.resp, s.cc, s.opts...)
 }

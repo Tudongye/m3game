@@ -1,4 +1,4 @@
-package dirclient
+package rolechclient
 
 import (
 	"context"
@@ -21,7 +21,7 @@ var (
 
 type Opt func(*Client)
 
-func DirClient() *Client {
+func RoleChClient() *Client {
 	return _instance
 }
 
@@ -32,7 +32,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 			EnvID:   srcins.EnvID,
 			WorldID: srcins.WorldID,
 			FuncID:  srcins.FuncID,
-			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.DirAppFuncID),
+			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID),
 		},
 	}
 	for _, opt := range opts {
@@ -40,13 +40,13 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	}
 	var err error
 	if _instance.conn, err = grpc.Dial(
-		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.DirAppFuncID)),
+		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID)),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(transport.SendInteror(SendInterFunc)),
 	); err != nil {
 		return err
 	} else {
-		_instance.client = dpb.NewDirSerClient(_instance.conn)
+		_instance.client = dpb.NewRoleChSerClient(_instance.conn)
 		return nil
 	}
 }
@@ -60,18 +60,18 @@ type Client struct {
 	conn   *grpc.ClientConn
 	srcins *pb.RouteIns
 	dstsvc *pb.RouteSvc
-	client dpb.DirSerClient
+	client dpb.RoleChSerClient
 
 	Client string
 }
 
-func (c *Client) Hello(ctx context.Context, hellostr string) (string, error) {
-	var in dpb.Hello_Req
-	in.RouteHead = client.CreateRouteHead_Random(c.srcins, c.dstsvc)
-	in.Req = hellostr
-	if out, err := c.client.Hello(ctx, &in); err != nil {
-		return "", err
+func (c *Client) TransChannel(ctx context.Context, msg *dpb.ChannelMsg) error {
+	var in dpb.TransChannel_Req
+	in.RouteHead = client.CreateRouteHead_Broad(c.srcins, c.dstsvc)
+	in.Msg = msg
+	if _, err := c.client.TransChannel(ctx, &in); err != nil {
+		return err
 	} else {
-		return out.Rsp, nil
+		return nil
 	}
 }

@@ -21,5 +21,4 @@ func init() {
 	RT_BROAD 广播？
 	RT_MUTIL 多播？
 	RT_SINGLE 单例
-	RT_DIRECT 直连？
 */

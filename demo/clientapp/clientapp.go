@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"m3game/app"
+	"m3game/broker/nats"
 	"m3game/config"
 	"m3game/demo/dirapp/dirclient"
 	"m3game/demo/mapapp/mapclient"
+	dproto "m3game/demo/proto"
 	"m3game/demo/roleapp/roleclient"
 	"m3game/mesh/router/consul"
 	"m3game/proto"
@@ -16,13 +18,9 @@ import (
 	"time"
 )
 
-const (
-	AppFuncID = "client"
-)
-
 func CreateClientApp() *ClientApp {
 	return &ClientApp{
-		DefaultApp: app.CreateDefaultApp(AppFuncID),
+		DefaultApp: app.CreateDefaultApp(dproto.ClientAppFuncID),
 	}
 }
 
@@ -84,6 +82,52 @@ func (d *ClientApp) Start() error {
 			}
 		}()
 	}
+	if testmode == "broad" {
+		log.Printf("Test:%s\n", testmode)
+		time.Sleep(time.Second * 3)
+		actorid := "ABCDEFG1234567"
+		name := "Mike"
+		log.Println("Call Register()")
+		log.Printf("Req: %s %s", actorid, name)
+		if roleid, err := roleclient.RoleClient().Register(context.Background(), actorid, name); err != nil {
+			log.Printf("Err: %s\n", err.Error())
+		} else {
+			log.Printf("Res: %s\n", roleid)
+		}
+
+		log.Println("Call Login()")
+		log.Printf("Req: %s ", actorid)
+		if name, tips, err := roleclient.RoleClient().Login(context.Background(), actorid); err != nil {
+			log.Printf("Err: %s\n", err.Error())
+		} else {
+			log.Printf("Res: %s %s\n", name, tips)
+		}
+
+		log.Println("Call PostChannel()")
+		log.Printf("Req: %s %s", actorid, "Hello World")
+		if err := roleclient.RoleClient().PostChannel(context.Background(), actorid, "Hello World"); err != nil {
+			log.Printf("Err: %s\n", err.Error())
+		} else {
+			log.Printf("Res: \n")
+		}
+
+		log.Println("Call PostChannel()")
+		log.Printf("Req: %s %s", actorid, "Hello World2")
+		if err := roleclient.RoleClient().PostChannel(context.Background(), actorid, "Hello World2"); err != nil {
+			log.Printf("Err: %s\n", err.Error())
+		} else {
+			log.Printf("Res: \n")
+		}
+
+		time.Sleep(time.Second * 3)
+		log.Println("Call PullChannel()")
+		log.Printf("Req: %s", actorid)
+		if msgs, err := roleclient.RoleClient().PullChannel(context.Background(), actorid); err != nil {
+			log.Printf("Err: %s\n", err.Error())
+		} else {
+			log.Printf("Res: %v\n", msgs)
+		}
+	}
 	if testmode == "roleapp" {
 		log.Printf("Test:%s\n", testmode)
 		time.Sleep(time.Second * 3)
@@ -130,6 +174,7 @@ func (d *ClientApp) Start() error {
 		} else {
 			log.Printf("Res: %s\n", name)
 		}
+
 		go func() {
 			log.Println("G1 Call Move()")
 			log.Printf("G1 Req: %s %d", actorid, 15)
@@ -158,6 +203,7 @@ func (d *ClientApp) HealthCheck() bool {
 
 func Run() error {
 	plugin.RegisterPluginFactory(&consul.Factory{})
+	plugin.RegisterPluginFactory(&nats.Factory{})
 	runtime.Run(CreateClientApp(), []server.Server{})
 	return nil
 }
