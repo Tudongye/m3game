@@ -2,16 +2,16 @@ package app
 
 import (
 	"fmt"
-	"log"
 	"m3game/config"
 	"m3game/proto/pb"
 	"m3game/runtime/transport"
 	"m3game/util"
+	"sync"
 )
 
 type App interface {
 	Init(cfg map[string]interface{}) error                                                                // 初始化
-	Start() error                                                                                         // 启动
+	Start(wg *sync.WaitGroup) error                                                                       // 启动
 	Stop() error                                                                                          // 停止
 	Reload() error                                                                                        // 重载
 	RecvInterFunc(*transport.Reciver, func(*transport.Reciver) (interface{}, error)) (interface{}, error) // RPC被调拦截器
@@ -24,17 +24,17 @@ type App interface {
 	RouteWorld() *pb.RouteWorld // 服务区服
 }
 
-func CreateDefaultApp(pfuncid string) *DefaultApp {
+func New(pfuncid string) *appBase {
 	idstr := config.GetIDStr()
 	if idstr == "" {
-		log.Panic("Flag IDStr not find")
+		panic("Flag IDStr not find")
 	}
 	if envid, worldid, funcid, insid, err := util.AppStr2ID(idstr); err != nil {
-		log.Panic(fmt.Errorf("IDStr %s not vaild %w", idstr, err))
+		panic(fmt.Errorf("IDStr %s not vaild %w", idstr, err))
 	} else if funcid != pfuncid {
-		log.Panic(fmt.Errorf("IDStr %s not vaild %w", idstr, err))
+		panic(fmt.Errorf("IDStr %s not vaild %w", idstr, err))
 	} else {
-		return &DefaultApp{
+		return &appBase{
 			routeins: &pb.RouteIns{
 				EnvID:   envid,
 				WorldID: worldid,
@@ -53,62 +53,61 @@ func CreateDefaultApp(pfuncid string) *DefaultApp {
 			},
 		}
 	}
-	return nil
 }
 
-type DefaultApp struct {
+type appBase struct {
 	routeins   *pb.RouteIns
 	routesvc   *pb.RouteSvc
 	routeworld *pb.RouteWorld
 }
 
 var (
-	_ App = (*DefaultApp)(nil)
+	_ App = (*appBase)(nil)
 )
 
-func (a *DefaultApp) Init(cfg map[string]interface{}) error {
+func (a *appBase) Init(cfg map[string]interface{}) error {
 	return nil
 }
 
-func (a *DefaultApp) Name() string {
+func (a *appBase) Name() string {
 	return ""
 }
 
-func (a *DefaultApp) Start() error {
+func (a *appBase) Start(wg *sync.WaitGroup) error {
 	return nil
 }
 
-func (a *DefaultApp) Stop() error {
+func (a *appBase) Stop() error {
 	return nil
 }
 
-func (a *DefaultApp) Reload() error {
+func (a *appBase) Reload() error {
 	return nil
 }
 
-func (a *DefaultApp) RecvInterFunc(rec *transport.Reciver, f func(*transport.Reciver) (resp interface{}, err error)) (resp interface{}, err error) {
+func (a *appBase) RecvInterFunc(rec *transport.Reciver, f func(*transport.Reciver) (resp interface{}, err error)) (resp interface{}, err error) {
 	return f(rec)
 }
 
-func (a *DefaultApp) HealthCheck() bool {
+func (a *appBase) HealthCheck() bool {
 	return false
 }
 
-func (a *DefaultApp) SendInterFunc(sender *transport.Sender, f func(sender *transport.Sender) error) error {
+func (a *appBase) SendInterFunc(sender *transport.Sender, f func(sender *transport.Sender) error) error {
 	return f(sender)
 }
 
-func (a *DefaultApp) RouteIns() *pb.RouteIns {
+func (a *appBase) RouteIns() *pb.RouteIns {
 	return a.routeins
 }
 
-func (a *DefaultApp) RouteSvc() *pb.RouteSvc {
+func (a *appBase) RouteSvc() *pb.RouteSvc {
 	return a.routesvc
 }
-func (a *DefaultApp) RouteWorld() *pb.RouteWorld {
+func (a *appBase) RouteWorld() *pb.RouteWorld {
 	return a.routeworld
 }
 
-func (a *DefaultApp) IDStr() string {
+func (a *appBase) IDStr() string {
 	return a.routeins.IDStr
 }

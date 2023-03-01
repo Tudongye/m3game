@@ -12,13 +12,16 @@ type M3Metas struct {
 	Metas map[string]string
 }
 
-func CreateM3Metas() *M3Metas {
+func NewM3Metas() *M3Metas {
 	return &M3Metas{
 		Metas: make(map[string]string),
 	}
 }
 
 func (m *M3Metas) Decode(pm *pb.Metas) {
+	if pm == nil {
+		return
+	}
 	for _, meta := range pm.Metas {
 		m.Metas[meta.Key] = meta.Value
 	}

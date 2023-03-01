@@ -5,6 +5,8 @@ import (
 	"m3game/runtime/transport"
 	"math/rand"
 
+	"github.com/pkg/errors"
+
 	"github.com/serialx/hashring"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
@@ -12,6 +14,11 @@ import (
 
 const (
 	Balance_m3g = "balance_m3g"
+)
+
+var (
+	_err_parsesenderfail   = errors.New("_err_parsesenderfail")
+	_err_routerheadinvaild = errors.New("_err_routerheadinvaild")
 )
 
 func newM3GPikerBuilder() balancer.Builder {
@@ -59,7 +66,7 @@ func (p *M3GPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 	var ret balancer.PickResult
 	sender := transport.ParseSender(info.Ctx)
 	if sender == nil {
-		return ret, nil
+		return ret, _err_parsesenderfail
 	}
 	if sender.RouteHead().RouteType == pb.RouteType_RT_P2P {
 		return M3G_P2P_Pick(p, sender.RouteHead().RoutePara.RouteP2PHead)
@@ -76,7 +83,7 @@ func (p *M3GPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 func M3G_P2P_Pick(p *M3GPicker, rps []*pb.RouteP2PHead) (balancer.PickResult, error) {
 	var ret balancer.PickResult
 	if len(rps) != 1 {
-		return ret, nil
+		return ret, _err_routerheadinvaild
 	}
 	for IDStr, subConn := range p.subConns {
 		if IDStr == rps[0].DstIns.IDStr {
@@ -93,7 +100,7 @@ func M3G_RAND_Pick(p *M3GPicker, rps []*pb.RouteRandHead) (balancer.PickResult, 
 func M3G_HASH_Pick(p *M3GPicker, rps []*pb.RouteHashHead) (balancer.PickResult, error) {
 	var ret balancer.PickResult
 	if len(rps) != 1 {
-		return ret, nil
+		return ret, _err_routerheadinvaild
 	}
 	if idstr, ok := p.hashRing.GetNode(rps[0].HashKey); ok {
 		return balancer.PickResult{SubConn: p.subConns[idstr]}, nil

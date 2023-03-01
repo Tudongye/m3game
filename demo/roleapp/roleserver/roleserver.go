@@ -2,7 +2,6 @@ package roleserver
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"m3game/demo/dirapp/dirclient"
 	"m3game/demo/loader"
@@ -11,6 +10,8 @@ import (
 	"m3game/demo/roleapp/rolechclient"
 	"m3game/demo/roleapp/rolechserver"
 	"m3game/server/actor"
+
+	"github.com/pkg/errors"
 
 	"google.golang.org/grpc"
 )
@@ -29,9 +30,9 @@ func init() {
 	_map = make(map[string]int32)
 }
 
-func CreateRoleSer() *RoleSer {
+func New() *RoleSer {
 	return &RoleSer{
-		Server: actor.CreateServer("RoleSer", RoleCreater),
+		Server: actor.New("RoleSer", roleCreater),
 	}
 }
 
@@ -56,9 +57,10 @@ func (d *RoleSer) Register(ctx context.Context, in *dpb.Register_Req) (*dpb.Regi
 	if err := role.Register(in.Name); err != nil {
 		return out, err
 	}
-	out.RoleID = role.roleid
+	out.RoleID = role.RoleID()
 	return out, nil
 }
+
 func (d *RoleSer) Login(ctx context.Context, in *dpb.Login_Req) (*dpb.Login_Rsp, error) {
 	out := new(dpb.Login_Rsp)
 	role := ParseRoleActor(ctx)

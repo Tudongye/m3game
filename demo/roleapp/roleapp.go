@@ -16,19 +16,20 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/plugin"
 	"m3game/server"
+	"sync"
 )
 
-func CreateRoleApp() *RoleApp {
+func newApp() *RoleApp {
 	return &RoleApp{
-		DefaultApp: app.CreateDefaultApp(dproto.RoleAppFuncID),
+		App: app.New(dproto.RoleAppFuncID),
 	}
 }
 
 type RoleApp struct {
-	*app.DefaultApp
+	app.App
 }
 
-func (d *RoleApp) Start() error {
+func (d *RoleApp) Start(wg *sync.WaitGroup) error {
 	router := plugin.GetRouterPlugin()
 	if router != nil {
 		if err := router.Register(d); err != nil {
@@ -50,12 +51,12 @@ func (d *RoleApp) HealthCheck() bool {
 	return true
 }
 func Run() error {
-	plugin.RegisterPluginFactory(&consul.Factory{})
-	plugin.RegisterPluginFactory(&cache.Factory{})
-	plugin.RegisterPluginFactory(&nats.Factory{})
+	plugin.RegisterFactory(&consul.Factory{})
+	plugin.RegisterFactory(&cache.Factory{})
+	plugin.RegisterFactory(&nats.Factory{})
 
 	loader.RegisterLocationCfg()
 
-	runtime.Run(CreateRoleApp(), []server.Server{roleserver.CreateRoleSer(), rolechserver.CreateRoleChSer()})
+	runtime.Run(newApp(), []server.Server{roleserver.New(), rolechserver.New()})
 	return nil
 }

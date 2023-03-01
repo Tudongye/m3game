@@ -3,19 +3,18 @@ package roleserver
 import (
 	"context"
 	"fmt"
-	"log"
 	"m3game/db/cache"
 	"m3game/demo/proto/pb"
 	"m3game/runtime/plugin"
 	"m3game/server/actor"
+	"m3game/util/log"
 
 	"google.golang.org/protobuf/proto"
 )
 
-func RoleCreater(actorid string) actor.Actor {
+func roleCreater(actorid string) actor.Actor {
 	return &RoleActor{
-		roleid:    actorid,
-		ActorBase: actor.ActorBaseCreator(),
+		ActorBase: actor.ActorBaseCreator(actorid),
 		dirty:     false,
 		ready:     false,
 	}
@@ -31,14 +30,17 @@ func ParseRoleActor(ctx context.Context) *RoleActor {
 
 type RoleActor struct {
 	*actor.ActorBase
-	roleid string
-	db     *pb.RoleDB
-	dirty  bool
-	ready  bool
+	db    *pb.RoleDB
+	dirty bool
+	ready bool
+}
+
+func (a *RoleActor) RoleID() string {
+	return a.ID()
 }
 
 func (a *RoleActor) OnInit() error {
-	log.Printf("OnInit %s\n", a.roleid)
+	log.InfoP(a.ID(), "OnInit")
 	return nil
 }
 
@@ -47,36 +49,36 @@ func (a *RoleActor) OnTick() error {
 }
 
 func (a *RoleActor) OnExit() error {
-	log.Printf("OnExit %s\n", a.roleid)
+	log.InfoP(a.ID(), "OnExit")
 	return nil
 }
 
 func (a *RoleActor) Save() error {
-	log.Printf("Save %s\n", a.roleid)
+	log.DebugP(a.ID(), "Save")
 	if a.dirty {
-		log.Printf("Saving %s\n", a.roleid)
+		log.Debug("Saving %s", a.ID())
 		a.dirty = false
 		db := plugin.GetDBPluginByName(cache.Name())
 		if db == nil {
 			return _err_actor_dberr
 		}
-		return db.Update(rolemeta, a.roleid, a.db)
+		return db.Update(rolemeta, a.ID(), a.db)
 	}
 	return nil
 }
 
 func (a *RoleActor) ReBuild(proto.Message) error {
-	log.Printf("ReBuild %s\n", a.roleid)
+	log.DebugP(a.ID(), "ReBuild")
 	return nil
 }
 
 func (a *RoleActor) Pack() (proto.Message, error) {
-	log.Printf("Pack %s\n", a.roleid)
+	log.DebugP(a.ID(), "Pack")
 	return nil, nil
 }
 
 func (a *RoleActor) ModifyName(name string) error {
-	log.Printf("ModifyName %s %s\n", a.roleid, name)
+	log.DebugP(a.ID(), "ModifyName %s", name)
 	if !a.ready {
 		return fmt.Errorf("Actor not Ready")
 	}
@@ -94,9 +96,9 @@ func (a *RoleActor) Register(name string) error {
 		return _err_actor_dberr
 	}
 	obj := roleDBCreater()
-	obj.RoleID = a.roleid
+	obj.RoleID = a.ID()
 	obj.Name = name
-	return db.Insert(rolemeta, a.roleid, obj)
+	return db.Insert(rolemeta, a.ID(), obj)
 }
 
 func (a *RoleActor) Login() error {
@@ -104,7 +106,7 @@ func (a *RoleActor) Login() error {
 	if db == nil {
 		return _err_actor_dberr
 	}
-	if obj, err := db.Get(rolemeta, a.roleid); err != nil {
+	if obj, err := db.Get(rolemeta, a.ID()); err != nil {
 		return err
 	} else if roleobj, ok := obj.(*pb.RoleDB); !ok {
 		return _err_actor_dberr

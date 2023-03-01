@@ -6,6 +6,16 @@ import (
 	"m3game/server"
 )
 
+func ParseActor(ctx context.Context) Actor {
+	if c := server.ParseContext(ctx); c == nil {
+		return nil
+	} else if sctx := c.(*Context); sctx == nil {
+		return nil
+	} else {
+		return sctx.Actor()
+	}
+}
+
 type Context struct {
 	reciver *transport.Reciver
 	server  *Server
@@ -44,19 +54,9 @@ type actorRsp struct {
 	err error
 }
 
-func CreateActorReq(ctx *Context) *actorReq {
+func newActorReq(ctx *Context) *actorReq {
 	return &actorReq{
 		ctx:     ctx,
 		rspchan: make(chan *actorRsp),
-	}
-}
-
-func ParseActor(ctx context.Context) Actor {
-	if c := server.ParseContext(ctx); c == nil {
-		return nil
-	} else if sctx := c.(*Context); sctx == nil {
-		return nil
-	} else {
-		return sctx.Actor()
 	}
 }

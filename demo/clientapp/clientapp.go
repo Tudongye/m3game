@@ -2,7 +2,6 @@ package clientapp
 
 import (
 	"context"
-	"log"
 	"m3game/app"
 	"m3game/broker/nats"
 	"m3game/config"
@@ -15,20 +14,22 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/plugin"
 	"m3game/server"
+	"m3game/util/log"
+	"sync"
 	"time"
 )
 
-func CreateClientApp() *ClientApp {
+func newApp() *ClientApp {
 	return &ClientApp{
-		DefaultApp: app.CreateDefaultApp(dproto.ClientAppFuncID),
+		App: app.New(dproto.ClientAppFuncID),
 	}
 }
 
 type ClientApp struct {
-	*app.DefaultApp
+	app.App
 }
 
-func (d *ClientApp) Start() error {
+func (d *ClientApp) Start(wg *sync.WaitGroup) error {
 	router := plugin.GetRouterPlugin()
 	if router != nil {
 		if err := router.Register(d); err != nil {
@@ -45,152 +46,153 @@ func (d *ClientApp) Start() error {
 		return err
 	}
 	testmode := config.GetEnv("testmode")
+	log.Info("TestMode:%s", testmode)
 	if testmode == "dirapp" {
-		log.Printf("Test:%s\n", testmode)
+		log.Info("Test:%s", testmode)
 		go func() {
 			time.Sleep(time.Second * 3)
-			log.Println("Call Hello()")
-			log.Printf("Req: good morning\n")
+			log.Info("Call Hello()")
+			log.Debug("Req: good morning")
 			if rsp, err := dirclient.DirClient().Hello(context.Background(), "good morning"); err != nil {
-				log.Printf("Err: %s\n", err.Error())
+				log.Error("Err: %s", err.Error())
 			} else {
-				log.Printf("Res: %s\n", rsp)
+				log.Debug("Res: %s", rsp)
 			}
 		}()
 	}
 	if testmode == "mapapp" {
-		log.Printf("Test:%s\n", testmode)
+		log.Info("Test:%s", testmode)
 		go func() {
 			time.Sleep(time.Second * 3)
-			log.Println("G1 Call Move()")
-			log.Printf("G1 Req: Mike 5")
+			log.Info("G1 Call Move()")
+			log.Debug("G1 Req: Mike 5")
 			if n, l, err := mapclient.MapClient().Move(context.Background(), "Mike", 5); err != nil {
-				log.Printf("G1 Err: %s\n", err.Error())
+				log.Error("G1 Err: %s", err.Error())
 			} else {
-				log.Printf("G1 Res: %s %d\n", n, l)
+				log.Debug("G1 Res: %s %d", n, l)
 			}
 		}()
 
 		go func() {
 			time.Sleep(time.Second * 3)
-			log.Println("G2 Call Move()")
-			log.Printf("G2 Req: June 10")
+			log.Info("G2 Call Move()")
+			log.Debug("G2 Req: June 10")
 			if n, l, err := mapclient.MapClient().Move(context.Background(), "June", 10); err != nil {
-				log.Printf("G2 Err: %s\n", err.Error())
+				log.Error("G2 Err: %s", err.Error())
 			} else {
-				log.Printf("G2 Res: %s %d\n", n, l)
+				log.Debug("G2 Res: %s %d", n, l)
 			}
 		}()
 	}
 	if testmode == "broad" {
-		log.Printf("Test:%s\n", testmode)
+		log.Info("Test:%s", testmode)
 		time.Sleep(time.Second * 3)
 		actorid := "ABCDEFG1234567"
 		name := "Mike"
-		log.Println("Call Register()")
-		log.Printf("Req: %s %s", actorid, name)
+		log.Info("Call Register()")
+		log.Debug("Req: %s %s", actorid, name)
 		if roleid, err := roleclient.RoleClient().Register(context.Background(), actorid, name); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %s\n", roleid)
+			log.Debug("Res: %s", roleid)
 		}
 
-		log.Println("Call Login()")
-		log.Printf("Req: %s ", actorid)
+		log.Info("Call Login()")
+		log.Debug("Req: %s ", actorid)
 		if name, tips, err := roleclient.RoleClient().Login(context.Background(), actorid); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %s %s\n", name, tips)
+			log.Debug("Res: %s %s", name, tips)
 		}
 
-		log.Println("Call PostChannel()")
-		log.Printf("Req: %s %s", actorid, "Hello World")
+		log.Info("Call PostChannel()")
+		log.Debug("Req: %s %s", actorid, "Hello World")
 		if err := roleclient.RoleClient().PostChannel(context.Background(), actorid, "Hello World"); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: \n")
+			log.Debug("Res: ")
 		}
 
-		log.Println("Call PostChannel()")
-		log.Printf("Req: %s %s", actorid, "Hello World2")
+		log.Info("Call PostChannel()")
+		log.Debug("Req: %s %s", actorid, "Hello World2")
 		if err := roleclient.RoleClient().PostChannel(context.Background(), actorid, "Hello World2"); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: \n")
+			log.Debug("Res: ")
 		}
 
 		time.Sleep(time.Second * 3)
-		log.Println("Call PullChannel()")
-		log.Printf("Req: %s", actorid)
+		log.Info("Call PullChannel()")
+		log.Debug("Req: %s", actorid)
 		if msgs, err := roleclient.RoleClient().PullChannel(context.Background(), actorid); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %v\n", msgs)
+			log.Debug("Res: %v", msgs)
 		}
 	}
 	if testmode == "roleapp" {
-		log.Printf("Test:%s\n", testmode)
+		log.Info("Test:%s", testmode)
 		time.Sleep(time.Second * 3)
 		actorid := "ABCDEFG1234567"
 		name := "Mike"
 
-		log.Println("Call Register()")
-		log.Printf("Req: %s %s", actorid, name)
+		log.Info("Call Register()")
+		log.Debug("Req: %s %s", actorid, name)
 		if roleid, err := roleclient.RoleClient().Register(context.Background(), actorid, name); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %s\n", roleid)
+			log.Debug("Res: %s", roleid)
 		}
 
-		log.Println("Call Login()")
-		log.Printf("Req: %s ", actorid)
+		log.Info("Call Login()")
+		log.Debug("Req: %s ", actorid)
 		if name, tips, err := roleclient.RoleClient().Login(context.Background(), actorid); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %s %s\n", name, tips)
+			log.Debug("Res: %s %s", name, tips)
 		}
 
-		log.Println("Call GetName()")
-		log.Printf("Req: %s", actorid)
+		log.Info("Call GetName()")
+		log.Debug("Req: %s", actorid)
 		if name, err := roleclient.RoleClient().GetName(context.Background(), actorid); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %s\n", name)
+			log.Debug("Res: %s", name)
 		}
 
 		newname := "June"
-		log.Println("Call ModifyName()")
-		log.Printf("Req: %s %s", actorid, newname)
+		log.Info("Call ModifyName()")
+		log.Debug("Req: %s %s", actorid, newname)
 		if name, err := roleclient.RoleClient().ModifyName(context.Background(), actorid, newname); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %s\n", name)
+			log.Debug("Res: %s", name)
 		}
 
-		log.Println("Call GetName()")
-		log.Printf("Req: %s", actorid)
+		log.Info("Call GetName()")
+		log.Debug("Req: %s", actorid)
 		if name, err := roleclient.RoleClient().GetName(context.Background(), actorid); err != nil {
-			log.Printf("Err: %s\n", err.Error())
+			log.Error("Err: %s", err.Error())
 		} else {
-			log.Printf("Res: %s\n", name)
+			log.Debug("Res: %s", name)
 		}
 
 		go func() {
-			log.Println("G1 Call Move()")
-			log.Printf("G1 Req: %s %d", actorid, 15)
+			log.Info("G1 Call Move()")
+			log.Debug("G1 Req: %s %d", actorid, 15)
 			if location, locatename, err := roleclient.RoleClient().MoveRole(context.Background(), actorid, 15); err != nil {
-				log.Printf("G1 Err: %s\n", err.Error())
+				log.Error("G1 Err: %s", err.Error())
 			} else {
-				log.Printf("G1 Res: %d %s\n", location, locatename)
+				log.Debug("G1 Res: %d %s", location, locatename)
 			}
 		}()
 		go func() {
-			log.Println("G2 Call Move()")
-			log.Printf("G2 Req: %s %d", actorid, 10)
+			log.Info("G2 Call Move()")
+			log.Debug("G2 Req: %s %d", actorid, 10)
 			if location, locatename, err := roleclient.RoleClient().MoveRole(context.Background(), actorid, 10); err != nil {
-				log.Printf("G2 Err: %s\n", err.Error())
+				log.Error("G2 Err: %s", err.Error())
 			} else {
-				log.Printf("G2 Res: %d %s\n", location, locatename)
+				log.Debug("G2 Res: %d %s", location, locatename)
 			}
 		}()
 	}
@@ -202,8 +204,8 @@ func (d *ClientApp) HealthCheck() bool {
 }
 
 func Run() error {
-	plugin.RegisterPluginFactory(&consul.Factory{})
-	plugin.RegisterPluginFactory(&nats.Factory{})
-	runtime.Run(CreateClientApp(), []server.Server{})
+	plugin.RegisterFactory(&consul.Factory{})
+	plugin.RegisterFactory(&nats.Factory{})
+	runtime.Run(newApp(), []server.Server{})
 	return nil
 }

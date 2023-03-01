@@ -44,7 +44,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	if _instance.conn, err = grpc.Dial(
 		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID)),
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(transport.SendInteror(SendInterFunc)),
+		grpc.WithUnaryInterceptor(client.SendInteror(SendInterFunc)),
 	); err != nil {
 		return err
 	} else {
@@ -53,7 +53,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	}
 }
 
-func SendInterFunc(s *transport.Sender) error {
+func SendInterFunc(s *transport.Sender, f func(*transport.Sender) error) error {
 	s.Metas().Set(proto.META_CLIENT, _instance.Client)
 	if m := s.Ctx().Value(_rolemetaskey); m != nil {
 		metas := m.(map[string]string)
@@ -61,7 +61,7 @@ func SendInterFunc(s *transport.Sender) error {
 			s.Metas().Set(k, v)
 		}
 	}
-	return client.SendInterFunc(s)
+	return f(s)
 }
 
 type Client struct {
@@ -75,7 +75,7 @@ type Client struct {
 
 func (c *Client) Register(ctx context.Context, roleid string, name string) (string, error) {
 	var in dpb.Register_Req
-	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
 	metas := make(map[string]string)
 	metas[proto.META_ACTORID] = roleid
 	metas[proto.META_CREATE_ACTORID] = proto.META_FLAG_TRUE
@@ -90,7 +90,7 @@ func (c *Client) Register(ctx context.Context, roleid string, name string) (stri
 
 func (c *Client) Login(ctx context.Context, roleid string) (string, string, error) {
 	var in dpb.Login_Req
-	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
 	metas := make(map[string]string)
 	metas[proto.META_ACTORID] = roleid
 	metas[proto.META_CREATE_ACTORID] = proto.META_FLAG_TRUE
@@ -104,7 +104,7 @@ func (c *Client) Login(ctx context.Context, roleid string) (string, string, erro
 
 func (c *Client) ModifyName(ctx context.Context, roleid string, name string) (string, error) {
 	var in dpb.ModifyName_Req
-	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
 	in.NewName = name
 	metas := make(map[string]string)
 	metas[proto.META_ACTORID] = roleid
@@ -118,7 +118,7 @@ func (c *Client) ModifyName(ctx context.Context, roleid string, name string) (st
 
 func (c *Client) GetName(ctx context.Context, roleid string) (string, error) {
 	var in dpb.GetName_Req
-	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
 	metas := make(map[string]string)
 	metas[proto.META_ACTORID] = roleid
 	ctx = context.WithValue(ctx, _rolemetaskey, metas)
@@ -131,7 +131,7 @@ func (c *Client) GetName(ctx context.Context, roleid string) (string, error) {
 
 func (c *Client) MoveRole(ctx context.Context, roleid string, distance int32) (int32, string, error) {
 	var in dpb.MoveRole_Req
-	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
 	in.Distance = distance
 	metas := make(map[string]string)
 	metas[proto.META_ACTORID] = roleid
@@ -145,7 +145,7 @@ func (c *Client) MoveRole(ctx context.Context, roleid string, distance int32) (i
 
 func (c *Client) PostChannel(ctx context.Context, roleid string, content string) error {
 	var in dpb.PostChannel_Req
-	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
 	in.Content = content
 	metas := make(map[string]string)
 	metas[proto.META_ACTORID] = roleid
@@ -159,7 +159,7 @@ func (c *Client) PostChannel(ctx context.Context, roleid string, content string)
 
 func (c *Client) PullChannel(ctx context.Context, roleid string) ([]*dpb.ChannelMsg, error) {
 	var in dpb.PullChannel_Req
-	in.RouteHead = client.CreateRouteHead_Hash(c.srcins, c.dstsvc, roleid)
+	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
 	metas := make(map[string]string)
 	metas[proto.META_ACTORID] = roleid
 	ctx = context.WithValue(ctx, _rolemetaskey, metas)

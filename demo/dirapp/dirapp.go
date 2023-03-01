@@ -9,19 +9,20 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/plugin"
 	"m3game/server"
+	"sync"
 )
 
-func CreateDirApp() *DirApp {
+func newApp() *DirApp {
 	return &DirApp{
-		DefaultApp: app.CreateDefaultApp(dproto.DirAppFuncID),
+		App: app.New(dproto.DirAppFuncID),
 	}
 }
 
 type DirApp struct {
-	*app.DefaultApp
+	app.App
 }
 
-func (d *DirApp) Start() error {
+func (d *DirApp) Start(wg *sync.WaitGroup) error {
 	router := plugin.GetRouterPlugin()
 	if router != nil {
 		if err := router.Register(d); err != nil {
@@ -34,8 +35,8 @@ func (d *DirApp) HealthCheck() bool {
 	return true
 }
 func Run() error {
-	plugin.RegisterPluginFactory(&consul.Factory{})
-	plugin.RegisterPluginFactory(&nats.Factory{})
-	runtime.Run(CreateDirApp(), []server.Server{dirserver.CreateDirSer()})
+	plugin.RegisterFactory(&consul.Factory{})
+	plugin.RegisterFactory(&nats.Factory{})
+	runtime.Run(newApp(), []server.Server{dirserver.New()})
 	return nil
 }

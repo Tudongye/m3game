@@ -2,15 +2,16 @@ package consul
 
 import (
 	"fmt"
-	"log"
 	"m3game/mesh/router"
 	"m3game/runtime/plugin"
 	"m3game/runtime/transport"
 	"m3game/util"
+	"m3game/util/log"
 	"time"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -46,12 +47,12 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 		apps: make(map[string]router.AppReciver),
 	}
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Router Decode Cfg")
 	}
 	consulConfig := api.DefaultConfig()
 	consulConfig.Address = _cfg.ConsulHost
 	if client, err := api.NewClient(consulConfig); err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "Consul.Api.NewClient Add %s", consulConfig.Address)
 	} else {
 		_instance.client = client
 	}
@@ -92,6 +93,7 @@ func (r *Router) Register(app router.AppReciver) error {
 	}
 	interval := time.Duration(10) * time.Second
 	deregister := time.Duration(1) * time.Minute
+	healthmethod := fmt.Sprintf("%v:%v/Health/%v", ip, port, app.IDStr())
 	reg := &api.AgentServiceRegistration{
 		ID:      app.IDStr(), // 服务节点的名称
 		Name:    svcstr,      // 服务名称
@@ -99,15 +101,15 @@ func (r *Router) Register(app router.AppReciver) error {
 		Port:    port,        // 服务端口
 		Address: ip,          // 服务 IP
 		Check: &api.AgentServiceCheck{ // 健康检查
-			Interval:                       interval.String(),                                     // 健康检查间隔
-			GRPC:                           fmt.Sprintf("%v:%v/Health/%v", ip, port, app.IDStr()), // grpc 支持，执行健康检查的地址，service 会传到 Health.Check 函数中
-			DeregisterCriticalServiceAfter: deregister.String(),                                   // 注销时间，相当于过期时间
+			Interval:                       interval.String(),   // 健康检查间隔
+			GRPC:                           healthmethod,        // grpc 支持，执行健康检查的地址，service 会传到 Health.Check 函数中
+			DeregisterCriticalServiceAfter: deregister.String(), // 注销时间，相当于过期时间
 		},
 	}
-	log.Println(fmt.Sprintf("%v:%v/Health/%v", ip, port, app.IDStr()))
+	log.Fatal("HealthMethod => %s", healthmethod)
 	agent := r.client.Agent()
 	if err := agent.ServiceRegister(reg); err != nil {
-		return err
+		return errors.Wrapf(err, "Consul.agent.ServiceRegister %s", app.IDStr())
 	}
 	return nil
 }

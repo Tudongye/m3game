@@ -2,27 +2,28 @@ package transport
 
 import (
 	"context"
-	"fmt"
+	"m3game/broker"
 	"m3game/proto"
 	"m3game/proto/pb"
-	"m3game/util"
 
 	"google.golang.org/grpc"
 )
+
+// Contain ClientInterPara
 
 const (
 	_senderkey = "_senderkey"
 )
 
-func CreateSender(
+func NewSender(
 	ctx context.Context,
 	method string,
 	req, resp interface{},
 	cc *grpc.ClientConn,
 	invoker grpc.UnaryInvoker,
 	opts []grpc.CallOption,
-) *Sender {
-	return &Sender{
+) (*Sender, error) {
+	s := &Sender{
 		ctx:     ctx,
 		method:  method,
 		req:     req,
@@ -30,8 +31,14 @@ func CreateSender(
 		cc:      cc,
 		invoker: invoker,
 		opts:    opts,
-		metas:   proto.CreateM3Metas(),
+		metas:   proto.NewM3Metas(),
 	}
+	if m3pkg, ok := req.(proto.M3Pkg); !ok {
+		return nil, _err_msgisnotm3pkg
+	} else {
+		s.routehead = m3pkg.GetRouteHead()
+	}
+	return s, nil
 }
 
 func WithSender(ctx context.Context, s *Sender) context.Context {
@@ -50,6 +57,7 @@ type Sender struct {
 	invoker   grpc.UnaryInvoker
 	opts      []grpc.CallOption
 	metas     *proto.M3Metas
+	routehead *pb.RouteHead
 }
 
 func (s *Sender) Ctx() context.Context {
@@ -80,30 +88,22 @@ func (s *Sender) Opts() []grpc.CallOption {
 	return s.opts
 }
 
-func (s *Sender) SendMsg() error {
-	if m3pkg, ok := s.Req().(proto.M3Pkg); ok {
-		m3pkg.GetRouteHead().Metas = s.Metas().Encode()
-	} else {
-		return fmt.Errorf("Req cant trans to M3Pkg")
-	}
-
-	if s.RouteHead().RouteType == pb.RouteType_RT_BROAD {
-		return SendToBroker(s, util.GenTopic(s.RouteHead().DstSvc.IDStr))
-	} else if s.RouteHead().RouteType == pb.RouteType_RT_MUTIL {
-		return SendToBroker(s, s.RouteHead().RoutePara.RouteMutilHead[0].Topic)
-	}
-
-	ctx := WithSender(s.ctx, s)
-	return s.invoker(ctx, s.method, s.req, s.resp, s.cc, s.opts...)
-}
-
 func (s *Sender) Metas() *proto.M3Metas {
 	return s.metas
 }
 
 func (s *Sender) RouteHead() *pb.RouteHead {
-	if m3pkg, ok := s.req.(proto.M3Pkg); ok {
-		return m3pkg.GetRouteHead()
+	return s.routehead
+}
+
+func (s *Sender) sendMsg() error {
+	s.RouteHead().Metas = s.Metas().Encode()
+	if s.RouteHead().RouteType == pb.RouteType_RT_BROAD {
+		return sendToBrokerSer(s, broker.GenTopic(s.RouteHead().DstSvc.IDStr))
+	} else if s.RouteHead().RouteType == pb.RouteType_RT_MUTIL {
+		return sendToBrokerSer(s, s.RouteHead().RoutePara.RouteMutilHead[0].Topic)
 	}
-	return nil
+
+	ctx := WithSender(s.ctx, s)
+	return s.invoker(ctx, s.method, s.req, s.resp, s.cc, s.opts...)
 }

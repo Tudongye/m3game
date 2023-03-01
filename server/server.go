@@ -4,6 +4,7 @@ import (
 	"context"
 	"m3game/app"
 	"m3game/runtime/transport"
+	"sync"
 
 	"google.golang.org/grpc"
 )
@@ -40,7 +41,7 @@ type Server interface {
 	Init(map[string]interface{}, app.App) error                     // 初始化
 	Type() Type                                                     // 类型
 	Name() string                                                   // 服务名
-	Start() error                                                   // 启动
+	Start(wg *sync.WaitGroup) error                                 // 启动
 	Stop() error                                                    // 停止
 	Reload() error                                                  // 重载
 	RecvInterFunc(*transport.Reciver) (resp interface{}, err error) // RPC ServerInterceptor

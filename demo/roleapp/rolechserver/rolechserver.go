@@ -25,9 +25,9 @@ func init() {
 	_map = make(map[string]int32)
 }
 
-func CreateRoleChSer() *RoleChSer {
+func New() *RoleChSer {
 	return &RoleChSer{
-		Server: async.CreateServer("RoleChSer"),
+		Server: async.New("RoleChSer"),
 	}
 }
 

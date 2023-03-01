@@ -2,8 +2,9 @@ package plugin
 
 import (
 	"fmt"
-	"log"
+	"m3game/util/log"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -11,10 +12,11 @@ type Type string
 
 const (
 	DB     Type = "db"
-	Router Type = "router" // 只可以有一个
+	Router Type = "router" // only one
 	Trace  Type = "trace"
 	Metric Type = "metric"
-	Broker Type = "broker"
+	Broker Type = "broker" // only one
+	Log    Type = "log"
 )
 
 const (
@@ -27,6 +29,13 @@ var (
 
 func init() {
 	_factoryMap = make(map[string]Factory)
+}
+
+func RegisterFactory(f Factory) {
+	if _, ok := _factoryMap[f.Name()]; ok {
+		panic(fmt.Sprintf("RegisterFactory factory name repeatad %s", f.Name()))
+	}
+	_factoryMap[f.Name()] = f
 }
 
 type PluginIns interface {
@@ -42,13 +51,6 @@ type Factory interface {
 	CanDelete(PluginIns) bool
 }
 
-func RegisterPluginFactory(f Factory) {
-	if _, ok := _factoryMap[f.Name()]; ok {
-		log.Panicf("RegisterPluginFactory factory name repeatad %s", f.Name())
-	}
-	_factoryMap[f.Name()] = f
-}
-
 type config struct {
 	Plugin map[string]map[string]map[string]interface{} `toml:"Plugin"`
 }
@@ -56,21 +58,21 @@ type config struct {
 func InitPlugins(v viper.Viper) error {
 	var cfg config
 	if err := v.Unmarshal(&cfg); err != nil {
-		return err
+		return errors.Wrap(err, "Unmarshal PluginCfg")
 	}
 	for _, tm := range cfg.Plugin {
 		for name, nm := range tm {
-			if factory, ok := _factoryMap[name]; !ok {
+			factory, ok := _factoryMap[name]
+			if !ok {
 				return fmt.Errorf("Factory not find %s", name)
-			} else {
-				log.Printf("Plugin Setup %s\n", name)
-				if p, err := factory.Setup(nm); err != nil {
-					return err
-				} else {
-					if err := registerPluginIns(factory.Type(), name, getPluginTag(nm), p); err != nil {
-						return err
-					}
-				}
+			}
+			log.Fatal("Plugin Setup %s", name)
+			pluginIns, err := factory.Setup(nm)
+			if err != nil {
+				return errors.Wrapf(err, "Factory %s", name)
+			}
+			if err := registerPluginIns(factory.Type(), name, getPluginTag(nm), pluginIns); err != nil {
+				return errors.Wrapf(err, "Factory %s", name)
 			}
 		}
 	}
@@ -80,7 +82,9 @@ func InitPlugins(v viper.Viper) error {
 func getPluginTag(m map[string]interface{}) string {
 	if v, ok := m["tag"]; !ok {
 		return _defaulttag
+	} else if tag, ok := v.(string); !ok {
+		return _defaulttag
 	} else {
-		return v.(string)
+		return tag
 	}
 }

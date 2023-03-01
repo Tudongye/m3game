@@ -3,8 +3,8 @@ package actor
 import (
 	"context"
 	"fmt"
-	"log"
 	"m3game/server"
+	"m3game/util/log"
 	"time"
 
 	"google.golang.org/protobuf/proto"
@@ -13,6 +13,7 @@ import (
 type ActorCreater func(string) Actor
 
 type Actor interface {
+	ID() string
 	OnInit() error                // 加载后触发
 	OnTick() error                // 触发定时任务时
 	OnExit() error                // 退出时触发
@@ -21,11 +22,18 @@ type Actor interface {
 	Pack() (proto.Message, error) // 打包,服务迁移
 }
 
-func ActorBaseCreator() *ActorBase {
-	return &ActorBase{}
+func ActorBaseCreator(actorid string) *ActorBase {
+	return &ActorBase{
+		actorid: actorid,
+	}
 }
 
 type ActorBase struct {
+	actorid string
+}
+
+func (a *ActorBase) ID() string {
+	return a.actorid
 }
 
 func (a *ActorBase) OnInit() error {
@@ -52,7 +60,7 @@ func (a *ActorBase) Pack() (proto.Message, error) {
 	return nil, nil
 }
 
-func CreateActorRuntime(actor Actor) *actorRuntime {
+func newActorRuntime(actor Actor) *actorRuntime {
 	return &actorRuntime{
 		actor:   actor,
 		reqchan: make(chan *actorReq, _cfg.MaxReqChanSize),
@@ -67,10 +75,7 @@ type actorRuntime struct {
 	savetime   int64 // 回写时间
 }
 
-func (ar *actorRuntime) run() error {
-	if err := ar.actor.OnInit(); err != nil {
-		return err
-	}
+func (ar *actorRuntime) run() {
 	now := time.Now().Unix()
 	ar.activetime = now
 	ar.savetime = now
@@ -83,7 +88,6 @@ func (ar *actorRuntime) run() error {
 			break
 		}
 	}
-	return nil
 }
 
 func (ar *actorRuntime) kick() {
@@ -92,27 +96,27 @@ func (ar *actorRuntime) kick() {
 
 func (ar *actorRuntime) exit() {
 	if err := ar.actor.Save(); err != nil {
-		log.Println(err)
+		log.ErrorP(ar.actor.ID(), "Save err %s", err.Error())
 	}
 	if err := ar.actor.OnExit(); err != nil {
-		log.Println(err)
+		log.ErrorP(ar.actor.ID(), "OnExit err %s", err.Error())
 	}
 }
 
 func (ar *actorRuntime) ontick() {
 	now := time.Now().Unix()
+	if err := ar.actor.OnTick(); err != nil {
+		log.ErrorP(ar.actor.ID(), "OnTick err %s", err.Error())
+	}
 	if now-ar.savetime > int64(_cfg.SaveTimeInter) {
 		ar.savetime = now
 		if err := ar.actor.Save(); err != nil {
-			log.Println(err)
+			log.ErrorP(ar.actor.ID(), "Save err %s", err.Error())
 		}
 	}
 	if now-ar.activetime > int64(_cfg.ActiveTimeOut) {
 		ar.cancel()
 		return
-	}
-	if err := ar.actor.OnTick(); err != nil {
-		log.Println(err)
 	}
 }
 
@@ -130,6 +134,8 @@ func (ar *actorRuntime) loop(ctx context.Context, t *time.Ticker) bool {
 	case <-ctx.Done():
 		ar.exit()
 		return false
+	case <-t.C:
+		ar.ontick()
 	case req := <-ar.reqchan:
 		now := time.Now().Unix()
 		ar.activetime = now
@@ -140,8 +146,6 @@ func (ar *actorRuntime) loop(ctx context.Context, t *time.Ticker) bool {
 			rsp: rsp,
 			err: err,
 		}
-	case <-t.C:
-		ar.ontick()
 	}
 	return true
 }

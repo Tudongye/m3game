@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func CreateServer(name string) *Server {
+func New(name string) *Server {
 	return &Server{
 		name: name,
 	}
@@ -40,7 +40,7 @@ func (s *Server) Name() string {
 	return fmt.Sprintf("%s.%s", server.Async, s.name)
 }
 
-func (s *Server) Start() error {
+func (s *Server) Start(wg *sync.WaitGroup) error {
 	return nil
 }
 

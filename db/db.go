@@ -6,7 +6,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func CreateDBMeta(table string, keyfield string, allfields []string, creater DBCreater, setter DBSetter, getter DBGetter) *DBMeta {
+func NewMeta(table string, keyfield string, allfields []string, creater DBCreater, setter DBSetter, getter DBGetter) *DBMeta {
 	return &DBMeta{
 		Table:     table,
 		Keyfield:  keyfield,
@@ -38,6 +38,6 @@ type DB interface {
 }
 
 var (
-	Err_DB_notfind     = fmt.Errorf("Err_DB_notfind")
-	Err_DB_repeatedkey = fmt.Errorf("Err_DB_notfind")
+	Err_DB_notfindkey  = fmt.Errorf("Err_DB_notfindkey")
+	Err_DB_repeatedkey = fmt.Errorf("Err_DB_repeatedkey")
 )

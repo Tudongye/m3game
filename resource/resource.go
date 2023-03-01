@@ -2,7 +2,6 @@ package resource
 
 import (
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/mitchellh/mapstructure"
@@ -49,7 +48,7 @@ func GetResource(k string) ResLoader {
 
 func RegisterResLoader(name string, f ResLoaderCreater) {
 	if _, ok := _resloadercreaters[name]; ok {
-		log.Panicf("Resource Name %s repeated", name)
+		panic(fmt.Sprintf("Resource Name %s repeated", name))
 	}
 	_resloadercreaters[name] = f
 }

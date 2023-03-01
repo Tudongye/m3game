@@ -42,7 +42,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	if _instance.conn, err = grpc.Dial(
 		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.MapAppFuncID)),
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(transport.SendInteror(SendInterFunc)),
+		grpc.WithUnaryInterceptor(client.SendInteror(SendInterFunc)),
 	); err != nil {
 		return err
 	} else {
@@ -50,10 +50,9 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 		return nil
 	}
 }
-
-func SendInterFunc(s *transport.Sender) error {
+func SendInterFunc(s *transport.Sender, f func(*transport.Sender) error) error {
 	s.Metas().Set(proto.META_CLIENT, _instance.Client)
-	return client.SendInterFunc(s)
+	return f(s)
 }
 
 type Client struct {
@@ -67,7 +66,7 @@ type Client struct {
 
 func (c *Client) Move(ctx context.Context, name string, distance int32) (string, int32, error) {
 	var in dpb.Move_Req
-	in.RouteHead = client.CreateRouteHead_Random(c.srcins, c.dstsvc)
+	in.RouteHead = client.NewRouteHeadRandom(c.srcins, c.dstsvc)
 	in.Name = name
 	in.Distance = distance
 	if out, err := c.client.Move(ctx, &in); err != nil {

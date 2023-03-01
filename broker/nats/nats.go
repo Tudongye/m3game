@@ -1,9 +1,9 @@
 package nats
 
 import (
-	"log"
 	"m3game/broker"
 	"m3game/runtime/plugin"
+	"m3game/util/log"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/nats-io/nats.go"
@@ -55,7 +55,6 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 			_instance.js = js
 		}
 	}
-
 	return _instance, nil
 }
 
@@ -81,9 +80,9 @@ func (b *Broker) Publish(topic string, m []byte) error {
 	_, err := b.js.PublishAsync(topic, m)
 	return err
 }
-func (b *Broker) Subscribe(topic string, h func([]byte)) error {
-	log.Printf("Subscribe %s\n", topic)
 
+func (b *Broker) Subscribe(topic string, h func([]byte)) error {
+	log.Fatal("Subscribe %s", topic)
 	_, err := b.nc.Subscribe(topic, func(m *nats.Msg) {
 		h(m.Data)
 	})

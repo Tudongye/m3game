@@ -1,13 +1,28 @@
 package client
 
 import (
+	"context"
 	"m3game/proto/pb"
 	"m3game/runtime"
 	"m3game/runtime/transport"
 	"m3game/server"
+	"m3game/util/log"
+
+	"google.golang.org/grpc"
 )
 
-func SendInterFunc(sender *transport.Sender) error {
+func SendInteror(f func(*transport.Sender, func(*transport.Sender) error) error) grpc.UnaryClientInterceptor {
+	return func(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+		s, err := transport.NewSender(ctx, method, req, resp, cc, invoker, opts)
+		if err != nil {
+			log.Error("NewSender err %s", err.Error())
+			return err
+		}
+		return f(s, sendInterFunc)
+	}
+}
+
+func sendInterFunc(sender *transport.Sender) error {
 	sctx := server.ParseContext(sender.Ctx())
 	if sctx == nil {
 		return runtime.SendInterFunc(sender)
@@ -16,7 +31,7 @@ func SendInterFunc(sender *transport.Sender) error {
 	return s.SendInterFunc(sender)
 }
 
-func CreateRouteHead_Random(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
+func NewRouteHeadRandom(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
 	var routehead pb.RouteHead
 	routehead.SrcIns = srcins
 	routehead.DstSvc = dstsvc
@@ -31,7 +46,7 @@ func CreateRouteHead_Random(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteH
 	return &routehead
 }
 
-func CreateRouteHead_P2P(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, dstins *pb.RouteIns) *pb.RouteHead {
+func NewRouteHeadP2P(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, dstins *pb.RouteIns) *pb.RouteHead {
 	var routehead pb.RouteHead
 	routehead.SrcIns = srcins
 	routehead.DstSvc = dstsvc
@@ -46,7 +61,7 @@ func CreateRouteHead_P2P(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, dstins *pb.Ro
 	return &routehead
 }
 
-func CreateRouteHead_Hash(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, hashkey string) *pb.RouteHead {
+func NewRouteHeadHash(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, hashkey string) *pb.RouteHead {
 	var routehead pb.RouteHead
 	routehead.SrcIns = srcins
 	routehead.DstSvc = dstsvc
@@ -61,7 +76,7 @@ func CreateRouteHead_Hash(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, hashkey stri
 	return &routehead
 }
 
-func CreateRouteHead_Single(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
+func NewRouteHeadSingle(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
 	var routehead pb.RouteHead
 	routehead.SrcIns = srcins
 	routehead.DstSvc = dstsvc
@@ -76,7 +91,7 @@ func CreateRouteHead_Single(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteH
 	return &routehead
 }
 
-func CreateRouteHead_Mutil(srcins *pb.RouteIns, topic string) *pb.RouteHead {
+func NewRouteHeadMutil(srcins *pb.RouteIns, topic string) *pb.RouteHead {
 	var routehead pb.RouteHead
 	routehead.SrcIns = srcins
 	routehead.RouteType = pb.RouteType_RT_MUTIL
@@ -90,7 +105,7 @@ func CreateRouteHead_Mutil(srcins *pb.RouteIns, topic string) *pb.RouteHead {
 	return &routehead
 }
 
-func CreateRouteHead_Broad(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
+func NewRouteHeadBroad(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
 	var routehead pb.RouteHead
 	routehead.SrcIns = srcins
 	routehead.DstSvc = dstsvc

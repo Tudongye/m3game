@@ -42,7 +42,7 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	if _instance.conn, err = grpc.Dial(
 		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID)),
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(transport.SendInteror(SendInterFunc)),
+		grpc.WithUnaryInterceptor(client.SendInteror(SendInterFunc)),
 	); err != nil {
 		return err
 	} else {
@@ -51,9 +51,9 @@ func Init(srcins *pb.RouteIns, opts ...Opt) error {
 	}
 }
 
-func SendInterFunc(s *transport.Sender) error {
+func SendInterFunc(s *transport.Sender, f func(*transport.Sender) error) error {
 	s.Metas().Set(proto.META_CLIENT, _instance.Client)
-	return client.SendInterFunc(s)
+	return f(s)
 }
 
 type Client struct {
@@ -67,7 +67,7 @@ type Client struct {
 
 func (c *Client) TransChannel(ctx context.Context, msg *dpb.ChannelMsg) error {
 	var in dpb.TransChannel_Req
-	in.RouteHead = client.CreateRouteHead_Broad(c.srcins, c.dstsvc)
+	in.RouteHead = client.NewRouteHeadBroad(c.srcins, c.dstsvc)
 	in.Msg = msg
 	if _, err := c.client.TransChannel(ctx, &in); err != nil {
 		return err

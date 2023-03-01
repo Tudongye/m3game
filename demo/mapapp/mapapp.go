@@ -9,19 +9,20 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/plugin"
 	"m3game/server"
+	"sync"
 )
 
-func CreateMapApp() *MapApp {
+func newApp() *MapApp {
 	return &MapApp{
-		DefaultApp: app.CreateDefaultApp(dproto.MapAppFuncID),
+		App: app.New(dproto.MapAppFuncID),
 	}
 }
 
 type MapApp struct {
-	*app.DefaultApp
+	app.App
 }
 
-func (d *MapApp) Start() error {
+func (d *MapApp) Start(wg *sync.WaitGroup) error {
 	router := plugin.GetRouterPlugin()
 	if router != nil {
 		if err := router.Register(d); err != nil {
@@ -34,8 +35,8 @@ func (d *MapApp) HealthCheck() bool {
 	return true
 }
 func Run() error {
-	plugin.RegisterPluginFactory(&consul.Factory{})
-	plugin.RegisterPluginFactory(&nats.Factory{})
-	runtime.Run(CreateMapApp(), []server.Server{mapserver.CreateMapSer()})
+	plugin.RegisterFactory(&consul.Factory{})
+	plugin.RegisterFactory(&nats.Factory{})
+	runtime.Run(newApp(), []server.Server{mapserver.New()})
 	return nil
 }

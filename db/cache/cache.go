@@ -71,7 +71,7 @@ func (c *CacheDB) Get(meta *db.DBMeta, key string) (proto.Message, error) {
 	obj := meta.Creater()
 	fieldname := genCacheKey(key, meta.Table, meta.Keyfield)
 	if _, ok := c.cache[fieldname]; !ok {
-		return nil, db.Err_DB_notfind
+		return nil, db.Err_DB_notfindkey
 	}
 	for _, field := range meta.Allfields {
 		fieldname := genCacheKey(key, meta.Table, field)
@@ -87,7 +87,7 @@ func (c *CacheDB) Update(meta *db.DBMeta, key string, obj proto.Message) error {
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table, meta.Keyfield)
 	if _, ok := c.cache[fieldname]; !ok {
-		return db.Err_DB_notfind
+		return db.Err_DB_notfindkey
 	}
 	for _, field := range meta.Allfields {
 		v := meta.Getter(obj, field)
@@ -115,7 +115,7 @@ func (c *CacheDB) Delete(meta *db.DBMeta, key string) error {
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table, meta.Keyfield)
 	if _, ok := c.cache[fieldname]; ok {
-		return db.Err_DB_notfind
+		return db.Err_DB_notfindkey
 	}
 	for _, field := range meta.Allfields {
 		fieldname := genCacheKey(key, meta.Table, field)

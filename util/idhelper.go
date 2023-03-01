@@ -11,12 +11,31 @@ AppID : EnvID.WorldID.FuncID.InsID
 SvcID : EnvID.WorldID.FuncID
 */
 var (
-	regexAppID, _   = regexp.Compile("^([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)$")
-	regexSvcID, _   = regexp.Compile("^([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)$")
-	regexWorldID, _ = regexp.Compile("^([^\\.]+)\\.([^\\.]+)$")
-	regexEnvID, _   = regexp.Compile("^([^\\.]+)$")
-	regexAddr, _    = regexp.Compile("^([^:]+):([0-9]+)$")
+	regexAppID   *regexp.Regexp
+	regexSvcID   *regexp.Regexp
+	regexWorldID *regexp.Regexp
+	regexEnvID   *regexp.Regexp
+	regexAddr    *regexp.Regexp
 )
+
+func init() {
+	var err error
+	if regexAppID, err = regexp.Compile("^([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)$"); err != nil {
+		panic(fmt.Sprintf("regexAppID.Compile err %s", err))
+	}
+	if regexSvcID, err = regexp.Compile("^([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)$"); err != nil {
+		panic(fmt.Sprintf("regexSvcID.Compile err %s", err))
+	}
+	if regexWorldID, err = regexp.Compile("^([^\\.]+)\\.([^\\.]+)$"); err != nil {
+		panic(fmt.Sprintf("regexWorldID.Compile err %s", err))
+	}
+	if regexEnvID, err = regexp.Compile("^([^\\.]+)$"); err != nil {
+		panic(fmt.Sprintf("regexEnvID.Compile err %s", err))
+	}
+	if regexAddr, err = regexp.Compile("^([^:]+):([0-9]+)$"); err != nil {
+		panic(fmt.Sprintf("regexAddr.Compile err %s", err))
+	}
+}
 
 func AppID2Str(envid string, worldid string, funcid string, insid string) string {
 	return fmt.Sprintf("%s.%s.%s.%s", envid, worldid, funcid, insid)
@@ -91,11 +110,7 @@ func Addr2IPPort(s string) (ip string, port int, err error) {
 		return
 	}
 	ip = groups[1]
-	port, _ = strconv.Atoi(groups[2])
+	port, err = strconv.Atoi(groups[2])
 	return
 
-}
-
-func GenTopic(c string) string {
-	return fmt.Sprintf("Topic.%s", c)
 }

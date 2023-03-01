@@ -2,8 +2,8 @@ package consul
 
 import (
 	"fmt"
-	"log"
 	"m3game/mesh/balance"
+	"m3game/util/log"
 	"sync"
 
 	"github.com/hashicorp/consul/api"
@@ -50,8 +50,8 @@ func (cr *Resolver) watcher() {
 	for {
 		services, metainfo, err := _instance.client.Health().Service(cr.svc, "", true, &api.QueryOptions{WaitIndex: cr.lastIndex})
 		if err != nil {
-			log.Println(err)
-			return
+			log.Error("Health.Service %s err %s", cr.svc, err.Error())
+			continue
 		}
 		cr.lastIndex = metainfo.LastIndex
 		var newAddrs []resolver.Address

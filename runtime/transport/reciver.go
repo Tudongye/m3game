@@ -8,26 +8,32 @@ import (
 	"google.golang.org/grpc"
 )
 
-func CreateReciver(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (*Reciver, error) {
+// Contain ServerInterPara
+
+func newReciver(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (*Reciver, error) {
 	rec := &Reciver{
 		ctx:     ctx,
 		req:     req,
 		info:    info,
 		handler: handler,
-		metas:   proto.CreateM3Metas(),
+		metas:   proto.NewM3Metas(),
 	}
-	if mspkg, ok := req.(proto.M3Pkg); ok {
+	if mspkg, ok := req.(proto.M3Pkg); !ok {
+		return nil, _err_msgisnotm3pkg
+	} else {
 		rec.metas.Decode(mspkg.GetRouteHead().Metas)
+		rec.routehead = mspkg.GetRouteHead()
 	}
 	return rec, nil
 }
 
 type Reciver struct {
-	ctx     context.Context
-	req     interface{}
-	info    *grpc.UnaryServerInfo
-	handler grpc.UnaryHandler
-	metas   *proto.M3Metas
+	ctx       context.Context
+	req       interface{}
+	info      *grpc.UnaryServerInfo
+	handler   grpc.UnaryHandler
+	metas     *proto.M3Metas
+	routehead *pb.RouteHead
 }
 
 func (r *Reciver) Ctx() context.Context {
@@ -46,17 +52,14 @@ func (r *Reciver) Handler() grpc.UnaryHandler {
 	return r.handler
 }
 
-func (r *Reciver) HandleMsg(ctx context.Context) (resp interface{}, err error) {
-	return r.handler(ctx, r.req)
-}
-
 func (s *Reciver) Metas() *proto.M3Metas {
 	return s.metas
 }
 
 func (s *Reciver) RouteHead() *pb.RouteHead {
-	if m3pkg, ok := s.req.(proto.M3Pkg); ok {
-		return m3pkg.GetRouteHead()
-	}
-	return nil
+	return s.routehead
+}
+
+func (r *Reciver) HandleMsg(ctx context.Context) (resp interface{}, err error) {
+	return r.handler(ctx, r.req)
 }

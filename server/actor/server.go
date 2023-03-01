@@ -7,15 +7,17 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/transport"
 	"m3game/server"
+	"sync"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
-func CreateServer(name string, creater ActorCreater) *Server {
+func New(name string, creater ActorCreater) *Server {
 	return &Server{
 		name:     name,
-		actormgr: CreateActorMgr(creater),
+		actormgr: newActorMgr(creater),
 	}
 }
 
@@ -60,7 +62,7 @@ var (
 func (s *Server) Init(c map[string]interface{}, app app.App) error {
 	s.app = app
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
-		return err
+		return errors.Wrap(err, "Actor.Cfg Decode")
 	}
 	if err := _cfg.CheckVaild(); err != nil {
 		return err
@@ -76,7 +78,7 @@ func (s *Server) Name() string {
 	return fmt.Sprintf("%s.%s", server.Actor, s.name)
 }
 
-func (s *Server) Start() error {
+func (s *Server) Start(wg *sync.WaitGroup) error {
 	return nil
 }
 
@@ -87,6 +89,7 @@ func (s *Server) Stop() error {
 func (s *Server) Reload() error {
 	return nil
 }
+
 func (s *Server) RecvInterFunc(recv *transport.Reciver) (resp interface{}, err error) {
 	if actorid, ok := recv.Metas().Get(proto.META_ACTORID); !ok {
 		return nil, fmt.Errorf("no find actorid")

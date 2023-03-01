@@ -3,14 +3,14 @@ package transport
 import (
 	"context"
 	"fmt"
-	"log"
 	"m3game/broker"
 	"m3game/config"
 	"m3game/proto/pb"
 	"m3game/util"
-	"sync"
+	"m3game/util/log"
 	"time"
 
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
@@ -20,53 +20,53 @@ import (
 type grpchandlerFunc func(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error)
 type brokerhandlerFunc func(ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error)
 
-type BrokerSer struct {
-	mu                sync.Mutex
-	handlers          map[string]brokerhandlerFunc
-	serverinterceptor grpc.UnaryServerInterceptor
-	broker            broker.Broker
-}
-
-func genhandlerFunc(s interface{}, h grpchandlerFunc) brokerhandlerFunc {
-	return func(ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-		return h(s, ctx, dec, interceptor)
-	}
-}
-
-func CreateBrokerSer(interceptor grpc.UnaryServerInterceptor) *BrokerSer {
-	return &BrokerSer{
+func newBrokerSer(interceptor grpc.UnaryServerInterceptor) *brokerSer {
+	return &brokerSer{
 		serverinterceptor: interceptor,
 		handlers:          make(map[string]brokerhandlerFunc),
 	}
 }
 
-func (n *BrokerSer) registerBroker(broker broker.Broker) {
-	n.broker = broker
-	idstr := config.GetIDStr()
-	if envid, worldid, funcid, _, err := util.AppStr2ID(idstr); err != nil {
-		log.Panicf(err.Error())
-	} else {
-		if err := broker.Subscribe(util.GenTopic(idstr), n.recvbytes); err != nil {
-			log.Panicf(err.Error())
-		}
-		if err := broker.Subscribe(util.GenTopic(util.SvcID2Str(envid, worldid, funcid)), n.recvbytes); err != nil {
-			log.Panicf(err.Error())
-		}
-		if err := broker.Subscribe(util.GenTopic(util.WorldID2Str(envid, worldid)), n.recvbytes); err != nil {
-			log.Panicf(err.Error())
-		}
-		if err := broker.Subscribe(util.GenTopic(util.EnvID2Str(envid)), n.recvbytes); err != nil {
-			log.Panicf(err.Error())
-		}
-	}
+type brokerSer struct {
+	handlers          map[string]brokerhandlerFunc
+	serverinterceptor grpc.UnaryServerInterceptor
+	broker            broker.Broker
 }
 
-func (n *BrokerSer) recvbytes(buff []byte) {
+var (
+	_ grpc.ServiceRegistrar = (*brokerSer)(nil)
+)
+
+func (n *brokerSer) registerBroker(b broker.Broker) error {
+	n.broker = b
+	idstr := config.GetIDStr()
+	if envid, worldid, funcid, _, err := util.AppStr2ID(idstr); err != nil {
+		return err
+	} else {
+		if err := n.broker.Subscribe(broker.GenTopic(idstr), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(idstr))
+		}
+		if err := n.broker.Subscribe(broker.GenTopic(util.SvcID2Str(envid, worldid, funcid)), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.SvcID2Str(envid, worldid, funcid)))
+		}
+		if err := n.broker.Subscribe(broker.GenTopic(util.WorldID2Str(envid, worldid)), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.WorldID2Str(envid, worldid)))
+		}
+		if err := n.broker.Subscribe(broker.GenTopic(util.EnvID2Str(envid)), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.EnvID2Str(envid)))
+		}
+	}
+	return nil
+}
+
+func (n *brokerSer) recvbytes(buff []byte) {
 	bmsg := &pb.BrokerPkg{}
 	if err := proto.Unmarshal(buff, bmsg); err != nil {
+		log.Error("Unmarshal buff err %s", err.Error())
 		return
 	}
 	if handlerfunc, ok := n.handlers[bmsg.FullMethod]; !ok {
+		log.Error("not find method %s", bmsg.FullMethod)
 		return
 	} else {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(_cfg.BroadTimeOut))
@@ -78,15 +78,15 @@ func (n *BrokerSer) recvbytes(buff []byte) {
 	}
 }
 
-func (n *BrokerSer) RegisterService(sd *grpc.ServiceDesc, ss interface{}) {
+func (n *brokerSer) RegisterService(sd *grpc.ServiceDesc, ss interface{}) {
 	for _, it := range sd.Methods {
 		path := fmt.Sprintf("/%v/%v", sd.ServiceName, it.MethodName)
-		n.handlers[path] = genhandlerFunc(ss, grpchandlerFunc(it.Handler))
-		log.Printf("BrokerSer register path => %v", path)
+		n.handlers[path] = genbrokerhandlerFunc(ss, grpchandlerFunc(it.Handler))
+		log.Fatal("Register path => %v", path)
 	}
 }
 
-func (n *BrokerSer) SendToBroker(topic string, method string, msg proto.Message) error {
+func (n *brokerSer) send(topic string, method string, msg proto.Message) error {
 	bmsg := &pb.BrokerPkg{}
 	bmsg.FullMethod = method
 	var err error
@@ -97,5 +97,11 @@ func (n *BrokerSer) SendToBroker(topic string, method string, msg proto.Message)
 		return err
 	} else {
 		return n.broker.Publish(topic, buff)
+	}
+}
+
+func genbrokerhandlerFunc(s interface{}, h grpchandlerFunc) brokerhandlerFunc {
+	return func(ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+		return h(s, ctx, dec, interceptor)
 	}
 }

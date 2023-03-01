@@ -11,9 +11,9 @@ import (
 	"google.golang.org/grpc"
 )
 
-func CreateDirSer() *DirSer {
+func New() *DirSer {
 	return &DirSer{
-		Server: mutil.CreateServer("DirSer"),
+		Server: mutil.New("DirSer"),
 	}
 }
 

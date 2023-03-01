@@ -1,9 +1,9 @@
 package roleserver
 
 import (
-	"log"
 	"m3game/db"
 	"m3game/demo/proto/pb"
+	"m3game/util/log"
 
 	"google.golang.org/protobuf/proto"
 )
@@ -13,7 +13,7 @@ var (
 )
 
 func init() {
-	rolemeta = db.CreateDBMeta("role_table", "RoleID", []string{"RoleID", "Name"}, RoleDBCreater, RoleSetter, RoleGetter)
+	rolemeta = db.NewMeta("role_table", "RoleID", []string{"RoleID", "Name"}, RoleDBCreater, RoleSetter, RoleGetter)
 }
 
 func RoleDBCreater() proto.Message {
@@ -22,7 +22,7 @@ func RoleDBCreater() proto.Message {
 
 func RoleSetter(obj proto.Message, field string, value interface{}) {
 	if roledb, ok := obj.(*pb.RoleDB); !ok {
-		log.Println("unknow message type, want roledb")
+		log.Error("unknow message type, want roledb")
 	} else {
 		switch field {
 		case "RoleID":
@@ -30,13 +30,13 @@ func RoleSetter(obj proto.Message, field string, value interface{}) {
 		case "Name":
 			FillValue(&roledb.Name, value, field)
 		default:
-			log.Printf("unknow field %s for roledb", field)
+			log.Error("unknow field %s for roledb", field)
 		}
 	}
 }
 func RoleGetter(obj proto.Message, field string) interface{} {
 	if roledb, ok := obj.(*pb.RoleDB); !ok {
-		log.Println("unknow message type, want roledb")
+		log.Error("unknow message type, want roledb")
 		return nil
 	} else {
 		switch field {
@@ -45,7 +45,7 @@ func RoleGetter(obj proto.Message, field string) interface{} {
 		case "Name":
 			return roledb.Name
 		default:
-			log.Printf("unknow field %s for roledb", field)
+			log.Error("unknow field %s for roledb", field)
 			return nil
 		}
 	}
@@ -59,6 +59,6 @@ func FillValue[T any](p *T, v interface{}, field string) {
 	if value, ok := v.(T); ok {
 		*p = value
 	} else {
-		log.Printf("unknow type for field %s\n", field)
+		log.Error("unknow type for field %s", field)
 	}
 }

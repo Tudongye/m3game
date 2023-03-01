@@ -3,7 +3,7 @@ package config
 import (
 	"flag"
 	"fmt"
-	"log"
+	"m3game/util/log"
 	"strings"
 	"sync"
 
@@ -86,12 +86,12 @@ func init() {
 	flag.StringVar(&_rconf.idstr, "idstr", "", "app idstr env.world.func.ins")
 	flag.Var(&_rconf.envmap, "env", "other config")
 	flag.Parse()
-	log.Println(_rconf.cfgPath)
+	log.Fatal("CfgPath:%s", _rconf.cfgPath)
 	if _rconf.cfgPath == "" {
 		_rconf.cfgPath = _defaultCfgPath
 	}
 	if err := _rconf.loadconfig(); err != nil {
-		log.Panic("LoadConfig Fail")
+		panic(fmt.Sprintf("LoadConfig Fail %s", err.Error()))
 	}
 }
 
@@ -108,7 +108,6 @@ func GetString(k string) string {
 			return realVal
 		}
 	}
-
 	c := GetConfig()
 	v := c.GetString(k)
 	insertToCache(k, v)
@@ -121,7 +120,6 @@ func GetInt(k string) int {
 			return realVal
 		}
 	}
-
 	c := GetConfig()
 	v := c.GetInt(k)
 	insertToCache(k, v)
@@ -134,7 +132,6 @@ func GetBool(k string) bool {
 			return realVal
 		}
 	}
-
 	c := GetConfig()
 	v := c.GetBool(k)
 	insertToCache(k, v)

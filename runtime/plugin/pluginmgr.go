@@ -36,7 +36,9 @@ func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 	}
 	_pluginMgr.insMap[typ][name][tag] = p
 	if typ == Broker {
-		transport.RegisterBroker(p.(broker.Broker))
+		if err := transport.RegisterBroker(p.(broker.Broker)); err != nil {
+			return err
+		}
 	}
 	return nil
 }

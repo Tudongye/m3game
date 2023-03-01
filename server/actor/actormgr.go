@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func CreateActorMgr(creater ActorCreater) *ActorMgr {
+func newActorMgr(creater ActorCreater) *ActorMgr {
 	return &ActorMgr{
 		actormap:     make(map[string]*actorRuntime),
 		actorcreater: creater,
@@ -32,7 +32,11 @@ func (am *ActorMgr) createActor(actorid string) (*actorRuntime, error) {
 	if a, ok := am.actormap[actorid]; ok {
 		return a, nil
 	}
-	am.actormap[actorid] = CreateActorRuntime(am.actorcreater(actorid))
+	actor := am.actorcreater(actorid)
+	if err := actor.OnInit(); err != nil {
+		return nil, err
+	}
+	am.actormap[actorid] = newActorRuntime(actor)
 	go func() {
 		am.actormap[actorid].run()
 		am.lock.Lock()
@@ -46,13 +50,15 @@ func (am *ActorMgr) recvInterFunc(actorid string, create bool, sctx *Context) (i
 	var ar *actorRuntime
 	var ok bool
 	if ar, ok = am.getActor(actorid); !ok {
-		if create {
-			ar, _ = am.createActor(actorid)
-		} else {
+		if !create {
 			return nil, fmt.Errorf("Actor not find %s", actorid)
 		}
+		var err error
+		if ar, err = am.createActor(actorid); err != nil {
+			return nil, err
+		}
 	}
-	actorreq := CreateActorReq(sctx)
+	actorreq := newActorReq(sctx)
 	if err := ar.pushreq(actorreq); err != nil {
 		return nil, err
 	}

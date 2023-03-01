@@ -17,9 +17,9 @@ func init() {
 	_map = make(map[string]int32)
 }
 
-func CreateMapSer() *MapSer {
+func New() *MapSer {
 	return &MapSer{
-		Server: async.CreateServer("MapSer"),
+		Server: async.New("MapSer"),
 	}
 }
 
