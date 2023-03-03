@@ -3,9 +3,12 @@ syntax = "proto3";
 package proto;
 
 
+
 option go_package = "proto/pb";
 
 import "pkg.proto";
+import "options.proto";
+
 
 service RoleSer {
     rpc Register(Register.Req) returns (Register.Rsp);
@@ -22,8 +25,9 @@ service RoleChSer {
 }
 
 message RoleDB {
+    option (db_primary_key) = "RoleID";
     string RoleID = 1;
-    string name = 2;
+    string Name = 2;
 }
 
 message Register {

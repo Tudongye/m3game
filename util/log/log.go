@@ -198,27 +198,10 @@ func GetCallPath(depth int) (string, string, int) {
 	if !ok {
 		return "", "", 0
 	}
-
-	// 函数名排除所有斜杠以及包名
 	funcName := goruntime.FuncForPC(pc).Name()
-	idxFunc := strings.LastIndexByte(funcName, '/')
+	idxFunc := strings.LastIndexByte(funcName, '.')
 	if idxFunc != -1 {
 		funcName = funcName[idxFunc+1:]
 	}
-	idxFunc = strings.IndexByte(funcName, '.')
-	if idxFunc != -1 {
-		funcName = funcName[idxFunc+1:]
-	}
-
-	// 文件名保留一级文件目录
-	idx := strings.LastIndexByte(file, '/')
-	if idx == -1 {
-		return file, funcName, line
-	}
-	idx = strings.LastIndexByte(file[:idx], '/')
-	if idx == -1 {
-		return file, funcName, line
-	}
-
-	return file[idx+1:], funcName, line
+	return file, funcName, line
 }

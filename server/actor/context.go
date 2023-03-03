@@ -29,6 +29,7 @@ func (c *Context) Server() server.Server {
 func (c *Context) Reciver() *transport.Reciver {
 	return c.reciver
 }
+
 func (c *Context) Actor() Actor {
 	return c.actor
 }

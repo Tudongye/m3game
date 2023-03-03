@@ -39,7 +39,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 		return _instance, nil
 	}
 	_instance = &CacheDB{
-		cache: make(map[string]interface{}),
+		cache: make(map[string][]byte),
 	}
 	return _instance, nil
 }
@@ -57,7 +57,7 @@ func (f *Factory) CanDelete(plugin.PluginIns) bool {
 }
 
 type CacheDB struct {
-	cache map[string]interface{}
+	cache map[string][]byte
 	lock  sync.RWMutex
 }
 
@@ -76,7 +76,9 @@ func (c *CacheDB) Get(meta *db.DBMeta, key string) (proto.Message, error) {
 	for _, field := range meta.Allfields {
 		fieldname := genCacheKey(key, meta.Table, field)
 		if v, ok := c.cache[fieldname]; ok {
-			meta.Setter(obj, field, v)
+			if err := meta.Setter(obj, field, v); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return obj, nil
@@ -90,9 +92,12 @@ func (c *CacheDB) Update(meta *db.DBMeta, key string, obj proto.Message) error {
 		return db.Err_DB_notfindkey
 	}
 	for _, field := range meta.Allfields {
-		v := meta.Getter(obj, field)
-		fieldname := genCacheKey(key, meta.Table, field)
-		c.cache[fieldname] = v
+		if v, err := meta.Getter(obj, field); err != nil {
+			return err
+		} else {
+			fieldname := genCacheKey(key, meta.Table, field)
+			c.cache[fieldname] = v
+		}
 	}
 	return nil
 }
@@ -104,9 +109,12 @@ func (c *CacheDB) Insert(meta *db.DBMeta, key string, obj proto.Message) error {
 		return db.Err_DB_repeatedkey
 	}
 	for _, field := range meta.Allfields {
-		v := meta.Getter(obj, field)
-		fieldname := genCacheKey(key, meta.Table, field)
-		c.cache[fieldname] = v
+		if v, err := meta.Getter(obj, field); err != nil {
+			return err
+		} else {
+			fieldname := genCacheKey(key, meta.Table, field)
+			c.cache[fieldname] = v
+		}
 	}
 	return nil
 }

@@ -17,6 +17,7 @@ const (
 	Metric Type = "metric"
 	Broker Type = "broker" // only one
 	Log    Type = "log"
+	Lock   Type = "lock"
 )
 
 const (
