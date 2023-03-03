@@ -18,9 +18,41 @@ A game framework using GO language and Grpc
 
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
+Mutil,Async,Actor-Server: 游戏后台常见的业务模式，分别对应并发，单线程异步，Actor模式
+
+App: 用于承载业务逻辑的服务实体，是服务网格中的独立个体，由“环境ID.区服ID.功能ID.实例ID”唯一标识。一个App可以承载一个或多个Server
+
+Client：RPC客户端，由服务提供方编写，包含一些参数校验，和路由规则
+
+ResourceLoader: 可线上热更新的资源加载器，一般用于GameLogic Config的管理
+
+Runtime: 驱动器
+
+Transport: 提供服务之间问答式RPC调用能力，采用tcp/GrpcSer实现一对一传输
+
+BroekerSer：提供服务之间单向Ntify式RPC调用能力，采用Broker-plugin实现一对多传输
+
+Mesh：服务网格，内含一组路由规则，以及规则对应的选路逻辑。采用Router-Plugin实现服务发现和服务注册
+
+ResourceMgr: 资源管理器
+
+PluginMgr：插件管理器
+
+Router-Plugin： 路由组件，提供服务注册和服务发现的能力。当前有一个Consul实现
+
+DB-Plugin: 存储组件，提供数据存储能力，当前有一个内存数据库实现
+
+Broker-Plugin：消息队列组件，提供针对主题的发布和订阅功能，当前有一个Nats实现
+
+Log-Plugin: 日志组件。
+
+Trace-Plugin: 链路追踪组件
+
+Metric-Plugin: 监控组件
+
 ## 一个简单的样例
 
-demo/dirapp 是一个无状态的并发服务，该服务提供Hello的RPC接口
+demo/dirapp 是一个无状态的并发服务，该服务提供Hello的RPC接口，其在业务层包含一个App 和 一个MutilServer
 
 Step1、定义服务 proto
 
@@ -189,7 +221,7 @@ func Run() error {
 
 DirSer 和 DirClient 是由dir.proto生成RPC调用服务端和客户端，protobuf保证双端协议一致。
 
-DirApp 和 ClientApp 都是服务网格中的服务实体，通过 “环境ID.区服ID.功能ID.实例ID”来进行唯一标识，RPC最终会选取一个目标实体来发送请求。
+DirApp 和 ClientApp 都是服务网格中的服务实体，Router会根据服务状态和路由策略最终选取一个服务实体发送请求。
 
 Rumtime为框架驱动，根据RPC请求的性质，选择不同的传输路径（比如单向Ntify，广播，多播等）
 
@@ -200,7 +232,7 @@ Transport 内建了一个绑定在TcpConn的GrpcSer，用于服务实体间通�
 
 ## 消息驱动
 
-## 三种服务
+## 三种业务模式
 
 ## 服务发现与路由
 
