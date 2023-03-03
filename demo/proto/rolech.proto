@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package proto;
+
+
+
+option go_package = "proto/pb";
+
+import "pkg.proto";
+import "options.proto";
+import "role.proto";
+
+
+service RoleChSer {
+    rpc TransChannel(TransChannel.Req) returns (TransChannel.Rsp);
+}
+
+
+message TransChannel {
+    option (rpc_option).route_key = "";
+    message Req {
+        RouteHead RouteHead = 1;
+        ChannelMsg Msg = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+    }
+}

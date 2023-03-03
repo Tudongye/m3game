@@ -96,7 +96,7 @@ func (s *Server) RecvInterFunc(recv *transport.Reciver) (resp interface{}, err e
 	} else {
 		sctx := s.CreateContext(recv).(*Context)
 		create := false
-		if flag, ok := recv.Metas().Get(proto.META_CREATE_ACTORID); ok && flag == proto.META_FLAG_TRUE {
+		if flag, ok := recv.Metas().Get(proto.META_CREATE_ACTOR); ok && flag == proto.META_FLAG_TRUE {
 			create = true
 		}
 		return s.actormgr.recvInterFunc(actorid, create, sctx)

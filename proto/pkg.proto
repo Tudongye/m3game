@@ -87,6 +87,7 @@ message RouteHead {
     RouteType RouteType = 3;
     RoutePara RoutePara = 4;
     Metas Metas = 5;
+    bool Ntf = 6;
 }
 
 

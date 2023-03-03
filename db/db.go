@@ -6,6 +6,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// db-plguin interface
 type DB interface {
 	Get(meta *DBMeta, key string) (proto.Message, error)
 	Update(meta *DBMeta, key string, obj proto.Message) error

@@ -2,9 +2,12 @@ package proto
 
 import (
 	"m3game/proto/pb"
+
+	"google.golang.org/protobuf/proto"
 )
 
 type M3Pkg interface {
+	proto.Message
 	GetRouteHead() *pb.RouteHead
 }
 

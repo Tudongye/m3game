@@ -6,6 +6,7 @@ option go_package = "proto/pb";
 
 
 import "pkg.proto";
+import "options.proto";
 
 
 service DirSer {
@@ -13,6 +14,7 @@ service DirSer {
 }
 
 message Hello {
+    option (rpc_option).route_key = "";
     message Req {
         RouteHead RouteHead = 1;
         string Req = 2;

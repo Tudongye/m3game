@@ -3,6 +3,7 @@ package roleapp
 import (
 	"m3game/app"
 	"m3game/broker/nats"
+	"m3game/client"
 	"m3game/db/cache"
 	"m3game/demo/dirapp/dirclient"
 	"m3game/demo/loader"
@@ -36,13 +37,13 @@ func (d *RoleApp) Start(wg *sync.WaitGroup) error {
 			return err
 		}
 	}
-	if err := dirclient.Init(d.RouteIns(), func(c *dirclient.Client) { c.Client = proto.META_FLAG_FALSE }); err != nil {
+	if err := dirclient.Init(d.RouteIns(), client.GenMetaClientOption(proto.META_FLAG_FALSE)); err != nil {
 		return err
 	}
-	if err := mapclient.Init(d.RouteIns(), func(c *mapclient.Client) { c.Client = proto.META_FLAG_FALSE }); err != nil {
+	if err := mapclient.Init(d.RouteIns()); err != nil {
 		return err
 	}
-	if err := rolechclient.Init(d.RouteIns(), func(c *rolechclient.Client) { c.Client = proto.META_FLAG_FALSE }); err != nil {
+	if err := rolechclient.Init(d.RouteIns(), client.GenMetaClientOption(proto.META_FLAG_FALSE)); err != nil {
 		return err
 	}
 	return nil

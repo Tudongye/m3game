@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"m3game/client"
-	"m3game/proto"
 	"m3game/proto/pb"
-	"m3game/runtime/transport"
 	"m3game/util"
 
 	dproto "m3game/demo/proto"
@@ -16,62 +14,47 @@ import (
 )
 
 var (
-	_instance *Client
+	_client *Client
 )
 
-type Opt func(*Client)
-
-func RoleChClient() *Client {
-	return _instance
-}
-
-func Init(srcins *pb.RouteIns, opts ...Opt) error {
-	_instance = &Client{
-		srcins: srcins,
-		dstsvc: &pb.RouteSvc{
-			EnvID:   srcins.EnvID,
-			WorldID: srcins.WorldID,
-			FuncID:  srcins.FuncID,
-			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID),
-		},
+func Init(srcins *pb.RouteIns, opts ...grpc.CallOption) error {
+	_client = &Client{
+		Meta: client.NewMeta(
+			dpb.File_rolech_proto.Services().Get(0),
+			srcins,
+			&pb.RouteSvc{
+				EnvID:   srcins.EnvID,
+				WorldID: srcins.WorldID,
+				FuncID:  srcins.FuncID,
+				IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID),
+			},
+		),
+		opts: opts,
 	}
-	for _, opt := range opts {
-		opt(_instance)
-	}
+
 	var err error
-	if _instance.conn, err = grpc.Dial(
+	if _client.conn, err = grpc.Dial(
 		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID)),
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(client.SendInteror(SendInterFunc)),
+		grpc.WithUnaryInterceptor(client.SendInteror()),
 	); err != nil {
 		return err
 	} else {
-		_instance.client = dpb.NewRoleChSerClient(_instance.conn)
+		_client.RoleChSerClient = dpb.NewRoleChSerClient(_client.conn)
 		return nil
 	}
-}
-
-func SendInterFunc(s *transport.Sender, f func(*transport.Sender) error) error {
-	s.Metas().Set(proto.META_CLIENT, _instance.Client)
-	return f(s)
 }
 
 type Client struct {
-	conn   *grpc.ClientConn
-	srcins *pb.RouteIns
-	dstsvc *pb.RouteSvc
-	client dpb.RoleChSerClient
-
-	Client string
+	client.Meta
+	dpb.RoleChSerClient
+	conn *grpc.ClientConn
+	opts []grpc.CallOption
 }
 
-func (c *Client) TransChannel(ctx context.Context, msg *dpb.ChannelMsg) error {
+func TransChannel(ctx context.Context, msg *dpb.ChannelMsg, opts ...grpc.CallOption) error {
 	var in dpb.TransChannel_Req
-	in.RouteHead = client.NewRouteHeadBroad(c.srcins, c.dstsvc)
 	in.Msg = msg
-	if _, err := c.client.TransChannel(ctx, &in); err != nil {
-		return err
-	} else {
-		return nil
-	}
+	_, err := client.RPCCallBroadCast(_client, _client.TransChannel, ctx, &in, append(opts, _client.opts...)...)
+	return err
 }

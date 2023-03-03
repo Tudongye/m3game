@@ -6,7 +6,6 @@ import (
 	"m3game/client"
 	"m3game/proto"
 	"m3game/proto/pb"
-	"m3game/runtime/transport"
 	"m3game/util"
 
 	dpb "m3game/demo/proto/pb"
@@ -17,153 +16,123 @@ import (
 )
 
 var (
-	_instance     *Client
-	_rolemetaskey = "_rolemetaskey"
+	_client *Client
 )
 
-type Opt func(*Client)
-
-func RoleClient() *Client {
-	return _instance
-}
-
-func Init(srcins *pb.RouteIns, opts ...Opt) error {
-	_instance = &Client{
-		srcins: srcins,
-		dstsvc: &pb.RouteSvc{
-			EnvID:   srcins.EnvID,
-			WorldID: srcins.WorldID,
-			FuncID:  srcins.FuncID,
-			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID),
-		},
+func Init(srcins *pb.RouteIns, opts ...grpc.CallOption) error {
+	_client = &Client{
+		Meta: client.NewMeta(
+			dpb.File_role_proto.Services().Get(0),
+			srcins,
+			&pb.RouteSvc{
+				EnvID:   srcins.EnvID,
+				WorldID: srcins.WorldID,
+				FuncID:  srcins.FuncID,
+				IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID),
+			},
+		),
+		opts: opts,
 	}
-	for _, opt := range opts {
-		opt(_instance)
-	}
+
 	var err error
-	if _instance.conn, err = grpc.Dial(
+	if _client.conn, err = grpc.Dial(
 		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.RoleAppFuncID)),
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(client.SendInteror(SendInterFunc)),
+		grpc.WithUnaryInterceptor(client.SendInteror()),
 	); err != nil {
 		return err
 	} else {
-		_instance.client = dpb.NewRoleSerClient(_instance.conn)
+		_client.RoleSerClient = dpb.NewRoleSerClient(_client.conn)
 		return nil
 	}
 }
 
-func SendInterFunc(s *transport.Sender, f func(*transport.Sender) error) error {
-	s.Metas().Set(proto.META_CLIENT, _instance.Client)
-	if m := s.Ctx().Value(_rolemetaskey); m != nil {
-		metas := m.(map[string]string)
-		for k, v := range metas {
-			s.Metas().Set(k, v)
-		}
-	}
-	return f(s)
-}
-
 type Client struct {
-	conn   *grpc.ClientConn
-	srcins *pb.RouteIns
-	dstsvc *pb.RouteSvc
-	client dpb.RoleSerClient
-
-	Client string
+	client.Meta
+	dpb.RoleSerClient
+	conn *grpc.ClientConn
+	opts []grpc.CallOption
 }
 
-func (c *Client) Register(ctx context.Context, roleid string, name string) (string, error) {
+func Register(ctx context.Context, roleid string, name string, opts ...grpc.CallOption) (string, error) {
 	var in dpb.Register_Req
-	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
-	metas := make(map[string]string)
-	metas[proto.META_ACTORID] = roleid
-	metas[proto.META_CREATE_ACTORID] = proto.META_FLAG_TRUE
-	ctx = context.WithValue(ctx, _rolemetaskey, metas)
 	in.Name = name
-	if out, err := c.client.Register(ctx, &in); err != nil {
+	opts = append(opts, client.GenMetaActorIDOption(roleid))
+	opts = append(opts, client.GenMetaCreateActorOption(proto.META_FLAG_TRUE))
+	out, err := client.RPCCallRandom(_client, _client.Register, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
 		return "", err
 	} else {
 		return out.RoleID, nil
 	}
 }
 
-func (c *Client) Login(ctx context.Context, roleid string) (string, string, error) {
+func Login(ctx context.Context, roleid string, opts ...grpc.CallOption) (string, string, error) {
 	var in dpb.Login_Req
-	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
-	metas := make(map[string]string)
-	metas[proto.META_ACTORID] = roleid
-	metas[proto.META_CREATE_ACTORID] = proto.META_FLAG_TRUE
-	ctx = context.WithValue(ctx, _rolemetaskey, metas)
-	if out, err := c.client.Login(ctx, &in); err != nil {
+	in.RoleID = roleid
+	opts = append(opts, client.GenMetaActorIDOption(roleid))
+	opts = append(opts, client.GenMetaCreateActorOption(proto.META_FLAG_TRUE))
+	out, err := client.RPCCallHash(_client, _client.Login, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
 		return "", "", err
 	} else {
 		return out.Name, out.Tips, nil
 	}
 }
 
-func (c *Client) ModifyName(ctx context.Context, roleid string, name string) (string, error) {
+func ModifyName(ctx context.Context, roleid string, name string, opts ...grpc.CallOption) (string, error) {
 	var in dpb.ModifyName_Req
-	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
+	in.RoleID = roleid
 	in.NewName = name
-	metas := make(map[string]string)
-	metas[proto.META_ACTORID] = roleid
-	ctx = context.WithValue(ctx, _rolemetaskey, metas)
-	if out, err := c.client.ModifyName(ctx, &in); err != nil {
+	opts = append(opts, client.GenMetaActorIDOption(roleid))
+	out, err := client.RPCCallHash(_client, _client.ModifyName, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
 		return "", err
 	} else {
 		return out.Name, nil
 	}
 }
 
-func (c *Client) GetName(ctx context.Context, roleid string) (string, error) {
+func GetName(ctx context.Context, roleid string, opts ...grpc.CallOption) (string, error) {
 	var in dpb.GetName_Req
-	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
-	metas := make(map[string]string)
-	metas[proto.META_ACTORID] = roleid
-	ctx = context.WithValue(ctx, _rolemetaskey, metas)
-	if out, err := c.client.GetName(ctx, &in); err != nil {
+	in.RoleID = roleid
+	opts = append(opts, client.GenMetaActorIDOption(roleid))
+	out, err := client.RPCCallHash(_client, _client.GetName, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
 		return "", err
 	} else {
 		return out.Name, nil
 	}
 }
 
-func (c *Client) MoveRole(ctx context.Context, roleid string, distance int32) (int32, string, error) {
+func MoveRole(ctx context.Context, roleid string, distance int32, opts ...grpc.CallOption) (int32, string, error) {
 	var in dpb.MoveRole_Req
-	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
+	in.RoleID = roleid
 	in.Distance = distance
-	metas := make(map[string]string)
-	metas[proto.META_ACTORID] = roleid
-	ctx = context.WithValue(ctx, _rolemetaskey, metas)
-	if out, err := c.client.MoveRole(ctx, &in); err != nil {
+	opts = append(opts, client.GenMetaActorIDOption(roleid))
+	out, err := client.RPCCallHash(_client, _client.MoveRole, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
 		return 0, "", err
 	} else {
 		return out.Location, out.LocateName, nil
 	}
 }
 
-func (c *Client) PostChannel(ctx context.Context, roleid string, content string) error {
+func PostChannel(ctx context.Context, roleid string, content string, opts ...grpc.CallOption) error {
 	var in dpb.PostChannel_Req
-	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
+	in.RoleID = roleid
 	in.Content = content
-	metas := make(map[string]string)
-	metas[proto.META_ACTORID] = roleid
-	ctx = context.WithValue(ctx, _rolemetaskey, metas)
-	if _, err := c.client.PostChannel(ctx, &in); err != nil {
-		return err
-	} else {
-		return nil
-	}
+	opts = append(opts, client.GenMetaActorIDOption(roleid))
+	_, err := client.RPCCallHash(_client, _client.PostChannel, ctx, &in, append(opts, _client.opts...)...)
+	return err
 }
 
-func (c *Client) PullChannel(ctx context.Context, roleid string) ([]*dpb.ChannelMsg, error) {
+func PullChannel(ctx context.Context, roleid string, opts ...grpc.CallOption) ([]*dpb.ChannelMsg, error) {
 	var in dpb.PullChannel_Req
-	in.RouteHead = client.NewRouteHeadHash(c.srcins, c.dstsvc, roleid)
-	metas := make(map[string]string)
-	metas[proto.META_ACTORID] = roleid
-	ctx = context.WithValue(ctx, _rolemetaskey, metas)
-	if out, err := c.client.PullChannel(ctx, &in); err != nil {
+	in.RoleID = roleid
+	opts = append(opts, client.GenMetaActorIDOption(roleid))
+	out, err := client.RPCCallHash(_client, _client.PullChannel, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
 		return nil, err
 	} else {
 		return out.Msgs, nil

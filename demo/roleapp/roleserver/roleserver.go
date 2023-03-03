@@ -74,7 +74,7 @@ func (d *RoleSer) Login(ctx context.Context, in *dpb.Login_Req) (*dpb.Login_Rsp,
 		return out, err
 	}
 	out.Name = role.Name()
-	if rsp, err := dirclient.DirClient().Hello(ctx, role.Name()); err != nil {
+	if rsp, err := dirclient.Hello(ctx, role.Name()); err != nil {
 		return out, fmt.Errorf("Hello Fail err:%s", err.Error())
 	} else {
 		out.Tips = rsp
@@ -109,7 +109,7 @@ func (d *RoleSer) MoveRole(ctx context.Context, in *dpb.MoveRole_Req) (*dpb.Move
 	if role == nil || !role.ready {
 		return out, _err_actor_notready
 	}
-	if _, l, err := mapclient.MapClient().Move(ctx, role.Name(), in.Distance); err != nil {
+	if _, l, err := mapclient.Move(ctx, role.Name(), in.Distance); err != nil {
 		return nil, fmt.Errorf("Move Fail err:%s", err.Error())
 	} else {
 		out.Location = l
@@ -128,7 +128,7 @@ func (d *RoleSer) PostChannel(ctx context.Context, in *dpb.PostChannel_Req) (*dp
 	if role == nil || !role.ready {
 		return out, _err_actor_notready
 	}
-	if err := rolechclient.RoleChClient().TransChannel(ctx, &dpb.ChannelMsg{Name: role.Name(), Content: in.Content}); err != nil {
+	if err := rolechclient.TransChannel(ctx, &dpb.ChannelMsg{Name: role.Name(), Content: in.Content}); err != nil {
 		return out, err
 	} else {
 		return out, nil

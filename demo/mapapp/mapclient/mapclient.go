@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"m3game/client"
-	"m3game/proto"
 	"m3game/proto/pb"
-	"m3game/runtime/transport"
 	"m3game/util"
 
 	dproto "m3game/demo/proto"
@@ -16,61 +14,51 @@ import (
 )
 
 var (
-	_instance *Client
+	_client *Client
 )
 
-type Opt func(*Client)
-
-func MapClient() *Client {
-	return _instance
-}
-
-func Init(srcins *pb.RouteIns, opts ...Opt) error {
-	_instance = &Client{
-		srcins: srcins,
-		dstsvc: &pb.RouteSvc{
-			EnvID:   srcins.EnvID,
-			WorldID: srcins.WorldID,
-			FuncID:  srcins.FuncID,
-			IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.MapAppFuncID),
-		},
+func Init(srcins *pb.RouteIns, opts ...grpc.CallOption) error {
+	_client = &Client{
+		Meta: client.NewMeta(
+			dpb.File_map_proto.Services().Get(0),
+			srcins,
+			&pb.RouteSvc{
+				EnvID:   srcins.EnvID,
+				WorldID: srcins.WorldID,
+				FuncID:  srcins.FuncID,
+				IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.MapAppFuncID),
+			},
+		),
+		opts: opts,
 	}
-	for _, opt := range opts {
-		opt(_instance)
-	}
+
 	var err error
-	if _instance.conn, err = grpc.Dial(
+	if _client.conn, err = grpc.Dial(
 		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.MapAppFuncID)),
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(client.SendInteror(SendInterFunc)),
+		grpc.WithUnaryInterceptor(client.SendInteror()),
 	); err != nil {
 		return err
 	} else {
-		_instance.client = dpb.NewMapSerClient(_instance.conn)
+		_client.MapSerClient = dpb.NewMapSerClient(_client.conn)
 		return nil
 	}
 }
-func SendInterFunc(s *transport.Sender, f func(*transport.Sender) error) error {
-	s.Metas().Set(proto.META_CLIENT, _instance.Client)
-	return f(s)
-}
 
 type Client struct {
-	conn   *grpc.ClientConn
-	srcins *pb.RouteIns
-	dstsvc *pb.RouteSvc
-	client dpb.MapSerClient
-
-	Client string
+	client.Meta
+	dpb.MapSerClient
+	conn *grpc.ClientConn
+	opts []grpc.CallOption
 }
 
-func (c *Client) Move(ctx context.Context, name string, distance int32) (string, int32, error) {
+func Move(ctx context.Context, name string, distance int32, opts ...grpc.CallOption) (string, int32, error) {
 	var in dpb.Move_Req
-	in.RouteHead = client.NewRouteHeadRandom(c.srcins, c.dstsvc)
 	in.Name = name
 	in.Distance = distance
-	if out, err := c.client.Move(ctx, &in); err != nil {
-		return "", 0, err
+	out, err := client.RPCCallRandom(_client, _client.Move, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
+		return "", 0, nil
 	} else {
 		return out.Name, out.Location, nil
 	}

@@ -20,10 +20,6 @@ service RoleSer {
     rpc PullChannel(PullChannel.Req) returns (PullChannel.Rsp);
 }
 
-service RoleChSer {
-    rpc TransChannel(TransChannel.Req) returns (TransChannel.Rsp);
-}
-
 message RoleDB {
     option (db_primary_key) = "RoleID";
     string RoleID = 1;
@@ -31,6 +27,7 @@ message RoleDB {
 }
 
 message Register {
+    option (rpc_option).route_key = "";
     message Req {
         RouteHead RouteHead = 1;
         string Name = 2;
@@ -42,8 +39,10 @@ message Register {
 }
 
 message Login {
+    option (rpc_option).route_key = "RoleID";
     message Req {
         RouteHead RouteHead = 1;
+        string RoleID = 2;
     }
     message Rsp {
         RouteHead RouteHead = 1;
@@ -53,9 +52,11 @@ message Login {
 }
 
 message ModifyName {
+    option (rpc_option).route_key = "RoleID";
     message Req {
         RouteHead RouteHead = 1;
-        string NewName = 2;
+        string RoleID = 2;
+        string NewName = 3;
     }
     message Rsp {
         RouteHead RouteHead = 1;
@@ -64,8 +65,10 @@ message ModifyName {
 }
 
 message GetName {
+    option (rpc_option).route_key = "RoleID";
     message Req {
         RouteHead RouteHead = 1;
+        string RoleID = 2;
     }
     message Rsp {
         RouteHead RouteHead = 1;
@@ -74,9 +77,11 @@ message GetName {
 }
 
 message MoveRole {
+    option (rpc_option).route_key = "RoleID";
     message Req {
         RouteHead RouteHead = 1;
-        int32 Distance = 2;
+        string RoleID = 2;
+        int32 Distance = 3;
     }
     message Rsp {
         RouteHead RouteHead = 1;
@@ -85,24 +90,18 @@ message MoveRole {
     }
 }
 message ChannelMsg {
+    option (rpc_option).route_key = "RoleID";
     string Name = 1;
     string Content = 2;
 }
 
-message TransChannel {
-    message Req {
-        RouteHead RouteHead = 1;
-        ChannelMsg Msg = 2;
-    }
-    message Rsp {
-        RouteHead RouteHead = 1;
-    }
-}
 
 message PostChannel {
+    option (rpc_option).route_key = "RoleID";
     message Req {
         RouteHead RouteHead = 1;
-        string Content = 2;
+        string RoleID = 2;
+        string Content = 3;
     }
     message Rsp {
         RouteHead RouteHead = 1;
@@ -110,8 +109,10 @@ message PostChannel {
 }
 
 message PullChannel {
+    option (rpc_option).route_key = "RoleID";
     message Req {
         RouteHead RouteHead = 1;
+        string RoleID = 2;
     }
     message Rsp {
         RouteHead RouteHead = 1;

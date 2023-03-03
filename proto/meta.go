@@ -1,9 +1,9 @@
 package proto
 
 const (
-	META_CLIENT         = "_client"      // 是否为客户端请求
-	META_ACTORID        = "_actorid"     // Actor实例ID
-	META_CREATE_ACTORID = "_createactor" // 创建Actor
+	META_CLIENT       = "_client"      // 是否为客户端请求
+	META_ACTORID      = "_actorid"     // Actor实例ID
+	META_CREATE_ACTOR = "_createactor" // 创建Actor
 )
 
 const (

@@ -1,3 +1,4 @@
+// a test cache-db
 package cache
 
 import (
