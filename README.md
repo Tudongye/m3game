@@ -10,11 +10,13 @@ A game framework using GO language and Grpc
 
 优势：
 
-1，简单但不简陋。框架包含了一个重度游戏后端的完备功能，囊括了大部分的业务场景。
+1，简单但不简陋。框架包含了一个重度游戏后端的完备功能，相信可以给你一些帮助。
 
 2、自动化的逻辑注入。借助pb的自定义选项，业务逻辑只需要很少的代码，就可以自动的注入到框架层
 
 3、拒绝定制工具。框架的代码生成和逻辑注入只依赖原生的protobuf和grpc，不需要额外安装任何定制工具
+
+4、
 
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
@@ -26,9 +28,9 @@ Client：RPC客户端，由服务提供方编写，包含一些参数校验，�
 
 ResourceLoader: 可线上热更新的资源加载器，一般用于GameLogic Config的管理
 
-Runtime: 驱动器
+Runtime: 框架驱动器
 
-Transport: 提供服务之间问答式RPC调用能力，采用tcp/GrpcSer实现一对一传输
+Transport: 提供服务之间Req-Rsp式RPC调用能力，采用tcp/GrpcSer实现一对一传输
 
 BroekerSer：提供服务之间单向Ntify式RPC调用能力，采用Broker-plugin实现一对多传输
 
@@ -123,64 +125,7 @@ func (s *DirSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 	}
 }
 ```
-Step3、定义服务客户端Client
-```
-package dirclient
-
-var (
-	_client *Client
-)
-
-// 初始化
-func Init(srcins *pb.RouteIns, opts ...grpc.CallOption) error {
-	_client = &Client{
-		Meta: client.NewMeta(
-			dpb.File_dir_proto.Services().Get(0),  // 逻辑注入
-			srcins,
-			&pb.RouteSvc{
-				EnvID:   srcins.EnvID,
-				WorldID: srcins.WorldID,
-				FuncID:  srcins.FuncID,
-				IDStr:   util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.DirAppFuncID),
-			},
-		),
-		opts: opts,
-	}
-	var err error
-	if _client.conn, err = grpc.Dial(
-		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.DirAppFuncID)),  // 自定义路由
-		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(client.SendInteror()),
-	); err != nil {
-		return err
-	} else {
-		_client.DirSerClient = dpb.NewDirSerClient(_client.conn)
-		return nil
-	}
-}
-
-type Client struct {
-	client.Meta
-	dpb.DirSerClient
-	conn *grpc.ClientConn
-	opts []grpc.CallOption
-}
-
-// 客户端参数检查
-func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (string, error) {
-	var in dpb.Hello_Req
-	in.Req = hellostr
-	out, err := client.RPCCallRandom(_client, _client.Hello, ctx, &in, append(opts, _client.opts...)...)
-	if err != nil {
-		return "", err
-	} else {
-		return out.Rsp, nil
-	}
-}
-```
-
-
-Step4、定义服务实体DirApp
+Step3、定义服务实体DirApp
 ```
 package dirapp
 
@@ -230,11 +175,71 @@ Transport 内建了一个绑定在TcpConn的GrpcSer，用于服务实体间通�
 ![未命名文件 (6)](https://user-images.githubusercontent.com/16680818/222782344-279fe08d-73f9-40f6-8bf2-5e3d4d56510e.png)
 
 
-## 消息驱动
+## RPC驱动
 
-## 三种业务模式
+在M3中所有的跨服务功能调用都依托RPC进行，RPC接口通过pb-grpc生成
+
+如下是一个RPC定义的proto。
+```
+// 定义服务与RPC路由
+service DirSer {
+    rpc Hello(Hello.Req) returns (Hello.Rsp) ;
+}
+
+// 定义RPC参数
+message Hello {
+    option (rpc_option).route_key = ""; // 当使用Hash路由时，路由Key字段名
+    message Req {
+        RouteHead RouteHead = 1;
+        string Req = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Rsp = 2;
+    }
+}
+```
+游戏RPC驱动通过ServerInterceptor注入Grpc，
+
+游戏服务端驱动参看 transport/transport.go: RecvInterceptor。
+
+![未命名文件 (11)](https://user-images.githubusercontent.com/16680818/222907647-cd2cf32e-c633-4cc8-95f5-187a10251e1f.png)
+
+游戏客户端端驱动参看 client/client.go: SendInterceptor。
+
+![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/222907580-1d82955a-ef8f-45da-a897-e99a2f13b55c.png)
+
+其中rpc_option是M3为了减少重复编码而添加的自定义选项（大部分框架都使用定制化的代码生成工具，这使得那些框架很难被集成到原先的代码中）。自定义选项相关定义参看 options.proto，相关逻辑参看client/meta.go.调用RPCCall，M3框架会自动根据协议文件内容填充路由参数。
+
+
+## 三种业务模型
+
+游戏后台服务常见的业务模型有 Mutil 多线程，Async 单线程异步，Actor 模式 三种（暂时没见过更复杂的模型）
+
+### Mutil
+
+Mutil 多线程模型，主要用于无状态服务，M3采用原生Grpc服务实现。
+
+### Async
+
+Async 单线程异步，使用这类模型的服务不允许并发的执行RPC调用
+
+M3在Async服务的RPC驱动链中加入了资源锁。通过资源锁确保同一时间只有一个RPC调用再执行
+
+![未命名文件 (12)](https://user-images.githubusercontent.com/16680818/222913602-eca183aa-c449-4d30-af10-c2579fdc4346.png)
+
+### Actor
+
+Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实体内部串行，实体之间并发。
+
+M3为每个Actor分配一个执行Goroutine，并引入ActorRuntime和ActorMgr对Actor进行管理，前者用于管理单个Actor的执行Goroutine，后者用于管理整个Actor池。
+
+M3在Actor服务的RPC调用链中加入了Actor管理逻辑，自动处理Actor内部和
+
 
 ## 服务发现与路由
+
+
 
 ## RPC与广播
 
