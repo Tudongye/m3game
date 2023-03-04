@@ -234,16 +234,21 @@ Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实
 
 M3为每个Actor分配一个执行Goroutine，并引入ActorRuntime和ActorMgr对Actor进行管理，前者用于管理单个Actor的执行Goroutine，后者用于管理整个Actor池。
 
-M3在Actor服务的RPC调用链中加入了Actor管理逻辑，自动处理Actor内部和
+M3在Actor服务的RPC调用链中加入了Actor管理逻辑，业务层逻辑都在Actor自己的Goroutine中执行。
+
+![未命名文件 (13)](https://user-images.githubusercontent.com/16680818/222914612-a50f88b5-ad3f-4dc9-9b65-35078f83605d.png)
 
 
 ## 服务发现与路由
 
+### Mesh
 
-
-## RPC与广播
+### 广播
 
 ## 资源管理
 
 ## 数据存储
 
+### DB结构注入
+
+### Dirty Flag
