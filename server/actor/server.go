@@ -28,11 +28,11 @@ type Server struct {
 }
 
 type Config struct {
-	ActiveTimeOut  int
-	SaveTimeInter  int
-	TickTimeInter  int
-	MaxReqChanSize int
-	MaxReqWaitTime int
+	ActiveTimeOut  int `mapstructure:"ActiveTimeOut"`
+	SaveTimeInter  int `mapstructure:"SaveTimeInter"`
+	TickTimeInter  int `mapstructure:"TickTimeInter"`
+	MaxReqChanSize int `mapstructure:"MaxReqChanSize"`
+	MaxReqWaitTime int `mapstructure:"MaxReqWaitTime"`
 }
 
 func (c *Config) CheckVaild() error {

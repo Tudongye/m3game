@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"m3game/app"
 	"m3game/config"
-	_ "m3game/mesh/balance"
+	"m3game/mesh"
+	_ "m3game/mesh"
 	"m3game/resource"
 	"m3game/runtime/plugin"
 	"m3game/runtime/transport"
@@ -33,6 +34,7 @@ type RuntimeCfg struct {
 	App       map[string]interface{}            `toml:"App"`
 	Server    map[string]map[string]interface{} `toml:"Server"`
 	Transport map[string]interface{}            `toml:"Transport"`
+	Mesh      map[string]interface{}            `toml:"Mesh"`
 }
 
 func SendInterFunc(sctx *transport.Sender) error {
@@ -40,11 +42,13 @@ func SendInterFunc(sctx *transport.Sender) error {
 }
 
 func ShutDown() error {
+	log.Fatal("ShutDown...")
 	_runtime.cancel()
 	return nil
 }
 
 func Reload() error {
+	log.Fatal("Reload...")
 	err := reload()
 	if err != nil {
 		log.Error("Runtime.Reload Fail:%s", err.Error())
@@ -69,12 +73,18 @@ func Run(app app.App, servers []server.Server) error {
 		}
 	}
 
-	log.Fatal("Resource.Load...")
+	log.Fatal("Config.Load...")
 	v := *config.GetConfig()
 	var cfg RuntimeCfg
 	if err := v.Unmarshal(&cfg); err != nil {
 		log.Error("UnMarshal RuntimeCfg %s", err.Error())
 		return err
+	}
+	log.Fatal("Mesh.Init...")
+	if err := mesh.Init(cfg.Mesh); err != nil {
+		log.Error("Mesh.Init err %s", err.Error())
+		return err
+
 	}
 
 	log.Fatal("Resource.Load...")
@@ -141,10 +151,16 @@ func Run(app app.App, servers []server.Server) error {
 		defer wg.Done()
 		select {
 		case <-ctx.Done():
+			log.Fatal("Recv Done...")
+			log.Fatal("App.Stop...")
 			_runtime.app.Stop()
 			for _, server := range _runtime.servers {
+				log.Fatal("Server.Stop %s...", server.Name())
 				server.Stop()
 			}
+			log.Fatal("Transport.Stop...")
+			transport.ShutDown()
+			log.Fatal("Doned")
 		}
 	}()
 	go signalProc()

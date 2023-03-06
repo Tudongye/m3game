@@ -76,6 +76,7 @@ func Start(wg *sync.WaitGroup) error {
 	_instance.cancel = cancel
 	wg.Add(1)
 	go func() {
+		defer log.Fatal("Transport.Stoped...")
 		defer wg.Done()
 		defer listener.Close()
 		_instance.start(ctx, listener)
@@ -85,6 +86,7 @@ func Start(wg *sync.WaitGroup) error {
 
 func ShutDown() {
 	if _instance != nil {
+		log.Fatal("Transport.Stoping...")
 		_instance.cancel()
 	}
 }

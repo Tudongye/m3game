@@ -58,7 +58,7 @@ func Move(ctx context.Context, name string, distance int32, opts ...grpc.CallOpt
 	in.Distance = distance
 	out, err := client.RPCCallRandom(_client, _client.Move, ctx, &in, append(opts, _client.opts...)...)
 	if err != nil {
-		return "", 0, nil
+		return "", 0, err
 	} else {
 		return out.Name, out.Location, nil
 	}

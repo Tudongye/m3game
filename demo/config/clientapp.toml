@@ -2,6 +2,8 @@
 [Transport]
 Addr = "127.0.0.1:22100"
 BroadTimeOut = 5
+[Mesh]
+WatcherInterSecond = 1
 
 [Plugin]
 [[Plugin.Router.router_consul]]
