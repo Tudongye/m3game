@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,20 +9,22 @@ import (
 )
 
 var (
-	_               resource.ResLoader = (*LocationCfgLoader)(nil)
-	_cfgname                           = "LocationCfg.json"
-	LocationCfgName                    = "locationcfg"
+	_                resource.ResLoader = (*LocationCfgLoader)(nil)
+	_cfgname                            = "LocationCfg.json"
+	_locationcfgflag                    = "locationcfg"
 )
 
 func RegisterLocationCfg() {
-	resource.RegisterResLoader(LocationCfgName, locationCfgLoaderCreater)
+	resource.RegisterResource(&locationCfgLoaderCreater{})
 }
 
-func GetLocationCfgLoader() *LocationCfgLoader {
-	return resource.GetResource(LocationCfgName).(*LocationCfgLoader)
+type locationCfgLoaderCreater struct {
 }
 
-func locationCfgLoaderCreater() resource.ResLoader {
+func (l *locationCfgLoaderCreater) Name() string {
+	return _locationcfgflag
+}
+func (l *locationCfgLoaderCreater) NewLoader() resource.ResLoader {
 	return &LocationCfgLoader{
 		cfgs: make(map[int32]LocationCfg),
 	}
@@ -40,7 +43,11 @@ type LocationCfgLoader struct {
 	cfgs map[int32]LocationCfg
 }
 
-func (l *LocationCfgLoader) Load(cfgpath string) error {
+func (l *LocationCfgLoader) Name() string {
+	return _locationcfgflag
+}
+
+func (l *LocationCfgLoader) Load(ctx context.Context, cfgpath string) error {
 	if data, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", cfgpath, _cfgname)); err != nil {
 		return err
 	} else {
@@ -55,10 +62,6 @@ func (l *LocationCfgLoader) Load(cfgpath string) error {
 			l.cfgs[cfg.Distance] = cfg
 		}
 	}
-	return nil
-}
-
-func (l *LocationCfgLoader) Check(f resource.ResLoaderGetter) error {
 	return nil
 }
 

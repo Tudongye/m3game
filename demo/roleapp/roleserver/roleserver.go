@@ -9,6 +9,7 @@ import (
 	dpb "m3game/demo/proto/pb"
 	"m3game/demo/roleapp/rolechclient"
 	"m3game/demo/roleapp/rolechserver"
+	"m3game/resource"
 	"m3game/server/actor"
 
 	"github.com/pkg/errors"
@@ -113,7 +114,7 @@ func (d *RoleSer) MoveRole(ctx context.Context, in *dpb.MoveRole_Req) (*dpb.Move
 		return nil, fmt.Errorf("Move Fail err:%s", err.Error())
 	} else {
 		out.Location = l
-		locationcfgloader := loader.GetLocationCfgLoader()
+		locationcfgloader := resource.GetLoader[*loader.LocationCfgLoader](ctx)
 		if locationcfgloader == nil {
 			return out, fmt.Errorf("LocationCfg Err")
 		}

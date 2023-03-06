@@ -13,7 +13,7 @@ type App interface {
 	Init(cfg map[string]interface{}) error                                                                // 初始化
 	Start(wg *sync.WaitGroup) error                                                                       // 启动
 	Stop() error                                                                                          // 停止
-	Reload() error                                                                                        // 重载
+	Reload(map[string]interface{}) error                                                                  // 重载
 	RecvInterFunc(*transport.Reciver, func(*transport.Reciver) (interface{}, error)) (interface{}, error) // RPC被调拦截器
 	SendInterFunc(*transport.Sender, func(sender *transport.Sender) error) error                          // RPC主调拦截器
 	HealthCheck() bool                                                                                    // 健康检查
@@ -81,7 +81,7 @@ func (a *appBase) Stop() error {
 	return nil
 }
 
-func (a *appBase) Reload() error {
+func (a *appBase) Reload(map[string]interface{}) error {
 	return nil
 }
 

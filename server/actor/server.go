@@ -86,7 +86,7 @@ func (s *Server) Stop() error {
 	return nil
 }
 
-func (s *Server) Reload() error {
+func (s *Server) Reload(map[string]interface{}) error {
 	return nil
 }
 

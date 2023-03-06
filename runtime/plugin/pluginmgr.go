@@ -6,6 +6,9 @@ import (
 	"m3game/db"
 	"m3game/mesh/router"
 	"m3game/runtime/transport"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 func init() {
@@ -21,6 +24,23 @@ type PluginMgr struct {
 var (
 	_pluginMgr *PluginMgr
 )
+
+func Reload(v viper.Viper) error {
+	var cfg config
+	if err := v.Unmarshal(&cfg); err != nil {
+		return errors.Wrap(err, "Unmarshal PluginCfg")
+	}
+	for typ, tmap := range _pluginMgr.insMap {
+		for name, nmap := range tmap {
+			for _, plugin := range nmap {
+				if err := _factoryMap[name].Reload(plugin, cfg.Plugin[string(typ)][name]); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
 
 func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 	if _, ok := _pluginMgr.insMap[typ]; !ok {

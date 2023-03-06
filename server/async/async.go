@@ -48,7 +48,7 @@ func (s *Server) Stop() error {
 	return nil
 }
 
-func (s *Server) Reload() error {
+func (s *Server) Reload(map[string]interface{}) error {
 	return nil
 }
 func (s *Server) RecvInterFunc(recv *transport.Reciver) (resp interface{}, err error) {

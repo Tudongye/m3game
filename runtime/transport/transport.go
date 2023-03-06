@@ -89,6 +89,10 @@ func ShutDown() {
 	}
 }
 
+func Reload(c map[string]interface{}) error {
+	return nil
+}
+
 func SendInterFunc(s *Sender) error {
 	return s.sendMsg()
 }

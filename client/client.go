@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"m3game/proto"
+	"m3game/proto/pb"
 	"m3game/runtime"
 	"m3game/runtime/transport"
 	"m3game/server"
@@ -33,8 +34,7 @@ func RPCCallRandom[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...gr
 	routehead := NewRouteHeadRandom(m.SrcIns(), m.DstSvc())
 	routehead.Ntf = method.grpcoption.Ntf
 
-	t1.ProtoReflect().Set(method.routeheadd, protoreflect.ValueOfMessage(routehead.ProtoReflect()))
-	return f(ctx, t1, opts...)
+	return rpcCall(method, routehead, f, ctx, t1, opts...)
 }
 
 // RPC Hash Route
@@ -55,8 +55,7 @@ func RPCCallHash[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc
 	routehead := NewRouteHeadHash(m.SrcIns(), m.DstSvc(), hashkey)
 	routehead.Ntf = method.grpcoption.Ntf
 
-	t1.ProtoReflect().Set(method.routeheadd, protoreflect.ValueOfMessage(routehead.ProtoReflect()))
-	return f(ctx, t1, opts...)
+	return rpcCall(method, routehead, f, ctx, t1, opts...)
 }
 
 // RPC BroadCast Route
@@ -70,6 +69,10 @@ func RPCCallBroadCast[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ..
 	routehead := NewRouteHeadBroad(m.SrcIns(), m.DstSvc())
 	routehead.Ntf = method.grpcoption.Ntf
 
+	return rpcCall(method, routehead, f, ctx, t1, opts...)
+}
+
+func rpcCall[T1, T2 proto.M3Pkg](method *m3Method, routehead *pb.RouteHead, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, opts ...grpc.CallOption) (T2, error) {
 	t1.ProtoReflect().Set(method.routeheadd, protoreflect.ValueOfMessage(routehead.ProtoReflect()))
 	return f(ctx, t1, opts...)
 }

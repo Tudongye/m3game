@@ -79,7 +79,6 @@ func InitPlugins(v viper.Viper) error {
 	}
 	return nil
 }
-
 func getPluginTag(m map[string]interface{}) string {
 	if v, ok := m["tag"]; !ok {
 		return _defaulttag

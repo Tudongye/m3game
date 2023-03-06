@@ -43,7 +43,7 @@ type Server interface {
 	Name() string                                                   // 服务名
 	Start(wg *sync.WaitGroup) error                                 // 启动
 	Stop() error                                                    // 停止
-	Reload() error                                                  // 重载
+	Reload(map[string]interface{}) error                            // 重载
 	RecvInterFunc(*transport.Reciver) (resp interface{}, err error) // RPC ServerInterceptor
 	SendInterFunc(sender *transport.Sender) error                   // RPC ClientInterceptor
 	CreateContext(*transport.Reciver) Context                       //
