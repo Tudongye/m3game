@@ -272,8 +272,54 @@ M3对于资源的访问需要附带上下文context用于确认是资源访问�
 
 M3对于资源文件格式没有要求，只要求资源管理器提供Load接口，demo/loader/locationcfg.go是一个对于json配置文件的资源管理器样例。
 
+```
+type ResLoader interface {
+	Load(ctx context.Context, cfgpath string) error // 资源更新
+	Name() string
+}
+```
+
+
 ## 数据存储
+
+M3采用pb管理游戏实体的DB存储结构。如下是一个简单实体的结构定义。
+
+当前M3要求DB结构所有一级字段必须是string 或 proto.Message,且DB结构必须设置一个string类型的Key字段。
+
+```
+message RoleDB {
+    option (db_primary_key) = "RoleID";	// DB存储Key字段
+    string RoleID = 1;
+    string Name = 2;
+}
+```
 
 ### DB结构注入
 
+M3使用DB插件来进行实体数据的落地，M3通过PbReflect自动感知实体数据的DB结构Meta，DB插件根据Meta来对实体数据进行CRUD操作。DBMeta的生成逻辑参看 db/dbmeta.go
+
+```
+type DBMeta struct {
+	Table     string                                  // DB表名
+	Keyfield  string                                  // 主键，强制为string
+	Allfields []string                                // 所有数据键
+	Creater   DBCreater                               // 游戏实体工场
+	fieldds   map[string]protoreflect.FieldDescriptor // 游戏实体字段反射信息
+}
+```
+
 ### Dirty Flag
+
+自动的脏标记位管理（TODO）
+
+## 熔断管理
+
+## 服务网关
+
+## 监控管理
+
+## 链路追踪
+
+## 日志管理
+
+
