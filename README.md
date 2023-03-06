@@ -1,6 +1,6 @@
 # m3game
 
-A game framework using GO language and Grpc
+A game framework using Golang and Grpc
 
 # m3game
 
@@ -10,13 +10,11 @@ A game framework using GO language and Grpc
 
 优势：
 
-1，简单但不简陋。框架包含了一个重度游戏后端的完备功能，相信可以给你一些帮助。
+1，简单但不简陋。框架包含了一个重度游戏的完备后端功能，相信可以给你一些帮助。
 
 2、自动化的逻辑注入。借助pb的自定义选项，业务逻辑只需要很少的代码，就可以自动的注入到框架层
 
-3、拒绝定制工具。框架的代码生成和逻辑注入只依赖原生的protobuf和grpc，不需要额外安装任何定制工具
-
-4、
+3、拒绝定制化工具。框架的代码生成和逻辑注入只依赖原生的protobuf和grpc，不需要额外安装定制化工具
 
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
@@ -243,9 +241,36 @@ M3在Actor服务的RPC调用链中加入了Actor管理逻辑，业务层逻辑�
 
 ### Mesh
 
+Mesh使用Router插件进行服务注册和服务发现，Router插件是必要插件，mesh/router/consul是一个基于Consul的Rotuer实现。
+
+M3使用Grpc的Resolver- Balancer.Picker方式将服务网格与RPC路由相关联，相关逻辑参看mesh/resolver.go,balance.go
+
+当前支持 P2P,Random,Hash,BroadCast,MutilCast,Single路由模式
+
+|  路由模式   | 选路参数  | 选路规则  |
+|  ----  | ----  | ----  |
+| P2P  | 目标实例ID | 直接寻路 |
+| Random  | 目标服务ID | 在目标服务中随机 |
+| Hash  | 目标服务ID & 哈希Key | 在目标服务中按哈希key，一致性哈希映射寻路 |
+| BroadCast  | 目标服务ID | 对目标服务所有实例广播 |
+| MutilCast  | 目标TopicID | 对订阅目标TopciID的所有实例广播 |
+| Single  | 目标服务ID | 对目标服务中ID最小的实例寻路 |
+
 ### 广播
 
+M3基于Broker插件，实现了GrpcSer兼容的BrokerSer，用于处理BroadCast和MutilCast等单向Notify式RPC调用。
+
+M3采用Interceptor的方式将BrokerSer注入RPC调用链，BrokerSer的相关实现参看 runtime/transport/brokerser.go。 broker/nats 是一个基于Nats的Broker实现。
+
 ## 资源管理
+
+M3使用ResourceMgr进行资源管理，在M3中的资源指由GameLogic定义，在服务运行过程中需要实时热更新的资源文件。一般用于GameLogic的配置管理。
+
+ResourceMgr使用双缓冲区模型，一主一备，主缓冲区用于资源访问，备缓冲区用于资源更新，每次热更新后主备缓冲区交换。相关逻辑参看resource/resourcemgr.go
+
+M3对于资源的访问需要附带上下文context用于确认是资源访问还是资源更新
+
+M3对于资源文件格式没有要求，只要求资源管理器提供Load接口，demo/loader/locationcfg.go是一个对于json配置文件的资源管理器样例。
 
 ## 数据存储
 
