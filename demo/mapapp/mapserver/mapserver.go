@@ -2,7 +2,9 @@ package mapserver
 
 import (
 	"context"
+	"fmt"
 	dpb "m3game/demo/proto/pb"
+	"m3game/runtime/rpc"
 	"m3game/runtime/server/async"
 	"time"
 
@@ -10,13 +12,14 @@ import (
 )
 
 var (
-	_map map[string]int32
+	_map = make(map[string]int32)
 )
 
 func init() {
-	_map = make(map[string]int32)
+	if err := rpc.RegisterRPCSvc(dpb.File_map_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("RegisterRPCSvc Map %s", err.Error()))
+	}
 }
-
 func New() *MapSer {
 	return &MapSer{
 		Server: async.New("MapSer"),

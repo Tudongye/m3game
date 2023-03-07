@@ -10,6 +10,7 @@ import (
 	"m3game/demo/roleapp/rolechclient"
 	"m3game/demo/roleapp/rolechserver"
 	"m3game/runtime/resource"
+	"m3game/runtime/rpc"
 	"m3game/runtime/server/actor"
 
 	"github.com/pkg/errors"
@@ -18,7 +19,6 @@ import (
 )
 
 var (
-	_map                 map[string]int32
 	_err_actor_parsefail = errors.New("_err_actor_parsefail")
 	_err_actor_created   = errors.New("_err_actor_created")
 	_err_actor_readyed   = errors.New("_err_actor_created")
@@ -28,7 +28,9 @@ var (
 )
 
 func init() {
-	_map = make(map[string]int32)
+	if err := rpc.RegisterRPCSvc(dpb.File_role_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("RegisterRPCSvc Role %s", err.Error()))
+	}
 }
 
 func New() *RoleSer {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"m3game/proto/pb"
 	"m3game/runtime/client"
+	"m3game/runtime/rpc"
 	"m3game/runtime/transport"
 	"m3game/util"
 
@@ -20,10 +21,15 @@ var (
 	_client *Client
 )
 
+func init() {
+	if err := rpc.RegisterRPCSvc(dpb.File_dir_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("RegisterRPCSvc Dir %s", err.Error()))
+	}
+}
+
 func Init(srcins *pb.RouteIns, opts ...grpc.CallOption) error {
 	_client = &Client{
 		Meta: client.NewMeta(
-			dpb.File_dir_proto.Services().Get(0),
 			srcins,
 			&pb.RouteSvc{
 				EnvID:   srcins.EnvID,
@@ -58,6 +64,28 @@ func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (strin
 	var in dpb.Hello_Req
 	in.Req = hellostr
 	out, err := client.RPCCallRandom(_client, _client.Hello, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
+		return "", err
+	} else {
+		return out.Rsp, nil
+	}
+}
+
+func TraceHello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (string, error) {
+	var in dpb.TraceHello_Req
+	in.Req = hellostr
+	out, err := client.RPCCallRandom(_client, _client.TraceHello, ctx, &in, append(opts, _client.opts...)...)
+	if err != nil {
+		return "", err
+	} else {
+		return out.Rsp, nil
+	}
+}
+
+func BreakHello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (string, error) {
+	var in dpb.BreakHello_Req
+	in.Req = hellostr
+	out, err := client.RPCCallRandom(_client, _client.BreakHello, ctx, &in, append(opts, _client.opts...)...)
 	if err != nil {
 		return "", err
 	} else {

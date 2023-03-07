@@ -17,6 +17,7 @@ import (
 	"m3game/runtime/plugin"
 	"m3game/runtime/server"
 	_ "m3game/shape/sentinel"
+	_ "m3game/trace/stdout"
 	"sync"
 	"time"
 )
@@ -61,16 +62,42 @@ func (d *ClientApp) Start(wg *sync.WaitGroup) error {
 				log.Debug("Res: %s", rsp)
 			}
 		}()
-
-		for i := 0; i < 100; i++ {
-			log.Info("Call Hello() %d", i)
+	}
+	if testmode == "break" {
+		log.Info("Test:%s", testmode)
+		go func() {
+			time.Sleep(time.Second * 3)
+			log.Info("Call BreakHello()")
 			log.Debug("Req: good morning")
-			if rsp, err := dirclient.Hello(context.Background(), "good morning"); err != nil {
+			if rsp, err := dirclient.BreakHello(context.Background(), "good morning"); err != nil {
+				log.Error("Err: %s", err.Error())
+			} else {
+				log.Debug("Res: %s", rsp)
+			}
+		}()
+
+		for i := 0; i < 10; i++ {
+			log.Info("Call BreakHello() %d", i)
+			log.Debug("Req: good morning")
+			if rsp, err := dirclient.BreakHello(context.Background(), "good morning"); err != nil {
 				log.Error("Err: %s", err.Error())
 			} else {
 				log.Debug("Res: %s", rsp)
 			}
 		}
+	}
+	if testmode == "trace" {
+		log.Info("Test:%s", testmode)
+		go func() {
+			time.Sleep(time.Second * 3)
+			log.Info("Call TraceHello()")
+			log.Debug("Req: good morning")
+			if rsp, err := dirclient.TraceHello(context.Background(), "good morning"); err != nil {
+				log.Error("Err: %s", err.Error())
+			} else {
+				log.Debug("Res: %s", rsp)
+			}
+		}()
 	}
 	if testmode == "mapapp" {
 		log.Info("Test:%s", testmode)

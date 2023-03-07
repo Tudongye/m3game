@@ -2,14 +2,15 @@ package rolechserver
 
 import (
 	"context"
+	"fmt"
 	dpb "m3game/demo/proto/pb"
+	"m3game/runtime/rpc"
 	"m3game/runtime/server/async"
 
 	"google.golang.org/grpc"
 )
 
 var (
-	_map       map[string]int32
 	_channmsgs []*dpb.ChannelMsg
 )
 
@@ -22,7 +23,9 @@ func GetMsg() []*dpb.ChannelMsg {
 }
 
 func init() {
-	_map = make(map[string]int32)
+	if err := rpc.RegisterRPCSvc(dpb.File_rolech_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("RegisterRPCSvc RoleCh %s", err.Error()))
+	}
 }
 
 func New() *RoleChSer {

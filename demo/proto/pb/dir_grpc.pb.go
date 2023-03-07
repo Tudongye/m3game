@@ -23,6 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DirSerClient interface {
 	Hello(ctx context.Context, in *Hello_Req, opts ...grpc.CallOption) (*Hello_Rsp, error)
+	TraceHello(ctx context.Context, in *TraceHello_Req, opts ...grpc.CallOption) (*TraceHello_Rsp, error)
+	BreakHello(ctx context.Context, in *BreakHello_Req, opts ...grpc.CallOption) (*BreakHello_Rsp, error)
 }
 
 type dirSerClient struct {
@@ -42,11 +44,31 @@ func (c *dirSerClient) Hello(ctx context.Context, in *Hello_Req, opts ...grpc.Ca
 	return out, nil
 }
 
+func (c *dirSerClient) TraceHello(ctx context.Context, in *TraceHello_Req, opts ...grpc.CallOption) (*TraceHello_Rsp, error) {
+	out := new(TraceHello_Rsp)
+	err := c.cc.Invoke(ctx, "/proto.DirSer/TraceHello", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dirSerClient) BreakHello(ctx context.Context, in *BreakHello_Req, opts ...grpc.CallOption) (*BreakHello_Rsp, error) {
+	out := new(BreakHello_Rsp)
+	err := c.cc.Invoke(ctx, "/proto.DirSer/BreakHello", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DirSerServer is the server API for DirSer service.
 // All implementations must embed UnimplementedDirSerServer
 // for forward compatibility
 type DirSerServer interface {
 	Hello(context.Context, *Hello_Req) (*Hello_Rsp, error)
+	TraceHello(context.Context, *TraceHello_Req) (*TraceHello_Rsp, error)
+	BreakHello(context.Context, *BreakHello_Req) (*BreakHello_Rsp, error)
 	mustEmbedUnimplementedDirSerServer()
 }
 
@@ -56,6 +78,12 @@ type UnimplementedDirSerServer struct {
 
 func (UnimplementedDirSerServer) Hello(context.Context, *Hello_Req) (*Hello_Rsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Hello not implemented")
+}
+func (UnimplementedDirSerServer) TraceHello(context.Context, *TraceHello_Req) (*TraceHello_Rsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TraceHello not implemented")
+}
+func (UnimplementedDirSerServer) BreakHello(context.Context, *BreakHello_Req) (*BreakHello_Rsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BreakHello not implemented")
 }
 func (UnimplementedDirSerServer) mustEmbedUnimplementedDirSerServer() {}
 
@@ -88,6 +116,42 @@ func _DirSer_Hello_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DirSer_TraceHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TraceHello_Req)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DirSerServer).TraceHello(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.DirSer/TraceHello",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DirSerServer).TraceHello(ctx, req.(*TraceHello_Req))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DirSer_BreakHello_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BreakHello_Req)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DirSerServer).BreakHello(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.DirSer/BreakHello",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DirSerServer).BreakHello(ctx, req.(*BreakHello_Req))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DirSer_ServiceDesc is the grpc.ServiceDesc for DirSer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +162,14 @@ var DirSer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Hello",
 			Handler:    _DirSer_Hello_Handler,
+		},
+		{
+			MethodName: "TraceHello",
+			Handler:    _DirSer_TraceHello_Handler,
+		},
+		{
+			MethodName: "BreakHello",
+			Handler:    _DirSer_BreakHello_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

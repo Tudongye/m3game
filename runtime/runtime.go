@@ -13,6 +13,7 @@ import (
 	"m3game/runtime/server"
 	"m3game/runtime/transport"
 	"m3game/shape"
+	"m3game/trace"
 	"m3game/util"
 	"os"
 	"os/signal"
@@ -283,6 +284,10 @@ func setupPluginInterceptor(cfg RuntimeCfg) error {
 		}
 		transport.RegisterServerInterceptor(s.ServerInterceptor())
 		transport.RegisterClientInterceptor(s.ClientInterceptor())
+	}
+	if tp := trace.GetTrace(); tp != nil {
+		transport.RegisterServerInterceptor(trace.ServerInterceptor())
+		transport.RegisterClientInterceptor(trace.ClientInterceptor())
 	}
 	return nil
 }

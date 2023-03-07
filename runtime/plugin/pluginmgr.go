@@ -55,9 +55,6 @@ func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 		return fmt.Errorf("Plugin repeated type %s name %s tag %s", typ, name, tag)
 	}
 	_pluginMgr.insMap[typ][name][tag] = p
-	if typ == Shape {
-		shape.SetShape(p.(shape.Shape))
-	}
 	return nil
 }
 

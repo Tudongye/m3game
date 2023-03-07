@@ -16,6 +16,7 @@ extend google.protobuf.MessageOptions {
 message M3GRPCOption {
     string route_key = 1;
     bool ntf = 2;
+    bool trace = 3;
 }
 
 

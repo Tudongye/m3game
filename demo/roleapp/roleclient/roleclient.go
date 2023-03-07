@@ -6,6 +6,7 @@ import (
 	"m3game/proto"
 	"m3game/proto/pb"
 	"m3game/runtime/client"
+	"m3game/runtime/rpc"
 	"m3game/util"
 
 	dpb "m3game/demo/proto/pb"
@@ -19,10 +20,14 @@ var (
 	_client *Client
 )
 
+func init() {
+	if err := rpc.RegisterRPCSvc(dpb.File_role_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("RegisterRPCSvc Role %s", err.Error()))
+	}
+}
 func Init(srcins *pb.RouteIns, opts ...grpc.CallOption) error {
 	_client = &Client{
 		Meta: client.NewMeta(
-			dpb.File_role_proto.Services().Get(0),
 			srcins,
 			&pb.RouteSvc{
 				EnvID:   srcins.EnvID,

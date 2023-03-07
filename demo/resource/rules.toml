@@ -1,5 +1,5 @@
 [Rules]
-Method = "/proto.DirSer/Hello"
+Method = "/proto.DirSer/BreakHello"
 [[Rules.FlowRules]]
 Threshold = 2
 StatIntervalMs = 1000

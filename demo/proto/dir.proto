@@ -10,7 +10,9 @@ import "options.proto";
 
 
 service DirSer {
-    rpc Hello(Hello.Req) returns (Hello.Rsp) ;
+    rpc Hello(Hello.Req) returns (Hello.Rsp);
+    rpc TraceHello(TraceHello.Req) returns (TraceHello.Rsp);
+    rpc BreakHello(BreakHello.Req) returns (BreakHello.Rsp);
 }
 
 message Hello {
@@ -18,11 +20,34 @@ message Hello {
     message Req {
         RouteHead RouteHead = 1;
         string Req = 2;
-
     }
     message Rsp {
         RouteHead RouteHead = 1;
         string Rsp = 2;
+    }
+}
 
+message TraceHello {
+    option (rpc_option).route_key = "";
+    option (rpc_option).trace = true;
+    message Req {
+        RouteHead RouteHead = 1;
+        string Req = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Rsp = 2;
+    }
+}
+
+message BreakHello {
+    option (rpc_option).route_key = "";
+    message Req {
+        RouteHead RouteHead = 1;
+        string Req = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Rsp = 2;
     }
 }
