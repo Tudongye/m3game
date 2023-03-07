@@ -10,7 +10,7 @@ A game framework using Golang and Grpc
 
 优势：
 
-1，简单但不简陋。框架包含了一个重度游戏的完备后端功能，相信可以给你一些帮助。
+1，简单但不简陋。框架包含了一个重度游戏后端的完备实现。
 
 2、自动化的逻辑注入。借助pb的自定义选项，业务逻辑只需要很少的代码，就可以自动的注入到框架层
 
@@ -282,16 +282,27 @@ type ResLoader interface {
 
 ## 数据存储
 
-M3采用pb管理游戏实体的DB存储结构。如下是一个简单实体的结构定义。
+M3采用pb管理游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看demo/roleapp/roleser/roleactor.go
 
-当前M3要求DB结构所有一级字段必须是string 或 proto.Message,且DB结构必须设置一个string类型的Key字段。
+当前M3要求DB结构所有一级字段必须是string（必须是主键） 或 proto.Message（pb类型不可重复）,且DB结构必须设置一个string类型的主键。
 
 ```
 message RoleDB {
-    option (db_primary_key) = "RoleID";	// DB存储Key字段
+    option (db_primary_key) = "RoleID";		 // DB主键
     string RoleID = 1;
-    string Name = 2;
+    RoleName RoleName = 2;
+    LocationInfo LocationInfo = 3;
 }
+
+message RoleName {
+    string Name = 1;
+}
+
+message LocationInfo {
+    int32 Location = 1;
+    string LocateName = 2;
+}
+
 ```
 
 ### DB结构注入
@@ -299,18 +310,68 @@ message RoleDB {
 M3使用DB插件来进行实体数据的落地，M3通过PbReflect自动感知实体数据的DB结构Meta，DB插件根据Meta来对实体数据进行CRUD操作。DBMeta的生成逻辑参看 db/dbmeta.go
 
 ```
-type DBMeta struct {
-	Table     string                                  // DB表名
-	Keyfield  string                                  // 主键，强制为string
-	Allfields []string                                // 所有数据键
-	Creater   DBCreater                               // 游戏实体工场
+type DBMeta[T proto.Message] struct {
+	objName   string
+	table     string                                  // DB表名
+	keyField  string                                  // 主键，强制为string
+	allFields []string                                // 所有数据键
+	allPBName map[string]string                       // 类型名到字段名映射
+	creater   func() T                                // 游戏实体工场
 	fieldds   map[string]protoreflect.FieldDescriptor // 游戏实体字段反射信息
 }
 ```
 
-### Dirty Flag
+### Wraper
 
-自动的脏标记位管理（TODO）
+Wraper，对数据的ORM级封装，采用pb反射&泛型极大的简化了DB相关操作。如下是Wraper定义
+
+```
+type Wraper[T proto.Message] struct {
+	key    string          // 实体Key
+	obj    T               // 实体pb.Message
+	meta   *db.DBMeta[T]   // Meta
+	dirtys map[string]bool // 置脏标记
+}
+
+
+func (w *Wraper[T]) Update(db db.DB) error	 // CRUD操作
+func (w *Wraper[T]) Create(db db.DB) error
+func (w *Wraper[T]) Delete(db db.DB) error
+func (w *Wraper[T]) Read(db db.DB) error
+
+func KeySetter[T proto.Message](wraper *Wraper[T], value string) error	 // key字段操作
+func KeyGetter[T proto.Message](wraper *Wraper[T]) (string, error)
+func Setter[P, T proto.Message](wraper *Wraper[T], value P) error	// 普通字段操作
+func Getter[P, T proto.Message](wraper *Wraper[T]) (P, error)		 
+```
+使用方式如下，以前述RoleDB为例
+
+```
+func roleDBCreater() *pb.RoleDB {
+	return &pb.RoleDB{		// 所有的一级结构体都要初始化
+		RoleID:       "",
+		RoleName:     &pb.RoleName{},
+		LocationInfo: &pb.LocationInfo{},
+	}
+}
+rolemeta := db.NewMeta("role_table", roleDBCreater)
+wp := wraper.New(rolemeta, "RoleID")	// 构建Wraper
+
+// 读数据
+dbplugin := plugin.GetDBPlugin()
+wp.Read(dbplugin)
+
+// 修改用户名
+rolename, _ := wraper.Getter[*pb.RoleName](wp)
+rolename.Name = "王小明"
+wp.Setter(a.wraper, rolename)
+
+// 脏字段写回
+if wp.HasDirty() {
+	wp.Update(dbplugin)
+}
+```
+
 
 ## 熔断管理
 
@@ -322,4 +383,15 @@ type DBMeta struct {
 
 ## 日志管理
 
+## 容灾&&扩缩容
+
+## 压测
+
+## 灰度
+
+## 异步任务
+
+## 热更新
+
+## 集群部署
 
