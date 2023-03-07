@@ -3,7 +3,7 @@ package wraper
 import (
 	"fmt"
 	"m3game/db"
-	"m3game/util/log"
+	"m3game/log"
 
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
@@ -21,10 +21,10 @@ func New[T proto.Message](meta *db.DBMeta[T], key string) *Wraper[T] {
 }
 
 type Wraper[T proto.Message] struct {
-	key    string
-	obj    T
-	meta   *db.DBMeta[T]
-	dirtys map[string]bool
+	key    string          // 实体Key
+	obj    T               // 实体pb.Message
+	meta   *db.DBMeta[T]   // Meta
+	dirtys map[string]bool // 置脏标记
 }
 
 func (w *Wraper[T]) Meta() *db.DBMeta[T] {

@@ -3,9 +3,9 @@ package roleclient
 import (
 	"context"
 	"fmt"
-	"m3game/client"
 	"m3game/proto"
 	"m3game/proto/pb"
+	"m3game/runtime/client"
 	"m3game/util"
 
 	dpb "m3game/demo/proto/pb"

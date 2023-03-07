@@ -2,7 +2,7 @@ package plugin
 
 import (
 	"fmt"
-	"m3game/util/log"
+	"m3game/log"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -11,13 +11,14 @@ import (
 type Type string
 
 const (
-	DB     Type = "db"
-	Router Type = "router" // only one
-	Trace  Type = "trace"
-	Metric Type = "metric"
-	Broker Type = "broker" // only one
-	Log    Type = "log"
-	Lock   Type = "lock"
+	DB     Type = "db"     // 存储
+	Router Type = "router" // 服务发现 only one
+	Trace  Type = "trace"  // 链路追踪
+	Metric Type = "metric" // 监控
+	Broker Type = "broker" // 消息队列 only one
+	Log    Type = "log"    // 日志
+	Lock   Type = "lock"   // 分布式锁
+	Shape  Type = "Shape"  // 流量管理 only one
 )
 
 const (
@@ -25,7 +26,8 @@ const (
 )
 
 var (
-	_factoryMap map[string]Factory
+	_factoryMap     map[string]Factory
+	_onlyonePlugins = map[Type]int{Router: 1, Trace: 1, Metric: 1, Broker: 1, Log: 1, Lock: 1, Shape: 1}
 )
 
 func init() {
@@ -67,7 +69,7 @@ func InitPlugins(v viper.Viper) error {
 			if !ok {
 				return fmt.Errorf("Factory not find %s", name)
 			}
-			log.Fatal("Plugin Setup %s", name)
+			log.Info("Plugin Setup %s", name)
 			pluginIns, err := factory.Setup(nm)
 			if err != nil {
 				return errors.Wrapf(err, "Factory %s", name)

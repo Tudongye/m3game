@@ -2,8 +2,8 @@ package mesh
 
 import (
 	"fmt"
+	"m3game/log"
 	"m3game/runtime/plugin"
-	"m3game/util/log"
 	"sync"
 	"time"
 

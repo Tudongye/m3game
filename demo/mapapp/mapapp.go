@@ -1,14 +1,15 @@
 package mapapp
 
 import (
-	"m3game/app"
-	"m3game/broker/nats"
+	_ "m3game/broker/nats"
 	"m3game/demo/mapapp/mapserver"
 	dproto "m3game/demo/proto"
-	"m3game/mesh/router/consul"
+	_ "m3game/mesh/router/consul"
 	"m3game/runtime"
+	"m3game/runtime/app"
 	"m3game/runtime/plugin"
-	"m3game/server"
+	"m3game/runtime/server"
+	_ "m3game/shape/sentinel"
 	"sync"
 )
 
@@ -35,8 +36,6 @@ func (d *MapApp) HealthCheck() bool {
 	return true
 }
 func Run() error {
-	plugin.RegisterFactory(&consul.Factory{})
-	plugin.RegisterFactory(&nats.Factory{})
 	runtime.Run(newApp(), []server.Server{mapserver.New()})
 	return nil
 }

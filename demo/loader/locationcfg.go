@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"m3game/resource"
+	"m3game/runtime/resource"
 )
 
 var (

@@ -2,20 +2,21 @@ package clientapp
 
 import (
 	"context"
-	"m3game/app"
-	"m3game/broker/nats"
-	"m3game/client"
+	_ "m3game/broker/nats"
 	"m3game/config"
 	"m3game/demo/dirapp/dirclient"
 	"m3game/demo/mapapp/mapclient"
 	dproto "m3game/demo/proto"
 	"m3game/demo/roleapp/roleclient"
-	"m3game/mesh/router/consul"
+	"m3game/log"
+	_ "m3game/mesh/router/consul"
 	"m3game/proto"
 	"m3game/runtime"
+	"m3game/runtime/app"
+	"m3game/runtime/client"
 	"m3game/runtime/plugin"
-	"m3game/server"
-	"m3game/util/log"
+	"m3game/runtime/server"
+	_ "m3game/shape/sentinel"
 	"sync"
 	"time"
 )
@@ -60,6 +61,16 @@ func (d *ClientApp) Start(wg *sync.WaitGroup) error {
 				log.Debug("Res: %s", rsp)
 			}
 		}()
+
+		for i := 0; i < 100; i++ {
+			log.Info("Call Hello() %d", i)
+			log.Debug("Req: good morning")
+			if rsp, err := dirclient.Hello(context.Background(), "good morning"); err != nil {
+				log.Error("Err: %s", err.Error())
+			} else {
+				log.Debug("Res: %s", rsp)
+			}
+		}
 	}
 	if testmode == "mapapp" {
 		log.Info("Test:%s", testmode)
@@ -206,8 +217,6 @@ func (d *ClientApp) HealthCheck() bool {
 }
 
 func Run() error {
-	plugin.RegisterFactory(&consul.Factory{})
-	plugin.RegisterFactory(&nats.Factory{})
 	runtime.Run(newApp(), []server.Server{})
 	return nil
 }

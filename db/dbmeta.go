@@ -7,8 +7,8 @@ package db
 
 import (
 	"fmt"
+	"m3game/log"
 	"m3game/proto/pb"
-	"m3game/util/log"
 
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -94,7 +94,7 @@ func NewMeta[T proto.Message](table string, creater func() T) *DBMeta[T] {
 				panic(fmt.Sprintf("DB %s KeyField %s Kind must be string", messagename, fieldname))
 			}
 			meta.keyField = keyfield
-			log.Fatal("DB %s KeyField => %s", messagename, keyfield)
+			log.Info("DB %s KeyField => %s", messagename, keyfield)
 
 		} else {
 			if fieldd.Kind() != protoreflect.MessageKind {
@@ -104,11 +104,11 @@ func NewMeta[T proto.Message](table string, creater func() T) *DBMeta[T] {
 				panic(fmt.Sprintf("DB %s field %s FullName %s repeated", messagename, fieldname, fieldd.Message().FullName()))
 			}
 			meta.allPBName[string(fieldd.Message().FullName())] = fieldname
-			log.Fatal("DB %s PBField => %s", messagename, fieldname)
+			log.Info("DB %s PBField => %s", messagename, fieldname)
 		}
 		meta.allFields = append(meta.allFields, fieldname)
 		meta.fieldds[fieldname] = fieldd
-		log.Fatal("DB %s AllField => %s", messagename, fieldname)
+		log.Info("DB %s AllField => %s", messagename, fieldname)
 	}
 	if meta.keyField == "" {
 		panic(fmt.Sprintf("DB %s not find KeyField", messagename))

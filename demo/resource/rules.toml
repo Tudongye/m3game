@@ -1,0 +1,12 @@
+[Rules]
+Method = "/proto.DirSer/Hello"
+[[Rules.FlowRules]]
+Threshold = 2
+StatIntervalMs = 1000
+MaxQueueWaitMs = 0
+[[Rules.BreakRules]]
+Threshold = 1
+Strategy = "ErrorCount"
+StatIntervalMs = 1000
+RetryTimeOutMs = 2000
+MinRequestNum = 2

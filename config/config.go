@@ -3,7 +3,7 @@ package config
 import (
 	"flag"
 	"fmt"
-	"m3game/util/log"
+	"m3game/log"
 	"strings"
 	"sync"
 
@@ -86,7 +86,7 @@ func init() {
 	flag.StringVar(&_rconf.idstr, "idstr", "", "app idstr env.world.func.ins")
 	flag.Var(&_rconf.envmap, "env", "other config")
 	flag.Parse()
-	log.Fatal("CfgPath:%s", _rconf.cfgPath)
+	log.Info("CfgPath:%s", _rconf.cfgPath)
 	if _rconf.cfgPath == "" {
 		_rconf.cfgPath = _defaultCfgPath
 	}

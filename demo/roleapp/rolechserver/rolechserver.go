@@ -3,7 +3,7 @@ package rolechserver
 import (
 	"context"
 	dpb "m3game/demo/proto/pb"
-	"m3game/server/async"
+	"m3game/runtime/server/async"
 
 	"google.golang.org/grpc"
 )

@@ -5,7 +5,7 @@ import (
 	"m3game/broker"
 	"m3game/db"
 	"m3game/mesh/router"
-	"m3game/runtime/transport"
+	"m3game/shape"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -45,7 +45,7 @@ func Reload(v viper.Viper) error {
 func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 	if _, ok := _pluginMgr.insMap[typ]; !ok {
 		_pluginMgr.insMap[typ] = make(map[string]map[string]PluginIns)
-	} else if typ == Router || typ == Broker {
+	} else if _, ok := _onlyonePlugins[typ]; ok {
 		return fmt.Errorf("Plugin %s only one", string(typ))
 	}
 	if _, ok := _pluginMgr.insMap[typ][name]; !ok {
@@ -55,10 +55,8 @@ func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 		return fmt.Errorf("Plugin repeated type %s name %s tag %s", typ, name, tag)
 	}
 	_pluginMgr.insMap[typ][name][tag] = p
-	if typ == Broker {
-		if err := transport.RegisterBroker(p.(broker.Broker)); err != nil {
-			return err
-		}
+	if typ == Shape {
+		shape.SetShape(p.(shape.Shape))
 	}
 	return nil
 }
@@ -129,4 +127,20 @@ func GetDBPluginByName(name string) db.DB {
 		return nil
 	}
 	return p.(db.DB)
+}
+
+func GetBrokerPlugin() broker.Broker {
+	p := getPluginByType(Broker)
+	if p == nil {
+		return nil
+	}
+	return p.(broker.Broker)
+}
+
+func GetShapePlugin() shape.Shape {
+	p := getPluginByType(Shape)
+	if p == nil {
+		return nil
+	}
+	return p.(shape.Shape)
 }

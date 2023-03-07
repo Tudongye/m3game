@@ -2,14 +2,22 @@
 [Transport]
 Addr = "127.0.0.1:22103"
 BroadTimeOut = 5
-[Mesh]
+
+[Options]
+[[Options.Mesh]]
 WatcherInterSecond = 1
+[[Options.Resource]]
+CfgPath = "../../resource"
+[[Options.Shape]]
+RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
 [[Plugin.Broker.broker_nats]]
 NatsURL = "127.0.0.1:4222"
+[[Plugin.Shape.shape_sentinel]]
+ConfigFile = "../../resource/sentinel.yml"
 [[Plugin.DB.db_cache]]
 Test = "1"
 
@@ -20,6 +28,3 @@ SaveTimeInter = 10  # role自动存储时间
 TickTimeInter = 10  # 定时器轮转时间
 MaxReqChanSize = 10 # 最大接受信道
 MaxReqWaitTime = 30 # 最大等待时间
-
-[Resource]
-CfgPath = "../../resource"

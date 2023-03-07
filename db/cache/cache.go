@@ -4,8 +4,8 @@ package cache
 import (
 	"fmt"
 	"m3game/db"
+	"m3game/log"
 	"m3game/runtime/plugin"
-	"m3game/util/log"
 	"sync"
 
 	"google.golang.org/protobuf/proto"
@@ -22,6 +22,9 @@ const (
 	_factoryname = "db_cache"
 )
 
+func init() {
+	plugin.RegisterFactory(&Factory{})
+}
 func Name() string {
 	return _factoryname
 }

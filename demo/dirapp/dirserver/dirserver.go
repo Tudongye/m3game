@@ -5,8 +5,8 @@ import (
 	"fmt"
 	dpb "m3game/demo/proto/pb"
 	"m3game/proto"
-	"m3game/server"
-	"m3game/server/mutil"
+	"m3game/runtime/server"
+	"m3game/runtime/server/mutil"
 
 	"google.golang.org/grpc"
 )

@@ -3,7 +3,7 @@ package mapserver
 import (
 	"context"
 	dpb "m3game/demo/proto/pb"
-	"m3game/server/async"
+	"m3game/runtime/server/async"
 	"time"
 
 	"google.golang.org/grpc"

@@ -9,8 +9,8 @@ import (
 	dpb "m3game/demo/proto/pb"
 	"m3game/demo/roleapp/rolechclient"
 	"m3game/demo/roleapp/rolechserver"
-	"m3game/resource"
-	"m3game/server/actor"
+	"m3game/runtime/resource"
+	"m3game/runtime/server/actor"
 
 	"github.com/pkg/errors"
 

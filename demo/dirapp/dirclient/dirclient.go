@@ -3,12 +3,15 @@ package dirclient
 import (
 	"context"
 	"fmt"
-	"m3game/client"
 	"m3game/proto/pb"
+	"m3game/runtime/client"
+	"m3game/runtime/transport"
 	"m3game/util"
 
 	dproto "m3game/demo/proto"
 	dpb "m3game/demo/proto/pb"
+
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 
 	"google.golang.org/grpc"
 )
@@ -35,7 +38,7 @@ func Init(srcins *pb.RouteIns, opts ...grpc.CallOption) error {
 	if _client.conn, err = grpc.Dial(
 		fmt.Sprintf("router://%s", util.SvcID2Str(srcins.EnvID, srcins.WorldID, dproto.DirAppFuncID)),
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(client.SendInteror()),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.ClientInterceptors()...)),
 	); err != nil {
 		return err
 	} else {

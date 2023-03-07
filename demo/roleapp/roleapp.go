@@ -1,10 +1,8 @@
 package roleapp
 
 import (
-	"m3game/app"
-	"m3game/broker/nats"
-	"m3game/client"
-	"m3game/db/cache"
+	_ "m3game/broker/nats"
+	_ "m3game/db/cache"
 	"m3game/demo/dirapp/dirclient"
 	"m3game/demo/loader"
 	"m3game/demo/mapapp/mapclient"
@@ -12,11 +10,14 @@ import (
 	"m3game/demo/roleapp/rolechclient"
 	"m3game/demo/roleapp/rolechserver"
 	"m3game/demo/roleapp/roleserver"
-	"m3game/mesh/router/consul"
+	_ "m3game/mesh/router/consul"
 	"m3game/proto"
 	"m3game/runtime"
+	"m3game/runtime/app"
+	"m3game/runtime/client"
 	"m3game/runtime/plugin"
-	"m3game/server"
+	"m3game/runtime/server"
+	_ "m3game/shape/sentinel"
 	"sync"
 )
 
@@ -52,12 +53,7 @@ func (d *RoleApp) HealthCheck() bool {
 	return true
 }
 func Run() error {
-	plugin.RegisterFactory(&consul.Factory{})
-	plugin.RegisterFactory(&cache.Factory{})
-	plugin.RegisterFactory(&nats.Factory{})
-
 	loader.RegisterLocationCfg()
-
 	runtime.Run(newApp(), []server.Server{roleserver.New(), rolechserver.New()})
 	return nil
 }

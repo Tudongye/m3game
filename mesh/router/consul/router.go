@@ -2,11 +2,11 @@ package consul
 
 import (
 	"fmt"
+	"m3game/log"
 	"m3game/mesh/router"
 	"m3game/runtime/plugin"
 	"m3game/runtime/transport"
 	"m3game/util"
-	"m3game/util/log"
 	"time"
 
 	"github.com/hashicorp/consul/api"
@@ -26,7 +26,7 @@ const (
 )
 
 type consulRouterCfg struct {
-	ConsulHost string
+	ConsulHost string `mapstructure:"ConsulHost"`
 }
 
 type Factory struct {
@@ -106,7 +106,7 @@ func (r *Router) Register(app router.AppReciver) error {
 			DeregisterCriticalServiceAfter: deregister.String(), // 注销时间，相当于过期时间
 		},
 	}
-	log.Fatal("HealthMethod => %s", healthmethod)
+	log.Info("Register HealthMethod => %s", healthmethod)
 	agent := r.client.Agent()
 	if err := agent.ServiceRegister(reg); err != nil {
 		return errors.Wrapf(err, "Consul.agent.ServiceRegister %s", app.IDStr())

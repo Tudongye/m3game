@@ -3,16 +3,17 @@ package runtime
 import (
 	"context"
 	"fmt"
-	"m3game/app"
 	"m3game/config"
+	"m3game/log"
 	"m3game/mesh"
 	_ "m3game/mesh"
-	"m3game/resource"
+	"m3game/runtime/app"
 	"m3game/runtime/plugin"
+	"m3game/runtime/resource"
+	"m3game/runtime/server"
 	"m3game/runtime/transport"
-	"m3game/server"
+	"m3game/shape"
 	"m3game/util"
-	"m3game/util/log"
 	"os"
 	"os/signal"
 	"sync"
@@ -29,12 +30,17 @@ func init() {
 	}
 }
 
+type RuntimeOptionCfg struct {
+	Mesh     map[string]interface{} `toml:"Mesh"`
+	Shape    map[string]interface{} `toml:"Shape"`
+	Resource map[string]interface{} `toml:"Resource"`
+}
+
 type RuntimeCfg struct {
-	Resource  map[string]interface{}            `toml:"Resource"`
+	Transport map[string]interface{}            `toml:"Transport"`
+	Options   RuntimeOptionCfg                  `toml:"Options"`
 	App       map[string]interface{}            `toml:"App"`
 	Server    map[string]map[string]interface{} `toml:"Server"`
-	Transport map[string]interface{}            `toml:"Transport"`
-	Mesh      map[string]interface{}            `toml:"Mesh"`
 }
 
 func SendInterFunc(sctx *transport.Sender) error {
@@ -42,13 +48,13 @@ func SendInterFunc(sctx *transport.Sender) error {
 }
 
 func ShutDown() error {
-	log.Fatal("ShutDown...")
+	log.Info("ShutDown...")
 	_runtime.cancel()
 	return nil
 }
 
 func Reload() error {
-	log.Fatal("Reload...")
+	log.Info("Reload...")
 	err := reload()
 	if err != nil {
 		log.Error("Runtime.Reload Fail:%s", err.Error())
@@ -63,7 +69,7 @@ func PreExit() error {
 func Run(app app.App, servers []server.Server) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	log.Fatal("Runtime.Init...")
+	log.Info("Runtime.Init...")
 	_runtime.cancel = cancel
 	_runtime.app = app
 	for _, server := range servers {
@@ -73,39 +79,52 @@ func Run(app app.App, servers []server.Server) error {
 		}
 	}
 
-	log.Fatal("Config.Load...")
+	log.Info("RuntimeCfg.Load...")
 	v := *config.GetConfig()
 	var cfg RuntimeCfg
 	if err := v.Unmarshal(&cfg); err != nil {
-		log.Error("UnMarshal RuntimeCfg %s", err.Error())
+		log.Error("UnMarshal RuntimeCfg err %s", err.Error())
 		return err
 	}
-	log.Fatal("Mesh.Init...")
-	if err := mesh.Init(cfg.Mesh); err != nil {
+
+	log.Info("Mesh.Init...")
+	if err := mesh.Init(cfg.Options.Mesh); err != nil {
 		log.Error("Mesh.Init err %s", err.Error())
 		return err
 
 	}
 
-	log.Fatal("Resource.Load...")
-	if err := resource.Init(cfg.Resource); err != nil {
-		log.Error("Runtime.Resource.Init %s err %s", cfg.Resource, err.Error())
+	log.Info("Resource.Init...")
+	if err := resource.Init(cfg.Options.Resource); err != nil {
+		log.Error("Runtime.Resource.Init %s err %s", cfg.Options.Resource, err.Error())
 		return err
 	}
 
-	log.Fatal("Transport.Init...")
+	log.Info("Transport.Init...")
 	if err := transport.Init(cfg.Transport, _runtime); err != nil {
 		log.Error("Transport.Init err %s", err.Error())
 		return err
 	}
 
-	log.Fatal("Plugin.Init...")
+	log.Info("Plugins.Init...")
 	if err := plugin.InitPlugins(v); err != nil {
 		log.Error("InitPlugins err %s", err.Error())
 		return err
 	}
 
-	log.Fatal("Server.Init...")
+	log.Info("SetupPluginInterceptor...")
+	if err := setupPluginInterceptor(cfg); err != nil {
+		log.Error("setupPluginInterceptor err %s", err.Error())
+		return err
+	}
+
+	log.Info("Transport.CreateSer...")
+	if err := transport.CreateSer(); err != nil {
+		log.Error("Transport.CreateSer err %s", err.Error())
+		return err
+	}
+
+	log.Info("Server.Init...")
 	for _, server := range servers {
 		log.Info("Server.Init.%s...", server.Name())
 		if err := server.Init(cfg.Server[string(server.Type())], app); err != nil {
@@ -118,20 +137,20 @@ func Run(app app.App, servers []server.Server) error {
 		}
 	}
 
-	log.Fatal("App.Init...")
+	log.Info("App.Init...")
 	if err := app.Init(cfg.App); err != nil {
 		log.Error("App.Init err %s", err.Error())
 		return err
 	}
 	var wg sync.WaitGroup
 
-	log.Fatal("Transport.Start...")
+	log.Info("Transport.Start...")
 	if err := transport.Start(&wg); err != nil {
 		log.Error("Transport.Start err %s", err.Error())
 		return err
 	}
 
-	log.Fatal("Server.Start...")
+	log.Info("Server.Start...")
 	for _, server := range servers {
 		log.Info("Server.Start.%s...", server.Name())
 		if err := server.Start(&wg); err != nil {
@@ -140,7 +159,7 @@ func Run(app app.App, servers []server.Server) error {
 		}
 	}
 
-	log.Fatal("App.Start.%s...", app.IDStr())
+	log.Info("App.Start.%s...", app.IDStr())
 	if err := app.Start(&wg); err != nil {
 		log.Error("App.Start err %s", err.Error())
 		return err
@@ -151,21 +170,21 @@ func Run(app app.App, servers []server.Server) error {
 		defer wg.Done()
 		select {
 		case <-ctx.Done():
-			log.Fatal("Recv Done...")
-			log.Fatal("App.Stop...")
+			log.Info("Recv Done...")
+			log.Info("App.Stop...")
 			_runtime.app.Stop()
 			for _, server := range _runtime.servers {
-				log.Fatal("Server.Stop %s...", server.Name())
+				log.Info("Server.Stop %s...", server.Name())
 				server.Stop()
 			}
-			log.Fatal("Transport.Stop...")
+			log.Info("Transport.Stop...")
 			transport.ShutDown()
-			log.Fatal("Doned")
+			log.Info("Doned")
 		}
 	}()
 	go signalProc()
 
-	log.Fatal("Wait...")
+	log.Info("Wait...")
 	wg.Wait()
 	return nil
 }
@@ -205,7 +224,7 @@ func signalProc() {
 	signal.Notify(sigs, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, util.SysCallSIGUSR1(), util.SysCallSIGUSR2())
 
 	for s := range sigs {
-		log.Fatal("Recv sig %s", s.String())
+		log.Info("Recv sig %s", s.String())
 		switch s {
 		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT:
 			ShutDown()
@@ -218,8 +237,8 @@ func signalProc() {
 }
 
 func reload() error {
-	log.Fatal("Runtime.Reload...")
-	log.Fatal("Config.Reload...")
+	log.Info("Runtime.Reload...")
+	log.Info("Config.Reload...")
 	if err := config.Reload(); err != nil {
 		return err
 	}
@@ -230,28 +249,40 @@ func reload() error {
 		return err
 	}
 
-	log.Fatal("Resource.Reload...")
-	if err := resource.ReLoad(cfg.Resource); err != nil {
+	log.Info("Resource.Reload...")
+	if err := resource.ReLoad(cfg.Options.Resource); err != nil {
 		return err
 	}
-	log.Fatal("Transport.Reload...")
+	log.Info("Transport.Reload...")
 	if err := transport.Reload(cfg.Transport); err != nil {
 		return err
 	}
-	log.Fatal("Plugin.Reload...")
+	log.Info("Plugin.Reload...")
 	if err := plugin.Reload(v); err != nil {
 		return err
 	}
-	log.Fatal("Server.Reload...")
+	log.Info("Server.Reload...")
 	for _, server := range _runtime.servers {
 		if err := server.Reload(cfg.Server[string(server.Type())]); err != nil {
 			return err
 		}
 	}
-	log.Fatal("App.Reload...")
+	log.Info("App.Reload...")
 	if err := _runtime.app.Reload(cfg.App); err != nil {
 		return err
 	}
-	log.Fatal("Runtime.Reload Succ...")
+	log.Info("Runtime.Reload Succ...")
+	return nil
+}
+
+func setupPluginInterceptor(cfg RuntimeCfg) error {
+	if s := shape.GetShape(); s != nil {
+		log.Info("SetupPluginInterceptor.Shape...")
+		if err := shape.Init(cfg.Options.Shape); err != nil {
+			return err
+		}
+		transport.RegisterServerInterceptor(s.ServerInterceptor())
+		transport.RegisterClientInterceptor(s.ClientInterceptor())
+	}
 	return nil
 }

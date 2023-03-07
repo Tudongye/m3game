@@ -3,8 +3,8 @@ package mapclient
 import (
 	"context"
 	"fmt"
-	"m3game/client"
 	"m3game/proto/pb"
+	"m3game/runtime/client"
 	"m3game/util"
 
 	dproto "m3game/demo/proto"

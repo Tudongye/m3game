@@ -2,8 +2,8 @@ package nats
 
 import (
 	"m3game/broker"
+	"m3game/log"
 	"m3game/runtime/plugin"
-	"m3game/util/log"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/nats-io/nats.go"
@@ -20,6 +20,10 @@ var (
 const (
 	_factoryname = "broker_nats"
 )
+
+func init() {
+	plugin.RegisterFactory(&Factory{})
+}
 
 type natsBrokerCfg struct {
 	NatsURL string
@@ -82,7 +86,7 @@ func (b *Broker) Publish(topic string, m []byte) error {
 }
 
 func (b *Broker) Subscribe(topic string, h func([]byte)) error {
-	log.Fatal("Subscribe %s", topic)
+	log.Info("Subscribe %s", topic)
 	_, err := b.nc.Subscribe(topic, func(m *nats.Msg) {
 		h(m.Data)
 	})

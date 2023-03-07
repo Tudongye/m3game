@@ -2,14 +2,19 @@
 [Transport]
 Addr = "127.0.0.1:22101"
 BroadTimeOut = 5
-[Mesh]
+
+[Options]
+[[Options.Mesh]]
 WatcherInterSecond = 1
+[[Options.Resource]]
+CfgPath = "../../resource"
+[[Options.Shape]]
+RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
 [[Plugin.Broker.broker_nats]]
 NatsURL = "127.0.0.1:4222"
-
-[Resource]
-CfgPath = "../../resource"
+[[Plugin.Shape.shape_sentinel]]
+ConfigFile = "../../resource/sentinel.yml"

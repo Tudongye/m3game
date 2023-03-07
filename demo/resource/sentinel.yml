@@ -1,0 +1,5 @@
+version: "v1"
+sentinel:
+  app:
+    name: sentinel-go-m3game
+    type: 0
