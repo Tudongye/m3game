@@ -323,7 +323,7 @@ type DBMeta[T proto.Message] struct {
 
 ### Wraper
 
-Wraper，对数据的ORM级封装，采用pb反射&泛型极大的简化了DB相关操作。如下是Wraper定义
+Wraper，对数据的ORM级封装，采用pb反射&泛型极大的简化了DB相关操作，同时封装了置脏管理。如下是Wraper定义
 
 ```
 type Wraper[T proto.Message] struct {
@@ -362,7 +362,7 @@ dbplugin := plugin.GetDBPlugin()
 wp.Read(dbplugin)
 
 // 修改用户名
-rolename, _ := wraper.Getter[*pb.RoleName](wp)
+rolename, _ := wraper.Getter[*pb.RoleName](wp)	 // 参看前述 要求DB的一级pb字段类型不能重复
 rolename.Name = "王小明"
 wp.Setter(a.wraper, rolename)
 
