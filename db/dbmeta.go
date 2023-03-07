@@ -15,29 +15,48 @@ import (
 )
 
 // Create DB Object
-type DBCreater func() proto.Message
+type DBMetaInter interface {
+	ObjName() string
+	Table() string
+	KeyField() string
+	AllFields() []string
+	AllPBName() map[string]string
+	Creater() func() proto.Message
+	Fieldds() map[string]protoreflect.FieldDescriptor
+
+	Decode(msg proto.Message, field string, buf []byte) error
+	Encode(msg proto.Message, field string) ([]byte, error)
+	HasField(field string) bool
+}
 
 /*
 DBMeta represents the format of the game entity in the DB, defined by the game logic, and used as the initialization parameter of the DB plug-in
 DBMeta表示游戏实体在DB中的格式，由游戏逻辑定义，作为DB插件的初始化参数
 */
-type DBMeta struct {
-	Table     string
-	Keyfield  string
-	Allfields []string
-	Creater   DBCreater
-	fieldds   map[string]protoreflect.FieldDescriptor // field's pb options
+type DBMeta[T proto.Message] struct {
+	objName   string
+	table     string                                  // DB表名
+	keyField  string                                  // 主键，强制为string
+	allFields []string                                // 所有数据键
+	allPBName map[string]string                       // 类型名到字段名映射
+	creater   func() T                                // 游戏实体工场
+	fieldds   map[string]protoreflect.FieldDescriptor // 游戏实体字段反射信息
 }
+
+var (
+	_ DBMetaInter = (*DBMeta[proto.Message])(nil)
+)
 
 /*
 Create DBMeta
 创建DBMeta
 */
-func NewMeta(table string, creater DBCreater) *DBMeta {
-	meta := &DBMeta{
-		Table:   table,
-		Creater: creater,
-		fieldds: make(map[string]protoreflect.FieldDescriptor),
+func NewMeta[T proto.Message](table string, creater func() T) *DBMeta[T] {
+	meta := &DBMeta[T]{
+		table:     table,
+		creater:   creater,
+		allPBName: make(map[string]string),
+		fieldds:   make(map[string]protoreflect.FieldDescriptor),
 	}
 
 	// game entity => proto.message.descriptor
@@ -48,15 +67,15 @@ func NewMeta(table string, creater DBCreater) *DBMeta {
 	if messageopts == nil {
 		panic(fmt.Sprintf("DB %s not have MessageOptions", messagename))
 	}
-
+	meta.objName = string(messagename)
 	// game entity pb.message must have option E_DbPrimaryKey
+	keyfield := ""
 	if v := proto.GetExtension(messageopts, pb.E_DbPrimaryKey); v == nil {
 		panic(fmt.Sprintf("DB %s not have E_DbPrimaryKey", messagename))
-	} else if keyfield, ok := v.(string); !ok {
+	} else if v, ok := v.(string); !ok {
 		panic(fmt.Sprintf("DB %s E_DbPrimaryKey type err", messagename))
 	} else {
-		log.Fatal("DB %s KeyField => %s", messagename, keyfield)
-		meta.Keyfield = keyfield
+		keyfield = v
 	}
 
 	// collect all field
@@ -70,49 +89,113 @@ func NewMeta(table string, creater DBCreater) *DBMeta {
 			fieldd.Kind() != protoreflect.MessageKind {
 			panic(fmt.Sprintf("DB %s field %s Kind not vaild", messagename, fieldname))
 		}
-		meta.Allfields = append(meta.Allfields, fieldname)
+		if fieldname == keyfield {
+			if fieldd.Kind() != protoreflect.StringKind {
+				panic(fmt.Sprintf("DB %s KeyField %s Kind must be string", messagename, fieldname))
+			}
+			meta.keyField = keyfield
+			log.Fatal("DB %s KeyField => %s", messagename, keyfield)
+
+		} else {
+			if fieldd.Kind() != protoreflect.MessageKind {
+				panic(fmt.Sprintf("DB %s Field %s Kind must be pb.Message", messagename, fieldname))
+			}
+			if _, ok := meta.allPBName[string(fieldd.Message().FullName())]; ok {
+				panic(fmt.Sprintf("DB %s field %s FullName %s repeated", messagename, fieldname, fieldd.Message().FullName()))
+			}
+			meta.allPBName[string(fieldd.Message().FullName())] = fieldname
+			log.Fatal("DB %s PBField => %s", messagename, fieldname)
+		}
+		meta.allFields = append(meta.allFields, fieldname)
 		meta.fieldds[fieldname] = fieldd
 		log.Fatal("DB %s AllField => %s", messagename, fieldname)
+	}
+	if meta.keyField == "" {
+		panic(fmt.Sprintf("DB %s not find KeyField", messagename))
 	}
 	return meta
 }
 
-// Assignment based on string field name, pbReflect
-func (meta *DBMeta) Setter(msg proto.Message, field string, buf []byte) error {
+func (meta *DBMeta[T]) Decode(msg proto.Message, field string, buf []byte) error {
 	fieldd, ok := meta.fieldds[field]
 	if !ok {
-		return nil
+		return fmt.Errorf("DB field %s not find in %s Meta", field, meta.ObjName())
 	}
-	if fieldd.Kind() == protoreflect.StringKind {
+	switch fieldd.Kind() {
+	case protoreflect.StringKind:
 		msg.ProtoReflect().Set(fieldd, protoreflect.ValueOfString(string(buf)))
-	}
-	if fieldd.Kind() == protoreflect.MessageKind {
-		var m proto.Message
-		if err := proto.Unmarshal(buf, m); err != nil {
-			return err
-		}
-		msg.ProtoReflect().Set(fieldd, protoreflect.ValueOfMessage(m.ProtoReflect()))
-	}
-	return nil
-}
-
-// Read from string field name, pbReflect
-func (meta *DBMeta) Getter(msg proto.Message, field string) ([]byte, error) {
-	fieldd, ok := meta.fieldds[field]
-	if !ok {
-		return nil, nil
-	}
-	if fieldd.Kind() == protoreflect.StringKind {
-		s := msg.ProtoReflect().Get(fieldd).String()
-		return []byte(s), nil
-	}
-	if fieldd.Kind() == protoreflect.MessageKind {
+		return nil
+	case protoreflect.MessageKind:
 		v := msg.ProtoReflect().Get(fieldd).Message().Interface()
 		m, ok := v.(proto.Message)
 		if !ok {
-			return nil, nil
+			return fmt.Errorf("DB Obj %s Field %s is not pb.message", meta.ObjName(), field)
 		}
-		return proto.Marshal(m)
+		if fieldd.Message().FullName() != m.ProtoReflect().Descriptor().FullName() {
+			return fmt.Errorf("DB Obj %s Field %s FullName %s but UnMarshal FullName %s", meta.ObjName(), field,
+				fieldd.Message().FullName(), m.ProtoReflect().Descriptor().FullName())
+		}
+		msg.ProtoReflect().Set(fieldd, protoreflect.ValueOfMessage(m.ProtoReflect()))
+		return nil
+	default:
+		return fmt.Errorf("DB Obj %s Field %s Kind %d is invaild", meta.ObjName(), field, fieldd.Kind())
 	}
-	return nil, nil
+}
+
+func (meta *DBMeta[T]) Encode(msg proto.Message, field string) ([]byte, error) {
+	fieldd, ok := meta.fieldds[field]
+	if !ok {
+		return nil, fmt.Errorf("DB field %s not find in %s Meta", field, meta.ObjName())
+	}
+	switch fieldd.Kind() {
+	case protoreflect.StringKind:
+		s := msg.ProtoReflect().Get(fieldd).String()
+		return []byte(s), nil
+	case protoreflect.MessageKind:
+		v := msg.ProtoReflect().Get(fieldd).Message().Interface()
+		m, ok := v.(proto.Message)
+		if !ok {
+			return nil, fmt.Errorf("DB Obj %s Field %s is not pb.message", meta.ObjName(), field)
+		}
+		b, e := proto.Marshal(m)
+		return b, e
+	default:
+		return nil, fmt.Errorf("DB Obj %s Field %s Kind %d is invaild", meta.ObjName(), field, fieldd.Kind())
+	}
+}
+
+func (meta *DBMeta[T]) HasField(field string) bool {
+	_, ok := meta.fieldds[field]
+	return ok
+}
+
+func (meta *DBMeta[T]) ObjName() string {
+	return meta.objName
+}
+func (meta *DBMeta[T]) Table() string {
+	return meta.table
+}
+func (meta *DBMeta[T]) KeyField() string {
+	return meta.keyField
+}
+func (meta *DBMeta[T]) AllFields() []string {
+	return meta.allFields
+}
+
+func (meta *DBMeta[T]) AllPBName() map[string]string {
+	return meta.allPBName
+}
+
+func (meta *DBMeta[T]) Creater() func() proto.Message {
+	return func() proto.Message {
+		return meta.creater()
+	}
+}
+
+func (meta *DBMeta[T]) ObjCreater() T {
+	return meta.creater()
+}
+
+func (meta *DBMeta[T]) Fieldds() map[string]protoreflect.FieldDescriptor {
+	return meta.fieldds
 }

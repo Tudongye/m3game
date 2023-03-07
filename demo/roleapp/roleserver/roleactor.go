@@ -3,7 +3,7 @@ package roleserver
 import (
 	"context"
 	"fmt"
-	"m3game/db/cache"
+	"m3game/db/wraper"
 	"m3game/demo/proto/pb"
 	"m3game/runtime/plugin"
 	"m3game/server/actor"
@@ -15,7 +15,6 @@ import (
 func roleCreater(actorid string) actor.Actor {
 	return &RoleActor{
 		ActorBase: actor.ActorBaseCreator(actorid),
-		dirty:     false,
 		ready:     false,
 	}
 }
@@ -30,9 +29,8 @@ func ParseRoleActor(ctx context.Context) *RoleActor {
 
 type RoleActor struct {
 	*actor.ActorBase
-	db    *pb.RoleDB
-	dirty bool
-	ready bool
+	wraper *wraper.Wraper[*pb.RoleDB]
+	ready  bool
 }
 
 func (a *RoleActor) RoleID() string {
@@ -41,6 +39,7 @@ func (a *RoleActor) RoleID() string {
 
 func (a *RoleActor) OnInit() error {
 	log.InfoP(a.ID(), "OnInit")
+	a.wraper = wraper.New(rolemeta, a.ID())
 	return nil
 }
 
@@ -55,14 +54,16 @@ func (a *RoleActor) OnExit() error {
 
 func (a *RoleActor) Save() error {
 	log.DebugP(a.ID(), "Save")
-	if a.dirty {
+	if a.wraper.HasDirty() {
 		log.Debug("Saving %s", a.ID())
-		a.dirty = false
-		db := plugin.GetDBPluginByName(cache.Name())
+		db := plugin.GetDBPlugin()
 		if db == nil {
 			return _err_actor_dberr
 		}
-		return db.Update(rolemeta, a.ID(), a.db)
+		if err := a.wraper.Update(db); err != nil {
+			log.Error(err.Error())
+			return err
+		}
 	}
 	return nil
 }
@@ -82,37 +83,73 @@ func (a *RoleActor) ModifyName(name string) error {
 	if !a.ready {
 		return fmt.Errorf("Actor not Ready")
 	}
-	a.db.Name = name
-	a.dirty = true
-	return nil
+	if rolename, err := wraper.Getter[*pb.RoleName](a.wraper); err != nil {
+		log.Error(err.Error())
+		return err
+	} else {
+		rolename.Name = name
+		return wraper.Setter(a.wraper, rolename)
+	}
 }
+
+func (a *RoleActor) ModifyLocation(locationname string, location int32) error {
+	log.DebugP(a.ID(), "ModifyLocation %s %d", locationname, location)
+	if !a.ready {
+		return fmt.Errorf("Actor not Ready")
+	}
+	if locationinfo, err := wraper.Getter[*pb.LocationInfo](a.wraper); err != nil {
+		log.Error(err.Error())
+		return err
+	} else {
+		locationinfo.LocateName = locationname
+		locationinfo.Location = location
+		return wraper.Setter(a.wraper, locationinfo)
+	}
+}
+
 func (a *RoleActor) Name() string {
-	return a.db.Name
+	if rolename, err := wraper.Getter[*pb.RoleName](a.wraper); err != nil {
+		log.Error(err.Error())
+		return ""
+	} else {
+		return rolename.Name
+	}
 }
 
 func (a *RoleActor) Register(name string) error {
-	db := plugin.GetDBPluginByName(cache.Name())
-	if db == nil {
+	dbplugin := plugin.GetDBPlugin()
+	if dbplugin == nil {
 		return _err_actor_dberr
 	}
-	obj := roleDBCreater()
-	obj.RoleID = a.ID()
-	obj.Name = name
-	return db.Insert(rolemeta, a.ID(), obj)
+	if err := wraper.KeySetter(a.wraper, a.ID()); err != nil {
+		log.Error(err.Error())
+		return _err_actor_dberr
+	}
+	if err := wraper.Setter(a.wraper, &pb.RoleName{
+		Name: name,
+	}); err != nil {
+		log.Error(err.Error())
+		return _err_actor_dberr
+	}
+	if err := wraper.Setter(a.wraper, &pb.LocationInfo{
+		Location:   0,
+		LocateName: "",
+	}); err != nil {
+		log.Error(err.Error())
+		return _err_actor_dberr
+	}
+	return a.wraper.Create(dbplugin)
 }
 
 func (a *RoleActor) Login() error {
-	db := plugin.GetDBPluginByName(cache.Name())
-	if db == nil {
+	dbplugin := plugin.GetDBPlugin()
+	if dbplugin == nil {
 		return _err_actor_dberr
 	}
-	if obj, err := db.Get(rolemeta, a.ID()); err != nil {
-		return err
-	} else if roleobj, ok := obj.(*pb.RoleDB); !ok {
+	if err := a.wraper.Read(dbplugin); err != nil {
+		log.Error(err.Error())
 		return _err_actor_dberr
-	} else {
-		a.db = roleobj
-		a.ready = true
-		return nil
 	}
+	a.ready = true
+	return nil
 }

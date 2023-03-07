@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"m3game/db"
 	"m3game/runtime/plugin"
+	"m3game/util/log"
 	"sync"
 
 	"google.golang.org/protobuf/proto"
@@ -66,18 +67,29 @@ func (c *CacheDB) Name() string {
 	return _factoryname
 }
 
-func (c *CacheDB) Get(meta *db.DBMeta, key string) (proto.Message, error) {
+func (c *CacheDB) Read(meta db.DBMetaInter, key string, filters ...string) (proto.Message, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	obj := meta.Creater()
-	fieldname := genCacheKey(key, meta.Table, meta.Keyfield)
+	obj := meta.Creater()()
+	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; !ok {
 		return nil, db.Err_DB_notfindkey
 	}
-	for _, field := range meta.Allfields {
-		fieldname := genCacheKey(key, meta.Table, field)
+	var fields []string
+	if len(filters) == 0 {
+		fields = meta.AllFields()
+	} else {
+		for _, field := range filters {
+			if !meta.HasField(field) {
+				log.Error("Obj %s not have field %s in filter", meta.ObjName, field)
+			}
+			fields = append(fields, field)
+		}
+	}
+	for _, field := range fields {
+		fieldname := genCacheKey(key, meta.Table(), field)
 		if v, ok := c.cache[fieldname]; ok {
-			if err := meta.Setter(obj, field, v); err != nil {
+			if err := meta.Decode(obj, field, v); err != nil {
 				return nil, err
 			}
 		}
@@ -85,49 +97,71 @@ func (c *CacheDB) Get(meta *db.DBMeta, key string) (proto.Message, error) {
 	return obj, nil
 }
 
-func (c *CacheDB) Update(meta *db.DBMeta, key string, obj proto.Message) error {
+func (c *CacheDB) Update(meta db.DBMetaInter, key string, obj proto.Message, filters ...string) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	fieldname := genCacheKey(key, meta.Table, meta.Keyfield)
+	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; !ok {
 		return db.Err_DB_notfindkey
 	}
-	for _, field := range meta.Allfields {
-		if v, err := meta.Getter(obj, field); err != nil {
+	var fields []string
+	if len(filters) == 0 {
+		fields = meta.AllFields()
+	} else {
+		for _, field := range filters {
+			if !meta.HasField(field) {
+				log.Error("Obj %s not have field %s in filter", meta.ObjName, field)
+			}
+			fields = append(fields, field)
+		}
+	}
+	for _, field := range fields {
+		if v, err := meta.Encode(obj, field); err != nil {
 			return err
 		} else {
-			fieldname := genCacheKey(key, meta.Table, field)
+			fieldname := genCacheKey(key, meta.Table(), field)
 			c.cache[fieldname] = v
 		}
 	}
 	return nil
 }
-func (c *CacheDB) Insert(meta *db.DBMeta, key string, obj proto.Message) error {
+func (c *CacheDB) Create(meta db.DBMetaInter, key string, obj proto.Message, filters ...string) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	fieldname := genCacheKey(key, meta.Table, meta.Keyfield)
+	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; ok {
 		return db.Err_DB_repeatedkey
 	}
-	for _, field := range meta.Allfields {
-		if v, err := meta.Getter(obj, field); err != nil {
+	var fields []string
+	if len(filters) == 0 {
+		fields = meta.AllFields()
+	} else {
+		for _, field := range filters {
+			if !meta.HasField(field) {
+				log.Error("Obj %s not have field %s in filter", meta.ObjName, field)
+			}
+			fields = append(fields, field)
+		}
+	}
+	for _, field := range fields {
+		if v, err := meta.Encode(obj, field); err != nil {
 			return err
 		} else {
-			fieldname := genCacheKey(key, meta.Table, field)
+			fieldname := genCacheKey(key, meta.Table(), field)
 			c.cache[fieldname] = v
 		}
 	}
 	return nil
 }
-func (c *CacheDB) Delete(meta *db.DBMeta, key string) error {
+func (c *CacheDB) Delete(meta db.DBMetaInter, key string) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	fieldname := genCacheKey(key, meta.Table, meta.Keyfield)
+	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; ok {
 		return db.Err_DB_notfindkey
 	}
-	for _, field := range meta.Allfields {
-		fieldname := genCacheKey(key, meta.Table, field)
+	for _, field := range meta.AllFields() {
+		fieldname := genCacheKey(key, meta.Table(), field)
 		delete(c.cache, fieldname)
 	}
 	return nil

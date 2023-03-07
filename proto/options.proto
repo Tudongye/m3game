@@ -9,7 +9,8 @@ option go_package = "m3game/proto/pb";
 
 extend google.protobuf.MessageOptions {
     string db_primary_key             = 50001;
-    M3GRPCOption rpc_option             = 50002;
+
+    M3GRPCOption rpc_option             = 51001;
 }
 
 message M3GRPCOption {

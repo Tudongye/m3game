@@ -46,6 +46,8 @@ func NewMeta(serviced protoreflect.ServiceDescriptor, srcins *pb.RouteIns, dstsv
 			panic(fmt.Sprintf("RPC %s not have E_RpcOption", rpcde.Name()))
 		} else if m3grpcopt, ok := v.(*pb.M3GRPCOption); !ok {
 			panic(fmt.Sprintf("RPC %s E_RpcOption type err", rpcde.Name()))
+		} else if m3grpcopt == nil {
+			panic(fmt.Sprintf("RPC %s E_RpcOption is nil", rpcde.Name()))
 		} else {
 			m.methods[inputname].grpcoption = m3grpcopt
 		}

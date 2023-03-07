@@ -119,6 +119,7 @@ func (d *RoleSer) MoveRole(ctx context.Context, in *dpb.MoveRole_Req) (*dpb.Move
 			return out, fmt.Errorf("LocationCfg Err")
 		}
 		out.LocateName = locationcfgloader.GetNameByDistance(l)
+		role.ModifyLocation(out.LocateName, out.Location)
 	}
 	return out, nil
 }

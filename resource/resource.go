@@ -16,7 +16,7 @@ var (
 )
 
 type ResLoader interface {
-	Load(ctx context.Context, cfgpath string) error
+	Load(ctx context.Context, cfgpath string) error // 资源更新
 	Name() string
 }
 

@@ -58,6 +58,45 @@ func RPCCallHash[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc
 	return rpcCall(method, routehead, f, ctx, t1, opts...)
 }
 
+// RPC P2P Route
+func RPCCallP2P[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, dstins *pb.RouteIns, opts ...grpc.CallOption) (T2, error) {
+	t1fullname := t1.ProtoReflect().Descriptor().FullName()
+	method := m.Method(t1fullname)
+	var t2 T2
+	if method == nil {
+		return t2, err_client_methodnotfind
+	}
+	routehead := NewRouteHeadP2P(m.SrcIns(), m.DstSvc(), dstins)
+	routehead.Ntf = method.grpcoption.Ntf
+	return rpcCall(method, routehead, f, ctx, t1, opts...)
+}
+
+// RPC Single Route
+func RPCCallSingle[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, opts ...grpc.CallOption) (T2, error) {
+	t1fullname := t1.ProtoReflect().Descriptor().FullName()
+	method := m.Method(t1fullname)
+	var t2 T2
+	if method == nil {
+		return t2, err_client_methodnotfind
+	}
+	routehead := NewRouteHeadSingle(m.SrcIns(), m.DstSvc())
+	routehead.Ntf = method.grpcoption.Ntf
+	return rpcCall(method, routehead, f, ctx, t1, opts...)
+}
+
+// RPC Mutil Route
+func RPCCallMutil[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, dsttopicid string, opts ...grpc.CallOption) (T2, error) {
+	t1fullname := t1.ProtoReflect().Descriptor().FullName()
+	method := m.Method(t1fullname)
+	var t2 T2
+	if method == nil {
+		return t2, err_client_methodnotfind
+	}
+	routehead := NewRouteHeadMutil(m.SrcIns(), dsttopicid)
+	routehead.Ntf = method.grpcoption.Ntf
+	return rpcCall(method, routehead, f, ctx, t1, opts...)
+}
+
 // RPC BroadCast Route
 func RPCCallBroadCast[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, opts ...grpc.CallOption) (T2, error) {
 	t1fullname := t1.ProtoReflect().Descriptor().FullName()

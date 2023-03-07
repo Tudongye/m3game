@@ -23,8 +23,19 @@ service RoleSer {
 message RoleDB {
     option (db_primary_key) = "RoleID";
     string RoleID = 1;
-    string Name = 2;
+    RoleName RoleName = 2;
+    LocationInfo LocationInfo = 3;
 }
+
+message RoleName {
+    string Name = 1;
+}
+
+message LocationInfo {
+    int32 Location = 1;
+    string LocateName = 2;
+}
+
 
 message Register {
     option (rpc_option).route_key = "";

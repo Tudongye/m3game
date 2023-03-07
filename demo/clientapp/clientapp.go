@@ -178,9 +178,10 @@ func (d *ClientApp) Start(wg *sync.WaitGroup) error {
 			log.Debug("Res: %s", name)
 		}
 
+		time.Sleep(time.Second * 20)
 		go func() {
 			log.Info("G1 Call Move()")
-			log.Debug("G1 Req: %s %d", actorid, 15)
+			log.Debug("G1 Req: %s %d", actorid, 10)
 			if location, locatename, err := roleclient.MoveRole(context.Background(), actorid, 15); err != nil {
 				log.Error("G1 Err: %s", err.Error())
 			} else {
@@ -189,7 +190,7 @@ func (d *ClientApp) Start(wg *sync.WaitGroup) error {
 		}()
 		go func() {
 			log.Info("G2 Call Move()")
-			log.Debug("G2 Req: %s %d", actorid, 10)
+			log.Debug("G2 Req: %s %d", actorid, 5)
 			if location, locatename, err := roleclient.MoveRole(context.Background(), actorid, 10); err != nil {
 				log.Error("G2 Err: %s", err.Error())
 			} else {
