@@ -10,12 +10,12 @@ import (
 	"m3game/demo/roleapp/rolechclient"
 	"m3game/demo/roleapp/rolechserver"
 	"m3game/demo/roleapp/roleserver"
+	"m3game/mesh/router"
 	_ "m3game/mesh/router/consul"
 	"m3game/proto"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/client"
-	"m3game/runtime/plugin"
 	"m3game/runtime/server"
 	_ "m3game/shape/sentinel"
 	"sync"
@@ -32,11 +32,8 @@ type RoleApp struct {
 }
 
 func (d *RoleApp) Start(wg *sync.WaitGroup) error {
-	router := plugin.GetRouterPlugin()
-	if router != nil {
-		if err := router.Register(d); err != nil {
-			return err
-		}
+	if err := router.Register(d); err != nil {
+		return err
 	}
 	if err := dirclient.Init(d.RouteIns(), client.GenMetaClientOption(proto.META_FLAG_FALSE)); err != nil {
 		return err

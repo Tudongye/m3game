@@ -21,3 +21,5 @@ NatsURL = "127.0.0.1:4222"
 ConfigFile = "../../resource/sentinel.yml"
 [[Plugin.Trace.trace_stdout]]
 Pass = ""
+[[Plugin.Metric.metric_prom]]
+Port = 32100

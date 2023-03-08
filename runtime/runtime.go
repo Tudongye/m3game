@@ -277,17 +277,16 @@ func reload() error {
 }
 
 func setupPluginInterceptor(cfg RuntimeCfg) error {
-	if s := shape.GetShape(); s != nil {
-		log.Info("SetupPluginInterceptor.Shape...")
-		if err := shape.Init(cfg.Options.Shape); err != nil {
-			return err
-		}
-		transport.RegisterServerInterceptor(s.ServerInterceptor())
-		transport.RegisterClientInterceptor(s.ClientInterceptor())
+	log.Info("SetupPluginInterceptor.Shape...")
+	if err := shape.Setup(cfg.Options.Shape); err != nil {
+		return err
 	}
-	if tp := trace.GetTrace(); tp != nil {
-		transport.RegisterServerInterceptor(trace.ServerInterceptor())
-		transport.RegisterClientInterceptor(trace.ClientInterceptor())
-	}
+	transport.RegisterServerInterceptor(shape.ServerInterceptor())
+	transport.RegisterClientInterceptor(shape.ClientInterceptor())
+
+	log.Info("SetupPluginInterceptor.Trace...")
+	transport.RegisterServerInterceptor(trace.ServerInterceptor())
+	transport.RegisterClientInterceptor(trace.ClientInterceptor())
+
 	return nil
 }

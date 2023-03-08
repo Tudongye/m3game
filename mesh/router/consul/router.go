@@ -19,6 +19,7 @@ var (
 	_         plugin.Factory = (*Factory)(nil)
 	_cfg                     = consulRouterCfg{}
 	_instance *Router
+	_factory  = &Factory{}
 )
 
 const (
@@ -27,6 +28,13 @@ const (
 
 type consulRouterCfg struct {
 	ConsulHost string `mapstructure:"ConsulHost"`
+}
+
+func (c *consulRouterCfg) CheckVaild() error {
+	if c.ConsulHost == "" {
+		return errors.New("ConsulHost cant be space")
+	}
+	return nil
 }
 
 type Factory struct {
@@ -43,11 +51,14 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if _instance != nil {
 		return _instance, nil
 	}
-	_instance = &Router{
-		apps: make(map[string]router.AppReciver),
-	}
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, errors.Wrap(err, "Router Decode Cfg")
+	}
+	if err := _cfg.CheckVaild(); err != nil {
+		return nil, err
+	}
+	_instance = &Router{
+		apps: make(map[string]router.AppReciver),
 	}
 	consulConfig := api.DefaultConfig()
 	consulConfig.Address = _cfg.ConsulHost
@@ -56,6 +67,8 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	} else {
 		_instance.client = client
 	}
+
+	router.Set(_instance)
 	return _instance, nil
 }
 
@@ -76,8 +89,8 @@ type Router struct {
 	apps   map[string]router.AppReciver
 }
 
-func (r *Router) Name() string {
-	return _factoryname
+func (r *Router) Factory() plugin.Factory {
+	return _factory
 }
 
 func (r *Router) Register(app router.AppReciver) error {

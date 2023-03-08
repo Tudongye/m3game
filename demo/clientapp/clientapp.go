@@ -9,12 +9,13 @@ import (
 	dproto "m3game/demo/proto"
 	"m3game/demo/roleapp/roleclient"
 	"m3game/log"
+	"m3game/mesh/router"
 	_ "m3game/mesh/router/consul"
+	_ "m3game/metric/prometheus"
 	"m3game/proto"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/client"
-	"m3game/runtime/plugin"
 	"m3game/runtime/server"
 	_ "m3game/shape/sentinel"
 	_ "m3game/trace/stdout"
@@ -33,11 +34,8 @@ type ClientApp struct {
 }
 
 func (d *ClientApp) Start(wg *sync.WaitGroup) error {
-	router := plugin.GetRouterPlugin()
-	if router != nil {
-		if err := router.Register(d); err != nil {
-			return err
-		}
+	if err := router.Register(d); err != nil {
+		return err
 	}
 	if err := dirclient.Init(d.RouteIns(), client.GenMetaClientOption(proto.META_FLAG_TRUE)); err != nil {
 		return err

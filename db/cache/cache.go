@@ -16,6 +16,7 @@ var (
 	_         plugin.Factory   = (*Factory)(nil)
 	_         plugin.PluginIns = (*CacheDB)(nil)
 	_instance *CacheDB
+	_factory  = &Factory{}
 )
 
 const (
@@ -23,10 +24,7 @@ const (
 )
 
 func init() {
-	plugin.RegisterFactory(&Factory{})
-}
-func Name() string {
-	return _factoryname
+	plugin.RegisterFactory(_factory)
 }
 
 type Factory struct {
@@ -46,6 +44,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	_instance = &CacheDB{
 		cache: make(map[string][]byte),
 	}
+	db.Set(_instance)
 	return _instance, nil
 }
 
@@ -66,8 +65,8 @@ type CacheDB struct {
 	lock  sync.RWMutex
 }
 
-func (c *CacheDB) Name() string {
-	return _factoryname
+func (c *CacheDB) Factory() plugin.Factory {
+	return _factory
 }
 
 func (c *CacheDB) Read(meta db.DBMetaInter, key string, filters ...string) (proto.Message, error) {

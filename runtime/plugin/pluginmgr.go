@@ -2,10 +2,6 @@ package plugin
 
 import (
 	"fmt"
-	"m3game/broker"
-	"m3game/db"
-	"m3game/mesh/router"
-	"m3game/shape"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -45,8 +41,6 @@ func Reload(v viper.Viper) error {
 func registerPluginIns(typ Type, name string, tag string, p PluginIns) error {
 	if _, ok := _pluginMgr.insMap[typ]; !ok {
 		_pluginMgr.insMap[typ] = make(map[string]map[string]PluginIns)
-	} else if _, ok := _onlyonePlugins[typ]; ok {
-		return fmt.Errorf("Plugin %s only one", string(typ))
 	}
 	if _, ok := _pluginMgr.insMap[typ][name]; !ok {
 		_pluginMgr.insMap[typ][name] = make(map[string]PluginIns)
@@ -102,42 +96,18 @@ func getPluginByTag(typ Type, name string, tag string) PluginIns {
 	}
 }
 
-func GetRouterPlugin() router.Router {
-	p := getPluginByType(Router)
-	if p == nil {
-		return nil
-	}
-	return p.(router.Router)
-}
+// func GetDBPlugin() db.DB {
+// 	p := getPluginByType(DB)
+// 	if p == nil {
+// 		return nil
+// 	}
+// 	return p.(db.DB)
+// }
 
-func GetDBPlugin() db.DB {
-	p := getPluginByType(DB)
-	if p == nil {
-		return nil
-	}
-	return p.(db.DB)
-}
-
-func GetDBPluginByName(name string) db.DB {
-	p := getPluginByName(DB, name)
-	if p == nil {
-		return nil
-	}
-	return p.(db.DB)
-}
-
-func GetBrokerPlugin() broker.Broker {
-	p := getPluginByType(Broker)
-	if p == nil {
-		return nil
-	}
-	return p.(broker.Broker)
-}
-
-func GetShapePlugin() shape.Shape {
-	p := getPluginByType(Shape)
-	if p == nil {
-		return nil
-	}
-	return p.(shape.Shape)
-}
+// func GetDBPluginByName(name string) db.DB {
+// 	p := getPluginByName(DB, name)
+// 	if p == nil {
+// 		return nil
+// 	}
+// 	return p.(db.DB)
+// }

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"m3game/log"
+	"m3game/util"
 	"strings"
 	"sync"
 
@@ -14,6 +15,11 @@ var (
 	_rconf   *m3Config
 	_lock    sync.RWMutex
 	_kvCache = make(map[string]interface{})
+
+	_appid   string
+	_svcid   string
+	_worldid string
+	_envid   string
 )
 
 var (
@@ -71,6 +77,22 @@ func GetIDStr() string {
 	return _rconf.idstr
 }
 
+func GetAppID() string {
+	return _appid
+}
+
+func GetSvcID() string {
+	return _svcid
+}
+
+func GetWorldID() string {
+	return _worldid
+}
+
+func GetEnvID() string {
+	return _envid
+}
+
 func GetEnv(key string) string {
 	return _rconf.envmap[key]
 }
@@ -86,6 +108,15 @@ func init() {
 	flag.StringVar(&_rconf.idstr, "idstr", "", "app idstr env.world.func.ins")
 	flag.Var(&_rconf.envmap, "env", "other config")
 	flag.Parse()
+	_appid = _rconf.idstr
+	if envid, worldid, funcid, _, err := util.AppStr2ID(_appid); err != nil {
+		panic("")
+	} else {
+		_svcid = util.SvcID2Str(envid, worldid, funcid)
+		_worldid = util.WorldID2Str(envid, worldid)
+		_envid = util.EnvID2Str(envid)
+	}
+
 	log.Info("CfgPath:%s", _rconf.cfgPath)
 	if _rconf.cfgPath == "" {
 		_rconf.cfgPath = _defaultCfgPath

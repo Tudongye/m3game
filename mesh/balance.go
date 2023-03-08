@@ -1,10 +1,11 @@
 package mesh
 
 import (
-	"errors"
 	"m3game/proto/pb"
 	"m3game/runtime/transport"
 	"math/rand"
+
+	"github.com/pkg/errors"
 
 	"github.com/serialx/hashring"
 	"google.golang.org/grpc/balancer"

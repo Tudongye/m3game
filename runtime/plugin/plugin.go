@@ -26,8 +26,7 @@ const (
 )
 
 var (
-	_factoryMap     map[string]Factory
-	_onlyonePlugins = map[Type]int{Router: 1, Trace: 1, Metric: 1, Broker: 1, Log: 1, Lock: 1, Shape: 1}
+	_factoryMap map[string]Factory
 )
 
 func init() {
@@ -42,7 +41,7 @@ func RegisterFactory(f Factory) {
 }
 
 type PluginIns interface {
-	Name() string
+	Factory() Factory
 }
 
 type Factory interface {
@@ -81,6 +80,7 @@ func InitPlugins(v viper.Viper) error {
 	}
 	return nil
 }
+
 func getPluginTag(m map[string]interface{}) string {
 	if v, ok := m["tag"]; !ok {
 		return _defaulttag
@@ -89,4 +89,10 @@ func getPluginTag(m map[string]interface{}) string {
 	} else {
 		return tag
 	}
+}
+
+func Gett[T PluginIns]() T {
+	var t T
+	v := getPluginByType(t.Factory().Type())
+	return v.(T)
 }

@@ -4,10 +4,10 @@ import (
 	_ "m3game/broker/nats"
 	"m3game/demo/dirapp/dirserver"
 	dproto "m3game/demo/proto"
+	"m3game/mesh/router"
 	_ "m3game/mesh/router/consul"
 	"m3game/runtime"
 	"m3game/runtime/app"
-	"m3game/runtime/plugin"
 	"m3game/runtime/server"
 	_ "m3game/shape/sentinel"
 	"sync"
@@ -24,11 +24,8 @@ type DirApp struct {
 }
 
 func (d *DirApp) Start(wg *sync.WaitGroup) error {
-	router := plugin.GetRouterPlugin()
-	if router != nil {
-		if err := router.Register(d); err != nil {
-			return err
-		}
+	if err := router.Register(d); err != nil {
+		return err
 	}
 	return nil
 }

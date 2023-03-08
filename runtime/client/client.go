@@ -6,7 +6,6 @@ package client
 
 import (
 	"context"
-	"errors"
 	"m3game/log"
 	"m3game/proto"
 	"m3game/proto/pb"
@@ -14,6 +13,8 @@ import (
 	"m3game/runtime/rpc"
 	"m3game/runtime/server"
 	"m3game/runtime/transport"
+
+	"github.com/pkg/errors"
 
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/reflect/protoreflect"

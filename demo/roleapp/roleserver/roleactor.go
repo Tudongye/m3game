@@ -3,10 +3,10 @@ package roleserver
 import (
 	"context"
 	"fmt"
+	"m3game/db"
 	"m3game/db/wraper"
 	"m3game/demo/proto/pb"
 	"m3game/log"
-	"m3game/runtime/plugin"
 	"m3game/runtime/server/actor"
 
 	"google.golang.org/protobuf/proto"
@@ -56,11 +56,11 @@ func (a *RoleActor) Save() error {
 	log.DebugP(a.ID(), "Save")
 	if a.wraper.HasDirty() {
 		log.Debug("Saving %s", a.ID())
-		db := plugin.GetDBPlugin()
-		if db == nil {
+		dbplugin := db.Get()
+		if dbplugin == nil {
 			return _err_actor_dberr
 		}
-		if err := a.wraper.Update(db); err != nil {
+		if err := a.wraper.Update(dbplugin); err != nil {
 			log.Error(err.Error())
 			return err
 		}
@@ -117,7 +117,7 @@ func (a *RoleActor) Name() string {
 }
 
 func (a *RoleActor) Register(name string) error {
-	dbplugin := plugin.GetDBPlugin()
+	dbplugin := db.Get()
 	if dbplugin == nil {
 		return _err_actor_dberr
 	}
@@ -142,7 +142,7 @@ func (a *RoleActor) Register(name string) error {
 }
 
 func (a *RoleActor) Login() error {
-	dbplugin := plugin.GetDBPlugin()
+	dbplugin := db.Get()
 	if dbplugin == nil {
 		return _err_actor_dberr
 	}

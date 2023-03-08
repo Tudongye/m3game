@@ -3,7 +3,7 @@ package mesh
 import (
 	"fmt"
 	"m3game/log"
-	"m3game/runtime/plugin"
+	"m3game/mesh/router"
 	"sync"
 	"time"
 
@@ -45,10 +45,7 @@ type Resolver struct {
 }
 
 func (cr *Resolver) watcher() {
-	router := plugin.GetRouterPlugin()
-	if router == nil {
-		panic("Router-Plugin not find")
-	}
+
 	for {
 		var newAddrs []resolver.Address
 		instances, err := router.GetAllInstances(cr.svc)
