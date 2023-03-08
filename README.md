@@ -378,7 +378,30 @@ if wp.HasDirty() {
 ```
 
 
-## 熔断管理
+## 熔断限流
+
+M3使用限流规则 FlowRule 和 熔断规则 BreakRule 来对RPC进行流量管理。如下是对BreakHello的流量管理配置
+
+```
+[Rules]
+Method = "/proto.DirSer/BreakHello"	// RPC方法
+[[Rules.FlowRules]]			// 限流规则
+Threshold = 2				// 限流阈值
+StatIntervalMs = 1000			// 统计周期
+MaxQueueWaitMs = 0			// 限流最大等待时长
+[[Rules.BreakRules]]			// 熔断规则
+Threshold = 1				// 熔断阈值
+Strategy = "ErrorCount"			// 熔断规则，错误请求数
+StatIntervalMs = 1000			// 统计周期
+RetryTimeOutMs = 2000			// 熔断恢复市场
+MinRequestNum = 2			// 熔断生效最小请求次数
+```
+
+M3采用Shape组件进行流量管理，shape/Sentinel是一个基于Sentinel实现的shape组件。
+```
+
+```
+
 
 ## 服务网关
 
