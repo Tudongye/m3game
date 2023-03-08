@@ -50,6 +50,11 @@ Trace-Plugin: 链路追踪组件
 
 Metric-Plugin: 监控组件
 
+## M3包依赖
+
+![image](https://user-images.githubusercontent.com/16680818/223596615-35c4111e-0d8f-489a-85a5-78f6932145d3.png)
+
+
 ## 一个简单的样例
 
 demo/dirapp 是一个无状态的并发服务，该服务提供Hello的RPC接口，其在业务层包含一个App 和 一个MutilServer
