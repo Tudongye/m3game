@@ -52,7 +52,7 @@ Metric-Plugin: 监控组件
 
 ## M3包依赖
 
-![image](https://user-images.githubusercontent.com/16680818/223596615-35c4111e-0d8f-489a-85a5-78f6932145d3.png)
+![image](https://user-images.githubusercontent.com/16680818/223715048-c32abb81-5aaf-4a54-ab9d-36f58db7071e.png)
 
 
 ## 一个简单的样例
