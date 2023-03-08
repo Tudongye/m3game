@@ -99,7 +99,7 @@ func (s *Sender) RouteHead() *pb.RouteHead {
 func (s *Sender) sendMsg() error {
 	s.RouteHead().Metas = s.Metas().Encode()
 	if s.RouteHead().RouteType == pb.RouteType_RT_BROAD {
-		return sendToBrokerSer(s, broker.GenTopic(s.RouteHead().DstSvc.IDStr))
+		return sendToBrokerSer(s, broker.GenTopic(BrokerSerTopic(s.RouteHead().DstSvc.IDStr)))
 	} else if s.RouteHead().RouteType == pb.RouteType_RT_MUTIL {
 		return sendToBrokerSer(s, s.RouteHead().RoutePara.RouteMutilHead[0].Topic)
 	}

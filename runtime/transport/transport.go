@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 	"m3game/broker"
-	"m3game/util/log"
+
+	"m3game/log"
 	"net"
 	"regexp"
 	"sync"
 
 	"github.com/pkg/errors"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -23,6 +25,10 @@ var (
 	_tcpAddr      *net.TCPAddr
 	_regexHealth  *regexp.Regexp
 	_healthmethod = "/grpc.health.v1.Health/Check"
+)
+var (
+	_serverInterceptors []grpc.UnaryServerInterceptor
+	_clientInterceptors []grpc.UnaryClientInterceptor
 )
 
 var _err_msgisnotm3pkg = errors.New("_err_msgisnotm3pkg")
@@ -37,6 +43,7 @@ func init() {
 	if _regexHealth, err = regexp.Compile("^Health/([^/]*)$"); err != nil {
 		panic(fmt.Sprintf("Compile regexHealth err %v", err))
 	}
+	RegisterServerInterceptor(RecvInteror())
 }
 
 func Init(c map[string]interface{}, runtime RuntimeReciver) error {
@@ -52,17 +59,42 @@ func Init(c map[string]interface{}, runtime RuntimeReciver) error {
 	_instance = &Transport{
 		runtime: runtime,
 	}
-	_instance.gser = grpc.NewServer(
-		grpc.UnaryInterceptor(
-			grpc.UnaryServerInterceptor(recvInteror()),
-		),
-	)
-	_instance.brokerser = newBrokerSer(grpc.UnaryServerInterceptor(recvInteror()))
 	return nil
 }
 
+func CreateSer() error {
+	_instance.gser = grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(_serverInterceptors...),
+		),
+	)
+	_instance.brokerser = newBrokerSer(
+		grpc_middleware.ChainUnaryServer(_serverInterceptors...),
+	)
+	b := broker.Get()
+	if b == nil {
+		return errors.New("Broker-Plugin not find")
+	}
+	if err := _instance.brokerser.registerBroker(b); err != nil {
+		return err
+	}
+	return nil
+}
+
+func RegisterClientInterceptor(f grpc.UnaryClientInterceptor) {
+	_clientInterceptors = append(_clientInterceptors, f)
+}
+
+func ClientInterceptors() []grpc.UnaryClientInterceptor {
+	return _clientInterceptors
+}
+
+func RegisterServerInterceptor(f grpc.UnaryServerInterceptor) {
+	_serverInterceptors = append(_serverInterceptors, f)
+}
+
 func Start(wg *sync.WaitGroup) error {
-	log.Fatal("Transport.TcpAddr %s", _cfg.Addr)
+	log.Info("Transport Listen %s", _cfg.Addr)
 	var err error
 	_tcpAddr, err = net.ResolveTCPAddr("tcp", _cfg.Addr)
 	if err != nil {
@@ -76,17 +108,17 @@ func Start(wg *sync.WaitGroup) error {
 	_instance.cancel = cancel
 	wg.Add(1)
 	go func() {
-		defer log.Fatal("Transport.Stoped...")
 		defer wg.Done()
 		defer listener.Close()
 		_instance.start(ctx, listener)
+		log.Info("Transport.Stoped...")
 	}()
 	return nil
 }
 
 func ShutDown() {
 	if _instance != nil {
-		log.Fatal("Transport.Stoping...")
+		log.Info("Transport.Stoping...")
 		_instance.cancel()
 	}
 }
@@ -177,7 +209,7 @@ func (r *Transport) Watch(req *grpc_health_v1.HealthCheckRequest, w grpc_health_
 	return nil
 }
 
-func recvInteror() grpc.UnaryServerInterceptor {
+func RecvInteror() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		if rec, err := newReciver(ctx, req, info, handler); err != nil {
 			return handler(ctx, req)

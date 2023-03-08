@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"m3game/broker"
 	"m3game/config"
+	"m3game/log"
 	"m3game/proto/pb"
 	"m3game/util"
-	"m3game/util/log"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,6 +16,10 @@ import (
 )
 
 // Process Nty,BroadCast,MutilCast use Broker
+
+func BrokerSerTopic(s string) string {
+	return fmt.Sprintf("BrokerSer-%s", s)
+}
 
 type grpchandlerFunc func(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error)
 type brokerhandlerFunc func(ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error)
@@ -43,17 +47,17 @@ func (n *brokerSer) registerBroker(b broker.Broker) error {
 	if envid, worldid, funcid, _, err := util.AppStr2ID(idstr); err != nil {
 		return err
 	} else {
-		if err := n.broker.Subscribe(broker.GenTopic(idstr), n.recvbytes); err != nil {
-			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(idstr))
+		if err := n.broker.Subscribe(broker.GenTopic(BrokerSerTopic(idstr)), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(BrokerSerTopic(idstr)))
 		}
-		if err := n.broker.Subscribe(broker.GenTopic(util.SvcID2Str(envid, worldid, funcid)), n.recvbytes); err != nil {
-			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.SvcID2Str(envid, worldid, funcid)))
+		if err := n.broker.Subscribe(broker.GenTopic(BrokerSerTopic(util.SvcID2Str(envid, worldid, funcid))), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(BrokerSerTopic(util.SvcID2Str(envid, worldid, funcid))))
 		}
-		if err := n.broker.Subscribe(broker.GenTopic(util.WorldID2Str(envid, worldid)), n.recvbytes); err != nil {
-			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.WorldID2Str(envid, worldid)))
+		if err := n.broker.Subscribe(broker.GenTopic(BrokerSerTopic(util.WorldID2Str(envid, worldid))), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(BrokerSerTopic(util.WorldID2Str(envid, worldid))))
 		}
-		if err := n.broker.Subscribe(broker.GenTopic(util.EnvID2Str(envid)), n.recvbytes); err != nil {
-			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.EnvID2Str(envid)))
+		if err := n.broker.Subscribe(broker.GenTopic(BrokerSerTopic(util.EnvID2Str(envid))), n.recvbytes); err != nil {
+			return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(BrokerSerTopic(util.EnvID2Str(envid))))
 		}
 	}
 	return nil
@@ -82,7 +86,7 @@ func (n *brokerSer) RegisterService(sd *grpc.ServiceDesc, ss interface{}) {
 	for _, it := range sd.Methods {
 		path := fmt.Sprintf("/%v/%v", sd.ServiceName, it.MethodName)
 		n.handlers[path] = genbrokerhandlerFunc(ss, grpchandlerFunc(it.Handler))
-		log.Fatal("Register path => %v", path)
+		log.Info("Register BrokerMethod => %v", path)
 	}
 }
 
