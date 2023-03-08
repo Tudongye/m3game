@@ -6,7 +6,9 @@ A game framework using Golang and Grpc
 
 一个基于Golang和Grpc的游戏后端框架。
 
-框架分为GameLogic, Frame-Runtime, Custom-Plugin三层。Frame-Runtime为框架驱动层，负责消息驱动，服务网格，插件管理等核心驱动工作。Custom-Plugin为自定义插件层，框架层将第三方服务抽象为多种自定义插件接口，插件层根据实际的基础设施来进行实现。GameLogic为游戏逻辑层，用于承载实际的业务逻辑。框架使用protobuf来生成脚手架，通过引入自定义Option等方式将业务逻辑自动注入到框架层中。
+M3Game是一个采用Golang重构游戏后端框架的尝试，其旨在探索游戏后台开发过程中所面临的常见问题的解决方案。
+
+框架分为GameLogic, Frame-Runtime, Custom-Plugin三层。Frame-Runtime为框架驱动层，负责消息驱动，服务网格，插件管理等核心驱动工作。Custom-Plugin为自定义插件层，框架层将第三方服务抽象为多种自定义插件接口，插件层根据实际的基础设施来进行实现。GameLogic为游戏逻辑层，用于承载实际的业务逻辑。框架使用protobuf来生成脚手架，通过引入pb.Option等方式将业务逻辑自动注入到框架层中。
 
 优势：
 
@@ -53,6 +55,8 @@ Metric-Plugin: 监控组件
 ## M3包依赖
 
 ![image](https://user-images.githubusercontent.com/16680818/223715048-c32abb81-5aaf-4a54-ab9d-36f58db7071e.png)
+
+
 
 
 ## 一个简单的样例
@@ -380,7 +384,11 @@ if wp.HasDirty() {
 
 ## 熔断限流
 
-M3使用限流规则 FlowRule 和 熔断规则 BreakRule 来对RPC进行流量管理。如下是对BreakHello的流量管理配置
+M3采用Shape组件进行流量管理，Shape组件采用Interceptor方式注入RPC调用链。shape/Sentinel是一个基于Sentinel实现的shape组件。
+
+流量管理针对RPC进行，规则分为限流规则 FlowRule 和 熔断规则 BreakRule。
+
+如下是对BreakHello的流量管理配置
 
 ```
 [Rules]
@@ -397,17 +405,59 @@ RetryTimeOutMs = 2000			// 熔断恢复市场
 MinRequestNum = 2			// 熔断生效最小请求次数
 ```
 
-M3采用Shape组件进行流量管理，shape/Sentinel是一个基于Sentinel实现的shape组件。
-```
-
-```
-
-
 ## 服务网关
 
-## 监控管理
+## 监控统计
+
+M3采用Metric组件来进行监控统计，对于统计项分为Counter,Guage,Histogram,Summary四类。
+
+metric/prometheus 是一个基于 prometheus 实现的Metric
+
+```
+type StatCounter interface {	// 计数器
+	Add(float64)
+	Inc()
+}
+
+type StatGauge interface {	// 测量器
+	Set(float64)
+	Sub(float64)
+	Dec()
+	Add(float64)
+	Inc()
+}
+
+type StatHistogram interface {	// 直方图
+	Observe(float64)
+}
+
+type StatSummary interface {	// 点分数
+	Observe(float64)
+}
+```
 
 ## 链路追踪
+
+M3的链路追踪采用Open-Telemetry方案，trace/stdout是一个直接向控制台打印的trace。
+
+对于RPC是否启用Trace，采用pb.Option的方式进行定义。如下是一个开启Trace的TraceHello RPC的定义
+
+```
+message TraceHello {
+    option (rpc_option).route_key = "";
+    option (rpc_option).trace = true;	// 打开Trace
+    message Req {
+        RouteHead RouteHead = 1;
+        string Req = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Rsp = 2;
+    }
+}
+```
+
+
 
 ## 日志管理
 
@@ -423,3 +473,12 @@ M3采用Shape组件进行流量管理，shape/Sentinel是一个基于Sentinel实
 
 ## 集群部署
 
+## Demo
+
+M3Game是为了解决游戏开发的具体问题而构建的框架。为了更好的暴露问题,验证解决方案，M3构建了一个常见重度游戏后端作为Demo验证。
+
+Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，同小区玩家可以组建社团(Club)，核心玩法采用匹配开单局(Fight)方式进行
+
+服务实例包括DirApp(导航服务),RoleApp(玩家服务),ClubApp(社团服务),WorldApp(小区服务),MatchApp(匹配服务),FightApp(战斗服务),ZoneApp(战斗集群服务)
+
+![未命名文件 (14)](https://user-images.githubusercontent.com/16680818/223752846-04288795-9f17-45e0-a327-1127509f1e7c.png)
