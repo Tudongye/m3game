@@ -10,6 +10,7 @@ import (
 	"m3game/demo/roleapp/rolechclient"
 	"m3game/demo/roleapp/rolechserver"
 	"m3game/demo/roleapp/roleserver"
+	_ "m3game/log/zap"
 	"m3game/mesh/router"
 	_ "m3game/mesh/router/consul"
 	"m3game/proto"

@@ -1,18 +1,18 @@
 package log
 
 import (
+	"fmt"
 	goruntime "runtime"
 	"strings"
 )
 
 var (
-	_logger Logger
+	_logger        Logger
+	_defaultlogger = newDefaultLogger()
 )
 
 const (
-	LogLvNull LogLv = iota
-	LogLvTrace
-	LogLvDebug
+	LogLvDebug LogLv = iota + 1
 	LogLvInfo
 	LogLvWarn
 	LogLvError
@@ -20,8 +20,6 @@ const (
 )
 
 const (
-	LogFlagNull  = "NULL "
-	LogFlagTrace = "TRACE"
 	LogFlagDebug = "DEBUG"
 	LogFlagInfo  = "INFO "
 	LogFlagWarn  = "WARN "
@@ -30,19 +28,13 @@ const (
 )
 
 const (
-	_outputdepth = 2
+	_outputdepth Depth = 2
 )
-
-func init() {
-	_logger = newDefaultLogger()
-}
 
 type LogLv int
 
 func (l LogLv) String() string {
 	switch l {
-	case LogLvTrace:
-		return LogFlagTrace
 	case LogLvDebug:
 		return LogFlagDebug
 	case LogLvInfo:
@@ -54,147 +46,57 @@ func (l LogLv) String() string {
 	case LogLvFatal:
 		return LogFlagFatal
 	default:
-		return LogFlagNull
+		return "unknow"
 	}
 }
 
-func GetLogger() Logger {
+func ConvertLogLv(s string) LogLv {
+	switch s {
+	case LogFlagDebug:
+		return LogLvDebug
+	case LogFlagInfo:
+		return LogLvInfo
+	case LogFlagWarn:
+		return LogLvWarn
+	case LogFlagError:
+		return LogLvError
+	case LogFlagFatal:
+		return LogLvFatal
+	default:
+		panic(fmt.Sprintf("Unknow LogLv %s", s))
+	}
+}
+
+func Get() Logger {
+	if _logger == nil {
+		return _defaultlogger
+	}
 	return _logger
 }
 
-func SerLogger(logger Logger) {
+func Set(logger Logger) {
+	if _logger != nil {
+		panic("")
+	}
 	_logger = logger
 }
 
-type Logger interface {
-	Output(depth int, logflag string, plus string, format string, v ...interface{})
-	SetLevel(level LogLv)
-	GetLevel() LogLv
+type LogPlus map[string]string
+
+func (l *LogPlus) String() string {
+	var s []string
+	for k, v := range *l {
+		s = append(s, fmt.Sprintf("%s:%s", k, v))
+	}
+	ps := strings.Join(s, "")
+	return ps
 }
 
-func Trace(format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvTrace {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagTrace, "", format, v...)
-}
+type Depth int
 
-func Info(format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvInfo {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagInfo, "", format, v...)
-}
-
-func Debug(format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvDebug {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagDebug, "", format, v...)
-}
-
-func Warn(format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvWarn {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagWarn, "", format, v...)
-}
-
-func Error(format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvError {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagError, "", format, v...)
-}
-
-func Fatal(format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvFatal {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagFatal, "", format, v...)
-}
-
-func TraceP(plus string, format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvTrace {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagTrace, plus, format, v...)
-}
-
-func InfoP(plus string, format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvInfo {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagInfo, plus, format, v...)
-}
-
-func DebugP(plus string, format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvDebug {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagDebug, plus, format, v...)
-}
-
-func WarnP(plus string, format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvWarn {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagWarn, plus, format, v...)
-}
-
-func ErrorP(plus string, format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvError {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagError, plus, format, v...)
-}
-
-func FatalP(plus string, format string, v ...interface{}) {
-	if _logger == nil {
-		return
-	}
-	if _logger.GetLevel() > LogLvFatal {
-		return
-	}
-	_logger.Output(_outputdepth, LogFlagFatal, plus, format, v...)
-}
-
-func GetCallPath(depth int) (string, string, int) {
+func (d *Depth) String() (string, string, int) {
 	const callOffset = 1
-	pc, file, line, ok := goruntime.Caller(depth + callOffset)
+	pc, file, line, ok := goruntime.Caller(int(*d) + callOffset)
 	if !ok {
 		return "", "", 0
 	}
@@ -213,4 +115,80 @@ func GetCallPath(depth int) (string, string, int) {
 		return file, funcName, line
 	}
 	return file[idx+1:], funcName, line
+}
+
+type Logger interface {
+	Output(depth Depth, lv LogLv, plus LogPlus, format string, v ...interface{})
+	SetLevel(level LogLv)
+	GetLevel() LogLv
+}
+
+func Info(format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvInfo {
+		return
+	}
+	Get().Output(_outputdepth, LogLvInfo, nil, format, v...)
+}
+
+func Debug(format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvDebug {
+		return
+	}
+	Get().Output(_outputdepth, LogLvDebug, nil, format, v...)
+}
+
+func Warn(format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvWarn {
+		return
+	}
+	Get().Output(_outputdepth, LogLvWarn, nil, format, v...)
+}
+
+func Error(format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvError {
+		return
+	}
+	Get().Output(_outputdepth, LogLvError, nil, format, v...)
+}
+
+func Fatal(format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvFatal {
+		return
+	}
+	Get().Output(_outputdepth, LogLvFatal, nil, format, v...)
+}
+
+func InfoP(plus LogPlus, format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvInfo {
+		return
+	}
+	Get().Output(_outputdepth, LogLvInfo, plus, format, v...)
+}
+
+func DebugP(plus LogPlus, format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvDebug {
+		return
+	}
+	Get().Output(_outputdepth, LogLvDebug, plus, format, v...)
+}
+
+func WarnP(plus LogPlus, format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvWarn {
+		return
+	}
+	Get().Output(_outputdepth, LogLvWarn, plus, format, v...)
+}
+
+func ErrorP(plus LogPlus, format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvError {
+		return
+	}
+	Get().Output(_outputdepth, LogLvError, plus, format, v...)
+}
+
+func FatalP(plus LogPlus, format string, v ...interface{}) {
+	if Get().GetLevel() > LogLvFatal {
+		return
+	}
+	Get().Output(_outputdepth, LogLvFatal, plus, format, v...)
 }

@@ -23,3 +23,6 @@ ConfigFile = "../../resource/sentinel.yml"
 Pass = ""
 [[Plugin.Metric.metric_prom]]
 Port = 32100
+[[Plugin.Log.log_zap]]
+LogLevel = "DEBUG"
+Encoding = "console"

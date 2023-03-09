@@ -38,7 +38,7 @@ func (a *RoleActor) RoleID() string {
 }
 
 func (a *RoleActor) OnInit() error {
-	log.InfoP(a.ID(), "OnInit")
+	log.InfoP(log.LogPlus{"RoleID": a.ID()}, "OnInit")
 	a.wraper = wraper.New(rolemeta, a.ID())
 	return nil
 }
@@ -48,12 +48,12 @@ func (a *RoleActor) OnTick() error {
 }
 
 func (a *RoleActor) OnExit() error {
-	log.InfoP(a.ID(), "OnExit")
+	log.InfoP(log.LogPlus{"RoleID": a.ID()}, "OnExit")
 	return nil
 }
 
 func (a *RoleActor) Save() error {
-	log.DebugP(a.ID(), "Save")
+	log.DebugP(log.LogPlus{"RoleID": a.ID()}, "Save")
 	if a.wraper.HasDirty() {
 		log.Debug("Saving %s", a.ID())
 		dbplugin := db.Get()
@@ -69,17 +69,17 @@ func (a *RoleActor) Save() error {
 }
 
 func (a *RoleActor) ReBuild(proto.Message) error {
-	log.DebugP(a.ID(), "ReBuild")
+	log.DebugP(log.LogPlus{"RoleID": a.ID()}, "ReBuild")
 	return nil
 }
 
 func (a *RoleActor) Pack() (proto.Message, error) {
-	log.DebugP(a.ID(), "Pack")
+	log.DebugP(log.LogPlus{"RoleID": a.ID()}, "Pack")
 	return nil, nil
 }
 
 func (a *RoleActor) ModifyName(name string) error {
-	log.DebugP(a.ID(), "ModifyName %s", name)
+	log.DebugP(log.LogPlus{"RoleID": a.ID()}, "ModifyName %s", name)
 	if !a.ready {
 		return fmt.Errorf("Actor not Ready")
 	}
@@ -93,7 +93,7 @@ func (a *RoleActor) ModifyName(name string) error {
 }
 
 func (a *RoleActor) ModifyLocation(locationname string, location int32) error {
-	log.DebugP(a.ID(), "ModifyLocation %s %d", locationname, location)
+	log.DebugP(log.LogPlus{"RoleID": a.ID()}, "ModifyLocation %s %d", locationname, location)
 	if !a.ready {
 		return fmt.Errorf("Actor not Ready")
 	}

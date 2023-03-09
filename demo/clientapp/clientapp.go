@@ -9,6 +9,7 @@ import (
 	dproto "m3game/demo/proto"
 	"m3game/demo/roleapp/roleclient"
 	"m3game/log"
+	_ "m3game/log/zap"
 	"m3game/mesh/router"
 	_ "m3game/mesh/router/consul"
 	_ "m3game/metric/prometheus"

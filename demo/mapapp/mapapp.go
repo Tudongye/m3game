@@ -4,6 +4,7 @@ import (
 	_ "m3game/broker/nats"
 	"m3game/demo/mapapp/mapserver"
 	dproto "m3game/demo/proto"
+	_ "m3game/log/zap"
 	"m3game/mesh/router"
 	_ "m3game/mesh/router/consul"
 	"m3game/runtime"

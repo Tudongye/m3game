@@ -20,6 +20,9 @@ NatsURL = "127.0.0.1:4222"
 ConfigFile = "../../resource/sentinel.yml"
 [[Plugin.DB.db_cache]]
 Test = "1"
+[[Plugin.Log.log_zap]]
+LogLevel = "DEBUG"
+Encoding = "console"
 
 [Server]
 [[Server.Actor]]
