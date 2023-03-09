@@ -8,7 +8,7 @@ A game framework using Golang and Grpc
 
 M3Game是一个采用Golang重构游戏后端框架的尝试，其旨在探索游戏后台开发过程中所面临的常见问题的解决方案。
 
-框架分为GameLogic, Frame-Runtime, Custom-Plugin三层。Frame-Runtime为框架驱动层，负责消息驱动，服务网格，插件管理等核心驱动工作。Custom-Plugin为自定义插件层，框架层将第三方服务抽象为多种自定义插件接口，插件层根据实际的基础设施来进行实现。GameLogic为游戏逻辑层，用于承载实际的业务逻辑。框架使用protobuf来生成脚手架，通过引入pb.Option等方式将业务逻辑自动注入到框架层中。
+框架分为GameLogic，Frame-Runtime，Custom-Plugin三层。Frame-Runtime为框架驱动层，负责消息驱动，服务网格，插件管理等核心驱动工作。Custom-Plugin为自定义插件层，框架层将第三方服务抽象为多种自定义插件接口，插件层根据实际的基础设施来进行实现。GameLogic为游戏逻辑层，用于承载实际的业务逻辑。框架使用protobuf来生成脚手架，通过引入pb.Option等方式将业务逻辑自动注入到框架层中。
 
 优势：
 
@@ -20,7 +20,7 @@ M3Game是一个采用Golang重构游戏后端框架的尝试，其旨在探索�
 
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
-Mutil,Async,Actor-Server: 游戏后台常见的业务模式，分别对应并发，单线程异步，Actor模式
+Mutil，Async，Actor-Server: 游戏后台常见的业务模式，分别对应并发，单线程异步，Actor模式
 
 App: 用于承载业务逻辑的服务实体，是服务网格中的独立个体，由“环境ID.区服ID.功能ID.实例ID”唯一标识。一个App可以承载一个或多个Server
 
@@ -168,7 +168,7 @@ func Run() error {
 	return nil
 }
 ```
-如下是从实例2,ClientApp 向 实例1 DirApp 发起RPC调用的调用链
+如下是从实例2，ClientApp 向 实例1 DirApp 发起RPC调用的调用链
 
 DirSer 和 DirClient 是由dir.proto生成RPC调用服务端和客户端，protobuf保证双端协议一致。
 
@@ -251,9 +251,9 @@ M3在Actor服务的RPC调用链中加入了Actor管理逻辑，业务层逻辑�
 
 Mesh使用Router插件进行服务注册和服务发现，Router插件是必要插件，mesh/router/consul是一个基于Consul的Rotuer实现。
 
-M3使用Grpc的Resolver- Balancer.Picker方式将服务网格与RPC路由相关联，相关逻辑参看mesh/resolver.go,balance.go
+M3使用Grpc的Resolver- Balancer.Picker方式将服务网格与RPC路由相关联，相关逻辑参看mesh/resolver.go，balance.go
 
-当前支持 P2P,Random,Hash,BroadCast,MutilCast,Single路由模式
+当前支持 P2P，Random，Hash，BroadCast，MutilCast，Single路由模式
 
 |  路由模式   | 选路参数  | 选路规则  |
 |  ----  | ----  | ----  |
@@ -292,7 +292,7 @@ type ResLoader interface {
 
 M3采用pb管理游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看demo/roleapp/roleser/roleactor.go
 
-当前M3要求DB结构所有一级字段必须是string（必须是主键） 或 proto.Message（pb类型不可重复）,且DB结构必须设置一个string类型的主键。
+当前M3要求DB结构所有一级字段必须是string（必须是主键） 或 proto.Message（pb类型不可重复），且DB结构必须设置一个string类型的主键。
 
 ```
 message RoleDB {
@@ -406,7 +406,7 @@ MinRequestNum = 2			// 熔断生效最小请求次数
 
 ## 监控统计
 
-M3采用Metric组件来进行监控统计，对于统计项分为Counter,Guage,Histogram,Summary四类。
+M3采用Metric组件来进行监控统计，对于统计项分为Counter，Guage，Histogram，Summary四类。
 
 metric/prometheus 是一个基于 prometheus 实现的Metric
 
@@ -456,7 +456,7 @@ message TraceHello {
 
 ## 本地日志
 
-M3采用Log组件进行本地日志管理，日志分为DEBUG,INFO,WARN,ERROR,FATAL 五个级别，log/zap 是一个基于zap实现的Log组件样例。
+M3采用Log组件进行本地日志管理，日志分为DEBUG，INFO，WARN，ERROR，FATAL 五个级别，log/zap 是一个基于zap实现的Log组件样例。
 
 ```
 type Logger interface {
@@ -494,9 +494,9 @@ Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，玩家
 
 ![未命名文件 (3)](https://user-images.githubusercontent.com/16680818/223912107-3d6c8c5c-7eb8-45a1-a820-75c49652257e.png)
 
-服务实例包括DirApp(导航服务),RoleApp(玩家服务),ClubApp(社团服务), ClubRoleApp(社团玩家服务),WorldApp(小区服务),WorlRoledApp(小区玩家服务),MatchApp(匹配服务),FightApp(战斗服务),ZoneApp(战斗集群服务)
+服务实例包括DirApp(导航服务)，RoleApp(玩家服务)，ClubApp(社团服务)， ClubRoleApp(社团玩家服务)，WorldApp(小区服务)，WorlRoledApp(小区玩家服务)，MatchApp(匹配服务)，FightApp(战斗服务)，ZoneApp(战斗集群服务)
 
-其中DirApp,ClubRoleApp,WorldRoleApp,MatchApp,ZoneApp为无状态服务，RoleApp，FightApp为激发式有状态服务(负载受玩家行为影响)，ClubApp 为常驻式动态负载有状态服务(负载不受玩家行为影响，且负载动态可变)，WorldApp为常驻式固定负载有状态服务(负载不受玩家行为影响，且负载固定)
+其中DirApp，ClubRoleApp，WorldRoleApp，MatchApp，ZoneApp为无状态服务，RoleApp，FightApp为激发式有状态服务(负载受玩家行为影响)，ClubApp 为常驻式动态负载有状态服务(负载不受玩家行为影响，且负载动态可变)，WorldApp为常驻式固定负载有状态服务(负载不受玩家行为影响，且负载固定)
 
 ![未命名文件 (4)](https://user-images.githubusercontent.com/16680818/223912598-982bc454-409e-46ec-b54b-84238194d582.png)
 
