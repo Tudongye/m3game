@@ -54,14 +54,13 @@ Metric-Plugin: 监控组件
 
 ## M3包依赖
 
-![image](https://user-images.githubusercontent.com/16680818/223715048-c32abb81-5aaf-4a54-ab9d-36f58db7071e.png)
+![image](https://user-images.githubusercontent.com/16680818/223908399-caf1afbd-2b0c-48dc-b5ae-b22226773860.png)
 
+## Example
 
+example 是一组简单服务的样例，用来展示M3框架提供的基础能力。
 
-
-## 一个简单的样例
-
-demo/dirapp 是一个无状态的并发服务，该服务提供Hello的RPC接口，其在业务层包含一个App 和 一个MutilServer
+example/dirapp 是一个无状态的并发服务，该服务提供Hello的RPC接口，其在业务层包含一个App 和 一个MutilServer
 
 Step1、定义服务 proto
 
@@ -405,8 +404,6 @@ RetryTimeOutMs = 2000			// 熔断恢复市场
 MinRequestNum = 2			// 熔断生效最小请求次数
 ```
 
-## 服务网关
-
 ## 监控统计
 
 M3采用Metric组件来进行监控统计，对于统计项分为Counter,Guage,Histogram,Summary四类。
@@ -457,28 +454,58 @@ message TraceHello {
 }
 ```
 
+## 本地日志
 
+M3采用Log组件进行本地日志管理，日志分为DEBUG,INFO,WARN,ERROR,FATAL 五个级别，log/zap 是一个基于zap实现的Log组件样例。
 
-## 日志管理
+```
+type Logger interface {
+	Output(depth Depth, lv LogLv, plus LogPlus, format string, v ...interface{})
+	SetLevel(level LogLv)
+	GetLevel() LogLv
+}
 
-## 容灾&&扩缩容
+func Debug(format string, v ...interface{})	// 调试日志，只在开发环境开启
+func Info(format string, v ...interface{}) 	// 重要行为日志，生产环境开启
+func Warn(format string, v ...interface{}) 	// 警告日志，如果遇到问题，用于辅助检查
+func Error(format string, v ...interface{})	// 错误日志，明确的逻辑异常，高度关注
+func Fatal(format string, v ...interface{})	// 致命错误，必须立机告警处理
+
+func DebugP(plus LogPlus, format string, v ...interface{})
+func InfoP(plus LogPlus, format string, v ...interface{})
+func WarnP(plus LogPlus, format string, v ...interface{})
+func ErrorP(plus LogPlus, format string, v ...interface{})
+func FatalP(plus LogPlus, format string, v ...interface{})
+```
+
+## 异步任务
+
+## 服务网关
 
 ## 压测
 
-## 灰度
+## Demo(TODO)
 
-## 异步任务
+M3Game是为了解决游戏开发时遇到的具体问题而构建的框架。为了更好的暴露问题,并验证解决方案，M3构建了一个重度游戏后端Demo作为集群化解决方案的载体。
+
+Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，玩家可以自由组建社团(Club)，核心玩法采用跨区匹配(Match)开单局(Fight)方式进行
+
+游戏实体可以分为 玩家(Role)，小区(World)，社团(Club)，小区玩家关系(WorldRole)，社团玩家关系(ClubRole)，单局(Fight)
+
+![未命名文件 (3)](https://user-images.githubusercontent.com/16680818/223912107-3d6c8c5c-7eb8-45a1-a820-75c49652257e.png)
+
+服务实例包括DirApp(导航服务),RoleApp(玩家服务),ClubApp(社团服务), ClubRoleApp(社团玩家服务),WorldApp(小区服务),WorlRoledApp(小区玩家服务),MatchApp(匹配服务),FightApp(战斗服务),ZoneApp(战斗集群服务)
+
+其中DirApp,ClubRoleApp,WorldRoleApp,MatchApp,ZoneApp为无状态服务，RoleApp，FightApp为激发式有状态服务(负载受玩家行为影响)，ClubApp 为常驻式动态负载有状态服务(负载不受玩家行为影响，且负载动态可变)，WorldApp为常驻式固定负载有状态服务(负载不受玩家行为影响，且负载固定)
+
+![未命名文件 (4)](https://user-images.githubusercontent.com/16680818/223912598-982bc454-409e-46ec-b54b-84238194d582.png)
+
+## 灰度发布
+
+## 容灾
+
+## 动态伸缩
 
 ## 热更新
 
 ## 集群部署
-
-## Demo
-
-M3Game是为了解决游戏开发的具体问题而构建的框架。为了更好的暴露问题,验证解决方案，M3构建了一个常见重度游戏后端作为Demo验证。
-
-Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，同小区玩家可以组建社团(Club)，核心玩法采用匹配开单局(Fight)方式进行
-
-服务实例包括DirApp(导航服务),RoleApp(玩家服务),ClubApp(社团服务),WorldApp(小区服务),MatchApp(匹配服务),FightApp(战斗服务),ZoneApp(战斗集群服务)
-
-![未命名文件 (14)](https://user-images.githubusercontent.com/16680818/223752846-04288795-9f17-45e0-a327-1127509f1e7c.png)
