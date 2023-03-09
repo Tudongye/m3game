@@ -96,22 +96,22 @@ func (ar *actorRuntime) kick() {
 
 func (ar *actorRuntime) exit() {
 	if err := ar.actor.Save(); err != nil {
-		log.ErrorP(ar.actor.ID(), "Save err %s", err.Error())
+		log.ErrorP(log.LogPlus{"ActorID": ar.actor.ID()}, "Save err %s", err.Error())
 	}
 	if err := ar.actor.OnExit(); err != nil {
-		log.ErrorP(ar.actor.ID(), "OnExit err %s", err.Error())
+		log.ErrorP(log.LogPlus{"ActorID": ar.actor.ID()}, "OnExit err %s", err.Error())
 	}
 }
 
 func (ar *actorRuntime) ontick() {
 	now := time.Now().Unix()
 	if err := ar.actor.OnTick(); err != nil {
-		log.ErrorP(ar.actor.ID(), "OnTick err %s", err.Error())
+		log.ErrorP(log.LogPlus{"ActorID": ar.actor.ID()}, "OnTick err %s", err.Error())
 	}
 	if now-ar.savetime > int64(_cfg.SaveTimeInter) {
 		ar.savetime = now
 		if err := ar.actor.Save(); err != nil {
-			log.ErrorP(ar.actor.ID(), "Save err %s", err.Error())
+			log.ErrorP(log.LogPlus{"ActorID": ar.actor.ID()}, "Save err %s", err.Error())
 		}
 	}
 	if now-ar.activetime > int64(_cfg.ActiveTimeOut) {
