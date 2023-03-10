@@ -1,5 +1,5 @@
 [Transport]
-Addr = "9.135.72.251:22103"
+Addr = "127.0.0.1:22103"
 BroadTimeOut = 5
 
 [Options]
@@ -12,10 +12,10 @@ RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "9.135.72.251:8500"
+ConsulHost = "127.0.0.1:8500"
 
 [[Plugin.Broker.broker_nats]]
-NatsURL = "9.135.72.251:4222"
+NatsURL = "127.0.0.1:4222"
 
 [[Plugin.Shape.shape_sentinel]]
 ConfigFile = "../../resource/sentinel.yml"
