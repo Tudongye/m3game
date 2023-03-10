@@ -54,36 +54,49 @@ Metric-Plugin: 监控组件
 
 ## M3包依赖
 
-![image](https://user-images.githubusercontent.com/16680818/223908399-caf1afbd-2b0c-48dc-b5ae-b22226773860.png)
+![image](https://user-images.githubusercontent.com/16680818/224403501-995bb24a-8199-416b-98a6-082ea095376b.png)
 
 ## Example
 
 example 是一组简单服务的样例，用来展示M3框架提供的基础能力。
 
-example/dirapp 是一个无状态的并发服务，该服务提供Hello的RPC接口，其在业务层包含一个App 和 一个MutilServer
+example/simpleapp 是一个HelloWorld服务。
 
-Step1、定义服务 proto
+example/mutilapp 是一个并发服务，提供Hello，TraceHello(链路追踪)，BreakHello(熔断限流) 接口
+
+example/asyncapp 是一个单线程异步服务，提供PostChannel(广播处理)，SSPullChannel(单线程阻塞) 接口
+
+example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。
+
+example/gateapp 是一个网关服务，对外提供Http接口(服务网关)访问内部服务。
+
+example/test 是一个模拟客户端发包程序，内置多种测试路径。
+
+## HelloWorld
+
+以example/simpleapp为例
+
+Step1、定义服务 proto，生成pb文件
 
 ```
-// demo/proto/dirapp.proto
+// example/proto/simpleapp.proto
 syntax = "proto3";
 
 package proto;
 
+import "pkg.proto";		// 框架文件
+import "options.proto";		// 框架文件
+
 option go_package = "proto/pb";
 
-
-import "pkg.proto";     // 框架层基础定义
-import "options.proto"; // 自定义选线
-
-// 定义服务与RPC路由
-service DirSer {
-    rpc Hello(Hello.Req) returns (Hello.Rsp) ;
+// 定义SimpleSer服务
+service SimpleSer {
+    rpc HelloWorld(HelloWorld.Req) returns (HelloWorld.Rsp);	 // 定义接口
 }
 
-// 定义RPC参数
-message Hello {
-    option (rpc_option).route_key = ""; // 路由Key字段名
+// 定义RPC
+message HelloWorld {
+    option (rpc_option).route_key = "";
     message Req {
         RouteHead RouteHead = 1;
         string Req = 2;
@@ -91,95 +104,119 @@ message Hello {
     message Rsp {
         RouteHead RouteHead = 1;
         string Rsp = 2;
-
     }
 }
-```
-Step2、定义逻辑实体DirSer
-```
-package dirserver
 
-// 创建服务实体
-func New() *DirSer {
-	return &DirSer{
-		Server: mutil.New("DirSer"),  // Mutil，并发服务
+```
+Step2、编写App代码
+```
+// example/simpleapp/simpleapp.go
+package simpleapp
+
+import (
+	"m3game/example/proto"
+	"m3game/example/simpleapp/simpleser"
+	_ "m3game/plugins/broker/nats"
+	_ "m3game/plugins/router/consul"
+	"m3game/runtime"
+	"m3game/runtime/app"
+	"m3game/runtime/server"
+)
+
+// 创建App实体
+func newApp() *SimpleApp {
+	return &SimpleApp{
+		App: app.New(proto.SimpleAppFuncID), // 指定App的FuncID
 	}
 }
 
-type DirSer struct {
+type SimpleApp struct {
+	app.App
+}
+
+// 健康检测
+func (d *SimpleApp) HealthCheck() bool {
+	return true
+}
+
+func Run() error {
+	// 启动一个 包含了simpleser的SimpleApp
+	runtime.Run(newApp(), []server.Server{simpleser.New()})
+	return nil
+}
+
+```
+Step3、定义服务实体simpleser
+```
+// example/simpleapp/simpleser
+package simpleser
+
+import (
+	"context"
+	"fmt"
+	"m3game/example/proto/pb"
+	"m3game/runtime/rpc"
+	"m3game/runtime/server/mutil"
+
+	"google.golang.org/grpc"
+)
+
+func init() {
+	// 注册RPC信息到框架层
+	if err := rpc.RegisterRPCSvc(pb.File_simple_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("RegisterRPCSvc SimpleSer %s", err.Error()))
+	}
+}
+
+func New() *SimpleSer {
+	return &SimpleSer{
+		Server: mutil.New("SimpleSer"), // 以MutilSer为基础构建SimpleSer
+	}
+}
+
+type SimpleSer struct {
 	*mutil.Server
-	dpb.UnimplementedDirSerServer
+	pb.UnimplementedSimpleSerServer
 }
 
-// 接口文件由pb自动生成，业务层自行实现
-func (d *DirSer) Hello(ctx context.Context, in *dpb.Hello_Req) (*dpb.Hello_Rsp, error) {
-	out := new(dpb.Hello_Rsp)
-	sctx := server.ParseContext(ctx)
-	out.Rsp = fmt.Sprintf("Hello , %s", in.Req)
-	if sctx != nil {
-		if v, ok := sctx.Reciver().Metas().Get(proto.META_CLIENT); ok && v == proto.META_FLAG_TRUE {
-			out.Rsp = fmt.Sprintf("Hello Client , %s", in.Req)
-		}
-	}
+// 实现HelloWorld接口
+func (d *SimpleSer) HelloWorld(ctx context.Context, in *pb.HelloWorld_Req) (*pb.HelloWorld_Rsp, error) {
+	out := new(pb.HelloWorld_Rsp)
+	out.Rsp = fmt.Sprintf("HelloWorld , %s", in.Req)
 	return out, nil
 }
-// 逻辑注入接口
-func (s *DirSer) TransportRegister() func(grpc.ServiceRegistrar) error {
+
+// 将SimpleSer注册到grpcser
+func (s *SimpleSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 	return func(t grpc.ServiceRegistrar) error {
-		dpb.RegisterDirSerServer(t, s)
+		pb.RegisterSimpleSerServer(t, s)
 		return nil
 	}
 }
 ```
-Step3、定义服务实体DirApp
+step4 制作配置文件
 ```
-package dirapp
+[Transport]
+Addr = "127.0.0.1:22105"	// 内部监听端口
+BroadTimeOut = 5		// 广播处理超时
 
-// 创建DirApp实体
-func newApp() *DirApp {
-	return &DirApp{
-		App: app.New(dproto.DirAppFuncID),  
-	}
-}
+[Options]
+[[Options.Mesh]]
+WatcherInterSecond = 1		// 服务发现间隔
 
-type DirApp struct {
-	app.App
-}
+[Plugin]
+[[Plugin.Router.router_consul]]
+ConsulHost = "127.0.0.1:8500"	
 
-func (d *DirApp) Start(wg *sync.WaitGroup) error {
-	router := plugin.GetRouterPlugin()
-	if router != nil {
-  // 服务注册
-		if err := router.Register(d); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-func (d *DirApp) HealthCheck() bool {
-	return true
-}
-
-// 启动服务
-func Run() error {
-	plugin.RegisterFactory(&consul.Factory{})  // 注册服务发现组件
-	plugin.RegisterFactory(&nats.Factory{})    // 注册broker组件
-	runtime.Run(newApp(), []server.Server{dirserver.New()})   // 逻辑注入到框架层运行
-	return nil
-}
+[[Plugin.Broker.broker_nats]]
+NatsURL = "127.0.0.1:4222"
 ```
-如下是从实例2，ClientApp 向 实例1 DirApp 发起RPC调用的调用链
+Step5 编译运行
+```
+go build .
 
-DirSer 和 DirClient 是由dir.proto生成RPC调用服务端和客户端，protobuf保证双端协议一致。
-
-DirApp 和 ClientApp 都是服务网格中的服务实体，Router会根据服务状态和路由策略最终选取一个服务实体发送请求。
-
-Rumtime为框架驱动，根据RPC请求的性质，选择不同的传输路径（比如单向Ntify，广播，多播等）
-
-Transport 内建了一个绑定在TcpConn的GrpcSer，用于服务实体间通讯
-
-![未命名文件 (6)](https://user-images.githubusercontent.com/16680818/222782344-279fe08d-73f9-40f6-8bf2-5e3d4d56510e.png)
-
+./main -idstr example.world1.simple.1 -conf ../../config/simpleapp.toml
+```
 
 ## RPC驱动
 
