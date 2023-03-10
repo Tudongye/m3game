@@ -4,7 +4,7 @@
 
 A game framework using Golang and Grpc
 
-M3Game是一个采用Golang重构游戏后端框架的尝试，其旨在探索游戏后台开发过程中所面临的常见问题的解决方案。
+M3Game是一个采用Golang重构游戏后端框架的尝试，其旨在探索基于Golang的游戏后台开发方案。
 
 框架分为GameLogic，Frame-Runtime，Custom-Plugin三层。Frame-Runtime为框架驱动层，负责消息驱动，服务网格，插件管理等核心驱动工作。Custom-Plugin为自定义插件层，框架层将第三方服务抽象为多种自定义插件接口，插件层根据实际的基础设施来进行实现。GameLogic为游戏逻辑层，用于承载实际的业务逻辑。框架使用protobuf来生成脚手架，通过引入pb.Option等方式将业务逻辑自动注入到框架层中。
 
@@ -14,7 +14,7 @@ M3Game是一个采用Golang重构游戏后端框架的尝试，其旨在探索�
 
 2、自动化的逻辑注入。借助pb的自定义选项，业务逻辑只需要很少的代码，就可以自动的注入到框架层
 
-3、拒绝定制化工具。框架的代码生成和逻辑注入只依赖原生的protobuf和grpc，不需要额外安装定制化工具
+3、没有自定义代码生成器。框架的代码生成和逻辑注入只依赖原生的protobuf和grpc，不需要额外安装定制化工具
 
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
@@ -68,7 +68,7 @@ example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多
 
 example/gateapp 是一个网关服务，对外提供Http接口(服务网关)访问内部服务。
 
-example/test 是一个模拟客户端发包程序，内置多种测试路径。
+example/test 是一个模拟客户端发包程序，内置多个测试用例。
 
 ## HelloWorld
 
@@ -106,7 +106,9 @@ message HelloWorld {
 }
 
 ```
+
 Step2、编写App代码
+
 ```
 // example/simpleapp/simpleapp.go
 package simpleapp
@@ -144,7 +146,9 @@ func Run() error {
 }
 
 ```
+
 Step3、定义服务实体simpleser
+
 ```
 // example/simpleapp/simpleser
 package simpleser
@@ -192,7 +196,9 @@ func (s *SimpleSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 	}
 }
 ```
+
 step4 制作配置文件
+
 ```
 [Transport]
 Addr = "127.0.0.1:22105"	// 内部监听端口
@@ -209,12 +215,17 @@ ConsulHost = "127.0.0.1:8500"
 [[Plugin.Broker.broker_nats]]
 NatsURL = "127.0.0.1:4222"
 ```
+
 Step5 编译运行
+
 ```
 go build .
 
 ./main -idstr example.world1.simple.1 -conf ../../config/simpleapp.toml
 ```
+
+![image](https://user-images.githubusercontent.com/16680818/224407634-3c464a0d-17bb-4f1b-8668-92a54a50d612.png)
+
 
 ## RPC驱动
 
@@ -222,14 +233,14 @@ go build .
 
 如下是一个RPC定义的proto。
 ```
-// 定义服务与RPC路由
-service DirSer {
-    rpc Hello(Hello.Req) returns (Hello.Rsp) ;
+// 定义SimpleSer服务
+service SimpleSer {
+    rpc HelloWorld(HelloWorld.Req) returns (HelloWorld.Rsp);	 // 定义接口
 }
 
-// 定义RPC参数
-message Hello {
-    option (rpc_option).route_key = ""; // 当使用Hash路由时，路由Key字段名
+// 定义RPC
+message HelloWorld {
+    option (rpc_option).route_key = "";
     message Req {
         RouteHead RouteHead = 1;
         string Req = 2;
@@ -250,7 +261,9 @@ message Hello {
 
 ![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/222907580-1d82955a-ef8f-45da-a897-e99a2f13b55c.png)
 
-其中rpc_option是M3为了减少重复编码而添加的自定义选项（大部分框架都使用定制化的代码生成工具，这使得那些框架很难被集成到原先的代码中）。自定义选项相关定义参看 options.proto，相关逻辑参看client/meta.go.调用RPCCall，M3框架会自动根据协议文件内容填充路由参数。
+其中rpc_option是M3为了减少重复编码而添加的自定义选项，使用反射注入到框架层。自定义选项相关定义参看 options.proto，相关逻辑参看runtime/rpc.
+
+当客户端调用RPCCall时，M3框架会自动根据协议文件内容填充路由参数。
 
 
 ## 三种业务模型
@@ -259,11 +272,11 @@ message Hello {
 
 ### Mutil
 
-Mutil 多线程模型，主要用于无状态服务，M3采用原生Grpc服务实现。
+Mutil 多线程模型，主要用于无状态服务，M3采用原生Grpc服务实现。参考实现 example/mutilapp/mutilser
 
 ### Async
 
-Async 单线程异步，使用这类模型的服务不允许并发的执行RPC调用
+Async 单线程异步，使用这类模型的服务不允许并发的执行RPC调用。参考实现 example/asyncapp/asyncser
 
 M3在Async服务的RPC驱动链中加入了资源锁。通过资源锁确保同一时间只有一个RPC调用再执行
 
@@ -271,7 +284,7 @@ M3在Async服务的RPC驱动链中加入了资源锁。通过资源锁确保同�
 
 ### Actor
 
-Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实体内部串行，实体之间并发。
+Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实体内部串行，实体之间并发。参考实现 example/actorapp/actorser
 
 M3为每个Actor分配一个执行Goroutine，并引入ActorRuntime和ActorMgr对Actor进行管理，前者用于管理单个Actor的执行Goroutine，后者用于管理整个Actor池。
 
@@ -284,9 +297,9 @@ M3在Actor服务的RPC调用链中加入了Actor管理逻辑，业务层逻辑�
 
 ### Mesh
 
-Mesh使用Router插件进行服务注册和服务发现，Router插件是必要插件，mesh/router/consul是一个基于Consul的Rotuer实现。
+Mesh使用Router插件进行服务注册和服务发现，Router插件是M3的必要插件，plugins/router/consul是一个基于Consul的Rotuer实现。
 
-M3使用Grpc的Resolver- Balancer.Picker方式将服务网格与RPC路由相关联，相关逻辑参看mesh/resolver.go，balance.go
+M3使用Grpc的Resolver & Picker方式将Mesh与RPC路由相关联，相关逻辑参看runtime/mesh/resolver.go，balance.go
 
 当前支持 P2P，Random，Hash，BroadCast，MutilCast，Single路由模式
 
@@ -301,50 +314,49 @@ M3使用Grpc的Resolver- Balancer.Picker方式将服务网格与RPC路由相关�
 
 ### 广播
 
-M3基于Broker插件，实现了GrpcSer兼容的BrokerSer，用于处理BroadCast和MutilCast等单向Notify式RPC调用。
+M3基于Broker插件，实现了GrpcSer兼容的BrokerSer，用于处理BroadCast和MutilCast等单向Notify式RPC调用。plugins/broker/nats 是一个基于Nats的Broker实现。
 
-M3采用Interceptor的方式将BrokerSer注入RPC调用链，BrokerSer的相关实现参看 runtime/transport/brokerser.go。 broker/nats 是一个基于Nats的Broker实现。
+M3使用BrokerSer来处理广播，BrokerSer的相关实现参看 runtime/transport/brokerser.go。 
+
+![未命名文件 (6)](https://user-images.githubusercontent.com/16680818/224411628-ce6afe7c-67b5-425e-bf32-003c600b08b5.png)
+
 
 ## 资源管理
 
-M3使用ResourceMgr进行资源管理，在M3中的资源指由GameLogic定义，在服务运行过程中需要实时热更新的资源文件。一般用于GameLogic的配置管理。
+M3中的资源指由GameLogic定义，在服务运行过程中需要实时热更新的资源文件。一般用于GameLogic的配置管理。
 
 ResourceMgr使用双缓冲区模型，一主一备，主缓冲区用于资源访问，备缓冲区用于资源更新，每次热更新后主备缓冲区交换。相关逻辑参看resource/resourcemgr.go
 
 M3对于资源的访问需要附带上下文context用于确认是资源访问还是资源更新
 
-M3对于资源文件格式没有要求，只要求资源管理器提供Load接口，demo/loader/locationcfg.go是一个对于json配置文件的资源管理器样例。
+M3对于资源文件格式没有要求，只要求资源管理器提供Load接口，example/loader/titlecfgloader.go是一个对于json配置文件的资源加载器样例。
 
-```
-type ResLoader interface {
-	Load(ctx context.Context, cfgpath string) error // 资源更新
-	Name() string
-}
-```
+![未命名文件 (7)](https://user-images.githubusercontent.com/16680818/224412683-4511817c-55b9-4657-915d-d1d6d55cadec.png)
 
 
-## 数据存储
+## 存储定义
 
-M3采用pb管理游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看demo/roleapp/roleser/roleactor.go
+M3采用pb管理游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看example/actorapp/actor
 
 当前M3要求DB结构所有一级字段必须是string（必须是主键） 或 proto.Message（pb类型不可重复），且DB结构必须设置一个string类型的主键。
 
 ```
-message RoleDB {
-    option (db_primary_key) = "RoleID";		 // DB主键
-    string RoleID = 1;
-    RoleName RoleName = 2;
-    LocationInfo LocationInfo = 3;
+
+message ActorDB {
+    option (db_primary_key) = "ActorID";
+    string ActorID = 1;
+    ActorName ActorName = 2;
+    ActorInfo ActorInfo = 3;
 }
 
-message RoleName {
+message ActorName {
     string Name = 1;
 }
 
-message LocationInfo {
-    int32 Location = 1;
-    string LocateName = 2;
+message ActorInfo {
+    int32 Level = 1;
 }
+
 
 ```
 
@@ -362,11 +374,20 @@ type DBMeta[T proto.Message] struct {
 	creater   func() T                                // 游戏实体工场
 	fieldds   map[string]protoreflect.FieldDescriptor // 游戏实体字段反射信息
 }
+
+type DB interface {
+	Read(meta DBMetaInter, key string, filters ...string) (proto.Message, error)
+	Update(meta DBMetaInter, key string, obj proto.Message, filters ...string) error
+	Create(meta DBMetaInter, key string, obj proto.Message, filters ...string) error
+	Delete(meta DBMetaInter, key string) error
+}
 ```
 
 ### Wraper
 
-Wraper，对数据的ORM级封装，采用pb反射&泛型极大的简化了DB相关操作，同时封装了置脏管理。如下是Wraper定义
+Wraper，对数据的ORM级封装，采用pb反射&泛型极大的简化了DB相关操作，同时封装了自动化的置脏管理。example/actorapp/actor是一个基于Wraper的实体样例
+
+如下是Wraper定义
 
 ```
 type Wraper[T proto.Message] struct {
@@ -387,27 +408,27 @@ func KeyGetter[T proto.Message](wraper *Wraper[T]) (string, error)
 func Setter[P, T proto.Message](wraper *Wraper[T], value P) error	// 普通字段操作
 func Getter[P, T proto.Message](wraper *Wraper[T]) (P, error)		 
 ```
-使用方式如下，以前述RoleDB为例
+使用方式如下，以前述ActorDB为例
 
 ```
-func roleDBCreater() *pb.RoleDB {
+func actorDBCreater() *pb.ActorDB {
 	return &pb.RoleDB{		// 所有的一级结构体都要初始化
-		RoleID:       "",
-		RoleName:     &pb.RoleName{},
-		LocationInfo: &pb.LocationInfo{},
+		ActorID:       "",
+		ActorName:     &pb.ActorName{},
+		ActorInfo:     &pb.ActorInfo{},
 	}
 }
-rolemeta := db.NewMeta("role_table", roleDBCreater)
-wp := wraper.New(rolemeta, "RoleID")	// 构建Wraper
+actormeta := db.NewMeta("actor_table", actorDBCreater)
+wp := wraper.New(actormeta, "ActorID123")	// 构建Wraper
 
 // 读数据
 dbplugin := plugin.GetDBPlugin()
 wp.Read(dbplugin)
 
 // 修改用户名
-rolename, _ := wraper.Getter[*pb.RoleName](wp)	 // 参看前述 要求DB的一级pb字段类型不能重复
-rolename.Name = "王小明"
-wp.Setter(a.wraper, rolename)
+actorname, _ := wraper.Getter[*pb.ActorName](wp)	 // 参看前述 要求DB的一级pb字段类型不能重复
+actorname.Name = "王小明"
+wp.Setter(a.wraper, actorname)
 
 // 脏字段写回
 if wp.HasDirty() {
@@ -422,11 +443,11 @@ M3采用Shape组件进行流量管理，Shape组件采用Interceptor方式注入
 
 流量管理针对RPC进行，规则分为限流规则 FlowRule 和 熔断规则 BreakRule。
 
-如下是对BreakHello的流量管理配置
+如下是对example/mutilapp的BreakHello的流量管理配置
 
 ```
 [Rules]
-Method = "/proto.DirSer/BreakHello"	// RPC方法
+Method = "/proto.MutilSer/BreakHello"	// RPC方法
 [[Rules.FlowRules]]			// 限流规则
 Threshold = 2				// 限流阈值
 StatIntervalMs = 1000			// 统计周期
