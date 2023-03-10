@@ -10,8 +10,8 @@ func NewRouteHeadRandom(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead 
 	routehead.DstSvc = dstsvc
 	routehead.RouteType = pb.RouteType_RT_RAND
 	routehead.RoutePara = &pb.RoutePara{
-		RouteRandHead: []*pb.RouteRandHead{
-			{
+		Para: &pb.RoutePara_RouteRandHead{
+			RouteRandHead: &pb.RouteRandHead{
 				Pass: "",
 			},
 		},
@@ -25,8 +25,8 @@ func NewRouteHeadP2P(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, dstins *pb.RouteI
 	routehead.DstSvc = dstsvc
 	routehead.RouteType = pb.RouteType_RT_P2P
 	routehead.RoutePara = &pb.RoutePara{
-		RouteP2PHead: []*pb.RouteP2PHead{
-			{
+		Para: &pb.RoutePara_RouteP2PHead{
+			RouteP2PHead: &pb.RouteP2PHead{
 				DstIns: dstins,
 			},
 		},
@@ -40,8 +40,8 @@ func NewRouteHeadHash(srcins *pb.RouteIns, dstsvc *pb.RouteSvc, hashkey string) 
 	routehead.DstSvc = dstsvc
 	routehead.RouteType = pb.RouteType_RT_HASH
 	routehead.RoutePara = &pb.RoutePara{
-		RouteHashHead: []*pb.RouteHashHead{
-			{
+		Para: &pb.RoutePara_RouteHashHead{
+			RouteHashHead: &pb.RouteHashHead{
 				HashKey: hashkey,
 			},
 		},
@@ -55,8 +55,8 @@ func NewRouteHeadSingle(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead 
 	routehead.DstSvc = dstsvc
 	routehead.RouteType = pb.RouteType_RT_SINGLE
 	routehead.RoutePara = &pb.RoutePara{
-		RouteSingleHead: []*pb.RouteSingleHead{
-			{
+		Para: &pb.RoutePara_RouteSingleHead{
+			RouteSingleHead: &pb.RouteSingleHead{
 				Pass: "",
 			},
 		},
@@ -69,8 +69,8 @@ func NewRouteHeadMutil(srcins *pb.RouteIns, topic string) *pb.RouteHead {
 	routehead.SrcIns = srcins
 	routehead.RouteType = pb.RouteType_RT_MUTIL
 	routehead.RoutePara = &pb.RoutePara{
-		RouteMutilHead: []*pb.RouteMutilHead{
-			{
+		Para: &pb.RoutePara_RouteMutilHead{
+			RouteMutilHead: &pb.RouteMutilHead{
 				Topic: topic,
 			},
 		},
@@ -84,8 +84,8 @@ func NewRouteHeadBroad(srcins *pb.RouteIns, dstsvc *pb.RouteSvc) *pb.RouteHead {
 	routehead.DstSvc = dstsvc
 	routehead.RouteType = pb.RouteType_RT_BROAD
 	routehead.RoutePara = &pb.RoutePara{
-		RouteBroadHead: []*pb.RouteBroadHead{
-			{
+		Para: &pb.RoutePara_RouteBroadHead{
+			RouteBroadHead: &pb.RouteBroadHead{
 				Pass: "",
 			},
 		},

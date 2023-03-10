@@ -53,3 +53,13 @@ func GenMetaCreateActorOption(v string) *M3Option {
 		},
 	}
 }
+
+// Actor Server :  bool create actor
+func GenMetaOption(k string, v string) *M3Option {
+	return &M3Option{
+		F: func(s *transport.Sender) error {
+			s.Metas().Set(k, v)
+			return nil
+		},
+	}
+}

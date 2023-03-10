@@ -29,7 +29,6 @@ digraph go_pkg_relation {
             {|{
                 <log> log\l|
                 <util> util\l|
-                <viper> viper\l|
             }}"
         shape = "record"
     ];
@@ -40,7 +39,6 @@ digraph go_pkg_relation {
                 <proto> proto\l|
                 <log> log\l|
                 <pb> pb\l|
-                <protoreflect> protoreflect\l|
             }}"
         shape = "record"
     ];
@@ -49,9 +47,7 @@ digraph go_pkg_relation {
             {|{
                 <db> db\l|
                 <log> log\l|
-                <errors> errors\l|
                 <proto> proto\l|
-                <protoreflect> protoreflect\l|
             }}"
         shape = "record"
     ];
@@ -86,8 +82,6 @@ digraph go_pkg_relation {
         label = "<head> pb\l|
             {|{
                 <descriptor> descriptor\l|
-                <protoreflect> protoreflect\l|
-                <protoimpl> protoimpl\l|
             }}"
         shape = "record"
     ];
@@ -97,7 +91,6 @@ digraph go_pkg_relation {
                 <rpc> rpc\l|
                 <otelgrpc> otelgrpc\l|
                 <trace> trace\l|
-                <grpc> grpc\l|
                 <proto> proto\l|
             }}"
         shape = "record"
@@ -116,7 +109,6 @@ digraph go_pkg_relation {
                 <shape> shape\l|
                 <trace> trace\l|
                 <util> util\l|
-                <signal> signal\l|
             }}"
         shape = "record"
     ];
@@ -133,7 +125,6 @@ digraph go_pkg_relation {
     "resource" [
         label = "<head> resource\l|
             {|{
-                <mapstructure> mapstructure\l|
             }}"
         shape = "record"
     ];
@@ -142,7 +133,6 @@ digraph go_pkg_relation {
             {|{
                 <app> app\l|
                 <transport> transport\l|
-                <grpc> grpc\l|
             }}"
         shape = "record"
     ];
@@ -153,7 +143,6 @@ digraph go_pkg_relation {
                 <transport> transport\l|
                 <runtime> runtime\l|
                 <app> app\l|
-                <grpc> grpc\l|
             }}"
         shape = "record"
     ];
@@ -165,9 +154,6 @@ digraph go_pkg_relation {
                 <app> app\l|
                 <server> server\l|
                 <transport> transport\l|
-                <mapstructure> mapstructure\l|
-                <errors> errors\l|
-                <grpc> grpc\l|
                 <log> log\l|
             }}"
         shape = "record"
@@ -179,7 +165,6 @@ digraph go_pkg_relation {
                 <app> app\l|
                 <server> server\l|
                 <transport> transport\l|
-                <grpc> grpc\l|
             }}"
         shape = "record"
     ];
@@ -188,14 +173,11 @@ digraph go_pkg_relation {
             {|{
                 <proto> proto\l|
                 <transport> transport\l|
-                <grpc> grpc\l|
                 <log> log\l|
                 <pb> pb\l|
                 <runtime> runtime\l|
                 <rpc> rpc\l|
                 <server> server\l|
-                <errors> errors\l|
-                <protoreflect> protoreflect\l|
             }}"
         shape = "record"
     ];
@@ -207,10 +189,7 @@ digraph go_pkg_relation {
                 <log> log\l|
                 <pb> pb\l|
                 <util> util\l|
-                <errors> errors\l|
-                <grpc> grpc\l|
                 <proto> proto\l|
-                <mapstructure> mapstructure\l|
             }}"
         shape = "record"
     ];
@@ -220,15 +199,12 @@ digraph go_pkg_relation {
                 <log> log\l|
                 <pb> pb\l|
                 <proto> proto\l|
-                <protoreflect> protoreflect\l|
             }}"
         shape = "record"
     ];
     "plugin" [
         label = "<head> plugin\l|
             {|{
-                <errors> errors\l|
-                <viper> viper\l|
                 <log> log\l|
             }}"
         shape = "record"
@@ -236,11 +212,7 @@ digraph go_pkg_relation {
     "shape" [
         label = "<head> shape\l|
             {|{
-                <grpc> grpc\l|
                 <log> log\l|
-                <mapstructure> mapstructure\l|
-                <errors> errors\l|
-                <viper> viper\l|
             }}"
         shape = "record"
     ];
@@ -249,16 +221,9 @@ digraph go_pkg_relation {
             {|{
                 <pb> pb\l|
                 <transport> transport\l|
-                <rand> rand\l|
-                <errors> errors\l|
-                <hashring> hashring\l|
                 <balancer> balancer\l|
-                <base> base\l|
                 <log> log\l|
                 <router> router\l|
-                <attributes> attributes\l|
-                <resolver> resolver\l|
-                <mapstructure> mapstructure\l|
             }}"
         shape = "record"
     ];

@@ -95,19 +95,3 @@ func getPluginByTag(typ Type, name string, tag string) PluginIns {
 		}
 	}
 }
-
-// func GetDBPlugin() db.DB {
-// 	p := getPluginByType(DB)
-// 	if p == nil {
-// 		return nil
-// 	}
-// 	return p.(db.DB)
-// }
-
-// func GetDBPluginByName(name string) db.DB {
-// 	p := getPluginByName(DB, name)
-// 	if p == nil {
-// 		return nil
-// 	}
-// 	return p.(db.DB)
-// }

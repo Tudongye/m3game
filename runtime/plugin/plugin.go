@@ -2,7 +2,7 @@ package plugin
 
 import (
 	"fmt"
-	"m3game/log"
+	"m3game/plugins/log"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -12,13 +12,14 @@ type Type string
 
 const (
 	DB     Type = "db"     // 存储
-	Router Type = "router" // 服务发现 only one
+	Router Type = "router" // 服务发现
 	Trace  Type = "trace"  // 链路追踪
 	Metric Type = "metric" // 监控
-	Broker Type = "broker" // 消息队列 only one
+	Broker Type = "broker" // 消息队列
 	Log    Type = "log"    // 日志
-	Lock   Type = "lock"   // 分布式锁
-	Shape  Type = "Shape"  // 流量管理 only one
+	Shape  Type = "Shape"  // 流量管理
+	Agent  Type = "Agent"  // CS连接
+	Store  Type = "Store"  // 缓存
 )
 
 const (

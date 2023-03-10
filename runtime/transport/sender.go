@@ -2,7 +2,7 @@ package transport
 
 import (
 	"context"
-	"m3game/broker"
+	"m3game/plugins/broker"
 	"m3game/proto"
 	"m3game/proto/pb"
 
@@ -97,11 +97,16 @@ func (s *Sender) RouteHead() *pb.RouteHead {
 }
 
 func (s *Sender) sendMsg() error {
-	s.RouteHead().Metas = s.Metas().Encode()
+	nmeta := s.Metas().Encode()
+	if s.RouteHead().Metas == nil {
+		s.RouteHead().Metas = nmeta
+	} else {
+		s.RouteHead().Metas.Metas = append(s.RouteHead().Metas.Metas, nmeta.Metas...)
+	}
 	if s.RouteHead().RouteType == pb.RouteType_RT_BROAD {
 		return sendToBrokerSer(s, broker.GenTopic(BrokerSerTopic(s.RouteHead().DstSvc.IDStr)))
 	} else if s.RouteHead().RouteType == pb.RouteType_RT_MUTIL {
-		return sendToBrokerSer(s, s.RouteHead().RoutePara.RouteMutilHead[0].Topic)
+		return sendToBrokerSer(s, s.RouteHead().RoutePara.GetRouteMutilHead().GetTopic())
 	}
 
 	ctx := WithSender(s.ctx, s)

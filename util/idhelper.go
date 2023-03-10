@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"m3game/proto/pb"
 	"regexp"
 	"strconv"
 )
@@ -102,6 +103,7 @@ func EnvStr2ID(s string) (envid string, err error) {
 	envid = groups[1]
 	return
 }
+
 func Addr2IPPort(s string) (ip string, port int, err error) {
 	err = nil
 	groups := regexAddr.FindStringSubmatch(s)
@@ -113,4 +115,17 @@ func Addr2IPPort(s string) (ip string, port int, err error) {
 	port, err = strconv.Atoi(groups[2])
 	return
 
+}
+
+func RouteIns2Svc(ins *pb.RouteIns, funcid string) *pb.RouteSvc {
+	return &pb.RouteSvc{
+		EnvID:   ins.EnvID,
+		WorldID: ins.WorldID,
+		FuncID:  funcid,
+		IDStr:   SvcID2Str(ins.EnvID, ins.WorldID, funcid),
+	}
+}
+
+func GenSessionID(s string) string {
+	return fmt.Sprintf("session-%s", s)
 }

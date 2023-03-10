@@ -6,6 +6,7 @@
 import os,re,sys
 
 go_path = sys.argv[1]
+filter_path = sys.argv[2]
 
 prefix = '''digraph go_pkg_relation {
     graph [
@@ -24,6 +25,7 @@ prefix = '''digraph go_pkg_relation {
 '''
 
 suffix = '}'
+filter_list = set()
 
 #从当前文件中获取包名
 def get_package_of_file(path_file):
@@ -71,6 +73,11 @@ def get_imported_package_from_file(path_file):
                 if m:
                     imported_package.append(m.group(2))
             tmpline = file_input.readline()
+    filtered_imported_package = []
+    for p in imported_package :
+        if p not in filter_list:
+            filtered_imported_package.append(p)
+    imported_package = filtered_imported_package
     return imported_package
 
 def build_node_from_file(file_path, file_name):
@@ -129,6 +136,11 @@ node_str = ''
 edge_string = ''
 color_arrary = ['red', 'green', 'blue', 'black','blueviolet','brown', 'cadetblue','chocolate','crimson','cyan','darkgrey','deeppink','darkred']
 i = 0
+
+if filter_path != "":
+    with open(filter_path, 'r', encoding="utf-8") as file_input:
+        for tmpline in file_input.readlines():
+            filter_list.add(tmpline.strip())
 
 for maindir, subdir, file_name_list in os.walk(go_path):#('G:\git_repository\linux-stable\linux-4.18\drivers\usb'):
     for tmpfile in file_name_list:

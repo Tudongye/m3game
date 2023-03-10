@@ -6,7 +6,8 @@ package client
 
 import (
 	"context"
-	"m3game/log"
+	"fmt"
+	"m3game/plugins/log"
 	"m3game/proto"
 	"m3game/proto/pb"
 	"m3game/runtime"
@@ -20,11 +21,6 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-var (
-	err_client_methodnotfind  = errors.New("err_client_methodnotfind")
-	err_client_hashkeynotfind = errors.New("err_client_hashkeynotfind")
-)
-
 func init() {
 	transport.RegisterClientInterceptor(SendInteror())
 }
@@ -35,7 +31,7 @@ func RPCCallRandom[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...gr
 	method := rpc.Method(t1fullname)
 	if method == nil {
 		var t2 T2
-		return t2, err_client_methodnotfind
+		return t2, fmt.Errorf("Method not find %s", t1fullname)
 	}
 	routehead := NewRouteHeadRandom(m.SrcIns(), m.DstSvc())
 	routehead.Ntf = method.GrpcOption().Ntf
@@ -49,14 +45,14 @@ func RPCCallHash[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc
 	method := rpc.Method(t1fullname)
 	var t2 T2
 	if method == nil {
-		return t2, err_client_methodnotfind
+		return t2, fmt.Errorf("Method not find %s", t1fullname)
 	}
 	if method.HashKeyd() == nil {
-		return t2, err_client_hashkeynotfind
+		return t2, fmt.Errorf("Method nohash %s", t1fullname)
 	}
 	hashkey, ok := t1.ProtoReflect().Get(method.HashKeyd()).Interface().(string)
 	if !ok {
-		return t2, err_client_hashkeynotfind
+		return t2, fmt.Errorf("Method %s hashkey %s invaild", t1fullname, method.HashKeyd().Name())
 	}
 	routehead := NewRouteHeadHash(m.SrcIns(), m.DstSvc(), hashkey)
 	routehead.Ntf = method.GrpcOption().Ntf
@@ -70,7 +66,7 @@ func RPCCallP2P[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grpc.
 	method := rpc.Method(t1fullname)
 	var t2 T2
 	if method == nil {
-		return t2, err_client_methodnotfind
+		return t2, fmt.Errorf("Method not find %s", t1fullname)
 	}
 	routehead := NewRouteHeadP2P(m.SrcIns(), m.DstSvc(), dstins)
 	routehead.Ntf = method.GrpcOption().Ntf
@@ -83,7 +79,7 @@ func RPCCallSingle[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...gr
 	method := rpc.Method(t1fullname)
 	var t2 T2
 	if method == nil {
-		return t2, err_client_methodnotfind
+		return t2, fmt.Errorf("Method not find %s", t1fullname)
 	}
 	routehead := NewRouteHeadSingle(m.SrcIns(), m.DstSvc())
 	routehead.Ntf = method.GrpcOption().Ntf
@@ -96,7 +92,7 @@ func RPCCallMutil[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ...grp
 	method := rpc.Method(t1fullname)
 	var t2 T2
 	if method == nil {
-		return t2, err_client_methodnotfind
+		return t2, fmt.Errorf("Method not find %s", t1fullname)
 	}
 	routehead := NewRouteHeadMutil(m.SrcIns(), dsttopicid)
 	routehead.Ntf = method.GrpcOption().Ntf
@@ -109,7 +105,7 @@ func RPCCallBroadCast[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ..
 	method := rpc.Method(t1fullname)
 	if method == nil {
 		var t2 T2
-		return t2, err_client_methodnotfind
+		return t2, fmt.Errorf("Method not find %s", t1fullname)
 	}
 	routehead := NewRouteHeadBroad(m.SrcIns(), m.DstSvc())
 	routehead.Ntf = method.GrpcOption().Ntf
@@ -119,7 +115,11 @@ func RPCCallBroadCast[T1, T2 proto.M3Pkg](m Meta, f func(context.Context, T1, ..
 
 func rpcCall[T1, T2 proto.M3Pkg](method *rpc.RPCMeta, routehead *pb.RouteHead, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, opts ...grpc.CallOption) (T2, error) {
 	t1.ProtoReflect().Set(method.RouteHead(), protoreflect.ValueOfMessage(routehead.ProtoReflect()))
-	return f(ctx, t1, opts...)
+	t2, err := f(ctx, t1, opts...)
+	if err != nil {
+		return t2, errors.Wrapf(err, "Rpc %s", method.RpcName())
+	}
+	return t2, err
 }
 
 // grpc.ClientInterceptor

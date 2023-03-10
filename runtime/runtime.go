@@ -4,16 +4,16 @@ import (
 	"context"
 	"fmt"
 	"m3game/config"
-	"m3game/log"
-	"m3game/mesh"
-	_ "m3game/mesh"
+	"m3game/plugins/log"
+	"m3game/plugins/router"
+	"m3game/plugins/shape"
+	"m3game/plugins/trace"
 	"m3game/runtime/app"
+	"m3game/runtime/mesh"
 	"m3game/runtime/plugin"
 	"m3game/runtime/resource"
 	"m3game/runtime/server"
 	"m3game/runtime/transport"
-	"m3game/shape"
-	"m3game/trace"
 	"m3game/util"
 	"os"
 	"os/signal"
@@ -163,6 +163,12 @@ func Run(app app.App, servers []server.Server) error {
 	log.Info("App.Start.%s...", app.IDStr())
 	if err := app.Start(&wg); err != nil {
 		log.Error("App.Start err %s", err.Error())
+		return err
+	}
+
+	log.Info("Router.Register...")
+	if err := router.Register(app); err != nil {
+		log.Error("Router.Register err %s", err.Error())
 		return err
 	}
 

@@ -2,7 +2,7 @@ package rpc
 
 import (
 	"fmt"
-	"m3game/log"
+	"m3game/plugins/log"
 	"m3game/proto/pb"
 
 	"google.golang.org/protobuf/proto"
@@ -15,11 +15,15 @@ const routeheadname = "RouteHead"
 var RPCMetas = make(map[protoreflect.FullName]*RPCMeta)
 
 type RPCMeta struct {
+	rpcname    string
 	grpcoption *pb.M3GRPCOption             // rpc_option
 	routeheadd protoreflect.FieldDescriptor // RouteHead,for Assignment
 	hashkeyd   protoreflect.FieldDescriptor
 }
 
+func (r *RPCMeta) RpcName() string {
+	return r.rpcname
+}
 func (r *RPCMeta) GrpcOption() *pb.M3GRPCOption {
 	return r.grpcoption
 }
@@ -37,6 +41,7 @@ func RegisterRPCSvc(serviced protoreflect.ServiceDescriptor) error {
 		inputname := inputd.FullName()
 		rpcde := inputd.Parent()
 		RPCMetas[inputname] = &RPCMeta{
+			rpcname:    string(rpcde.Name()),
 			grpcoption: nil,
 			routeheadd: nil,
 			hashkeyd:   nil,

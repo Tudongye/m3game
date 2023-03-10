@@ -2,7 +2,6 @@ package actor
 
 import (
 	"fmt"
-	"m3game/proto"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
@@ -14,17 +13,19 @@ import (
 	"google.golang.org/grpc"
 )
 
-func New(name string, creater ActorCreater) *Server {
+func New(name string, creater ActorCreater, actoridmeta string) *Server {
 	return &Server{
-		name:     name,
-		actormgr: newActorMgr(creater),
+		name:        name,
+		actormgr:    newActorMgr(creater),
+		actoridmeta: actoridmeta,
 	}
 }
 
 type Server struct {
-	name     string
-	app      app.App
-	actormgr *ActorMgr
+	name        string
+	app         app.App
+	actormgr    *ActorMgr
+	actoridmeta string
 }
 
 type Config struct {
@@ -91,14 +92,11 @@ func (s *Server) Reload(map[string]interface{}) error {
 }
 
 func (s *Server) RecvInterFunc(recv *transport.Reciver) (resp interface{}, err error) {
-	if actorid, ok := recv.Metas().Get(proto.META_ACTORID); !ok {
-		return nil, fmt.Errorf("no find actorid")
+	if actorid, ok := recv.Metas().Get(s.actoridmeta); !ok {
+		return nil, fmt.Errorf("no find actorid %s", s.actoridmeta)
 	} else {
 		sctx := s.CreateContext(recv).(*Context)
-		create := false
-		if flag, ok := recv.Metas().Get(proto.META_CREATE_ACTOR); ok && flag == proto.META_FLAG_TRUE {
-			create = true
-		}
+		create := true
 		return s.actormgr.recvInterFunc(actorid, create, sctx)
 	}
 }

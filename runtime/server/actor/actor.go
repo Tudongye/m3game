@@ -3,23 +3,19 @@ package actor
 import (
 	"context"
 	"fmt"
-	"m3game/log"
+	"m3game/plugins/log"
 	"m3game/runtime/server"
 	"time"
-
-	"google.golang.org/protobuf/proto"
 )
 
 type ActorCreater func(string) Actor
 
 type Actor interface {
 	ID() string
-	OnInit() error                // 加载后触发
-	OnTick() error                // 触发定时任务时
-	OnExit() error                // 退出时触发
-	Save() error                  // 写回
-	ReBuild(proto.Message) error  // 重建,服务迁移
-	Pack() (proto.Message, error) // 打包,服务迁移
+	OnInit() error // 加载后触发
+	OnTick() error // 触发定时任务时
+	OnExit() error // 退出时触发
+	Save() error   // 写回
 }
 
 func ActorBaseCreator(actorid string) *ActorBase {
@@ -50,14 +46,6 @@ func (a *ActorBase) OnExit() error {
 
 func (a *ActorBase) Save() error {
 	return nil
-}
-
-func (a *ActorBase) ReBuild(proto.Message) error {
-	return nil
-}
-
-func (a *ActorBase) Pack() (proto.Message, error) {
-	return nil, nil
 }
 
 func newActorRuntime(actor Actor) *actorRuntime {
