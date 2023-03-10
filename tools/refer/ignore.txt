@@ -1,0 +1,9 @@
+example
+plugins/agent/httpagent
+plugins/broker/nats
+plugins/db/cache
+plugins/log/zap
+plugins/metric/prometheus
+plugins/router/consul
+plugins/shape/sentinel
+plugins/trace/stdout
