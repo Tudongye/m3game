@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package proto;
+
+import "pkg.proto";
+import "options.proto";
+import "google/api/annotations.proto";
+
+option go_package = "proto/pb";
+
+service MutilSer {
+    rpc Hello(Hello.Req) returns (Hello.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/mutilser/hello"
+            body: "*"
+        };
+    }
+    rpc TraceHello(TraceHello.Req) returns (TraceHello.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/mutilser/tracehello"
+            body: "*"
+        };
+    }
+    rpc BreakHello(BreakHello.Req) returns (BreakHello.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/mutilser/breakhello"
+            body: "*"
+        };
+    }
+}
+
+message Hello {
+    option (rpc_option).route_key = "";
+    message Req {
+        RouteHead RouteHead = 1;
+        string Req = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Rsp = 2;
+    }
+}
+
+message TraceHello {
+    option (rpc_option).route_key = "";
+    option (rpc_option).trace = true;
+    message Req {
+        RouteHead RouteHead = 1;
+        string Req = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Rsp = 2;
+    }
+}
+
+message BreakHello {
+    option (rpc_option).route_key = "";
+    message Req {
+        RouteHead RouteHead = 1;
+        string Req = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Rsp = 2;
+    }
+}

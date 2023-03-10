@@ -4,19 +4,6 @@ package proto;
 
 option go_package = "m3game/proto/pb";
 
-// 
-message Meta {
-    string Key = 1;
-    string Value = 2;
-}
-
-message Metas {
-    repeated Meta Metas = 1;
-
-}
-
-
-
 enum RouteType {
     RT_MIN = 0;
     RT_P2P = 1;     
@@ -71,14 +58,25 @@ message RouteSingleHead {
     string Pass = 1;
 }
 
-
 message RoutePara {
-    repeated RouteP2PHead RouteP2PHead = 1;
-    repeated RouteRandHead RouteRandHead = 2;
-    repeated RouteHashHead RouteHashHead = 3;
-    repeated RouteBroadHead RouteBroadHead = 4;
-    repeated RouteMutilHead RouteMutilHead = 5;
-    repeated RouteSingleHead RouteSingleHead = 6;
+    oneof Para {
+        RouteP2PHead RouteP2PHead = 1;
+        RouteRandHead RouteRandHead = 2;
+        RouteHashHead RouteHashHead = 3;
+        RouteBroadHead RouteBroadHead = 4;
+        RouteMutilHead RouteMutilHead = 5;
+        RouteSingleHead RouteSingleHead = 6;
+    }
+}
+
+message Meta {
+    string Key = 1;
+    string Value = 2;
+}
+
+message Metas {
+    repeated Meta Metas = 1;
+
 }
 
 message RouteHead {

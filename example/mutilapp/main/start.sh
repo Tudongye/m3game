@@ -1,0 +1,1 @@
+./main -idstr example.world1.mutil.1 -conf ../../config/mutilapp.toml

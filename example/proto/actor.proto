@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package proto;
+
+import "pkg.proto";
+import "options.proto";
+import "async.proto";
+import "google/api/annotations.proto";
+
+option go_package = "proto/pb";
+
+service ActorSer {
+    rpc Login(Login.Req) returns (Login.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/actorser/login"
+            body: "*"
+        };
+    }
+    rpc GetInfo(GetInfo.Req) returns (GetInfo.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/actorser/getinfo"
+            body: "*"
+        };
+    }
+    rpc ModifyName(ModifyName.Req) returns (ModifyName.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/actorser/modifyname"
+            body: "*"
+        };
+    }
+    rpc LvUp(LvUp.Req) returns (LvUp.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/actorser/lvup"
+            body: "*"
+        };
+    }
+    rpc PostChannel(PostChannel.Req) returns (PostChannel.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/actorser/postchannel"
+            body: "*"
+        };
+    }
+    rpc PullChannel(PullChannel.Req) returns (PullChannel.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/actorser/pullchannel"
+            body: "*"
+        };
+    }
+}
+
+service ActorRegSer {
+    rpc Register(Register.Req) returns (Register.Rsp){ 
+        option (google.api.http) = {
+            post: "/v1/example/actorser/register"
+            body: "*"
+        };
+    }
+}
+
+message ActorDB {
+    option (db_primary_key) = "ActorID";
+    string ActorID = 1;
+    ActorName ActorName = 2;
+    ActorInfo ActorInfo = 3;
+}
+
+message ActorName {
+    string Name = 1;
+}
+
+message ActorInfo {
+    int32 Level = 1;
+}
+
+message Register {
+    option (rpc_option).route_key = "";
+    message Req {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string ActorID = 2;
+    }
+}
+
+message Login {
+    option (rpc_option).route_key = "ActorID";
+    message Req {
+        RouteHead RouteHead = 1;
+        string ActorID = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        ActorDB ActorDB = 2;
+    }
+}
+
+message ModifyName {
+    option (rpc_option).route_key = "ActorID";
+    message Req {
+        RouteHead RouteHead = 1;
+        string ActorID = 2;
+        string NewName = 3;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        ActorName ActorName = 2;
+    }
+}
+
+message LvUp {
+    option (rpc_option).route_key = "ActorID";
+    message Req {
+        RouteHead RouteHead = 1;
+        string ActorID = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        ActorInfo ActorInfo = 2;
+    }
+}
+
+message GetInfo {
+    option (rpc_option).route_key = "ActorID";
+    message Req {
+        RouteHead RouteHead = 1;
+        string ActorID = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        string Name = 2;
+        string Title = 3;
+    }
+}
+
+message PostChannel {
+    option (rpc_option).route_key = "ActorID";
+    message Req {
+        RouteHead RouteHead = 1;
+        string ActorID = 2;
+        string Content = 3;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+    }
+}
+
+message PullChannel {
+    option (rpc_option).route_key = "ActorID";
+    message Req {
+        RouteHead RouteHead = 1;
+        string ActorID = 2;
+    }
+    message Rsp {
+        RouteHead RouteHead = 1;
+        repeated ChannelMsg Msgs = 2;
+    }
+}

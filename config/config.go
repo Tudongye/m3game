@@ -3,7 +3,7 @@ package config
 import (
 	"flag"
 	"fmt"
-	"m3game/log"
+	"m3game/plugins/log"
 	"m3game/util"
 	"strings"
 	"sync"
