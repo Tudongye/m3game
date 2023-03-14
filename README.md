@@ -54,27 +54,9 @@ Shape-Plugin：流量治理组件，当前有一个sentinel实现
 
 Gate-Plugin：服务网关组件，当前有一个grpc-stream实现
 
-## M3包依赖
+## M3内部依赖
 
-![image](https://user-images.githubusercontent.com/16680818/224403501-995bb24a-8199-416b-98a6-082ea095376b.png)
-
-## Example
-
-example 是一组简单服务的样例，用来展示M3框架提供的基础能力。
-
-example/simpleapp 是一个HelloWorld服务。
-
-example/mutilapp 是一个并发服务，提供Hello，TraceHello(链路追踪)，BreakHello(熔断限流) 接口
-
-example/asyncapp 是一个单线程异步服务，提供PostChannel(广播处理)，SSPullChannel(单线程阻塞) 接口
-
-example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。
-
-example/gateapp 是一个网关服务，客户端可以通过gprc-stream方式与网关建立长连接。
-
-example/test 是一个模拟客户端发包程序，内置多个测试用例。
-
-![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/224889189-950ed58b-2b9f-470d-a096-282cd849767e.png)
+![image](https://user-images.githubusercontent.com/16680818/224892560-8904a233-d952-4bba-806e-83ac26c97c4c.png)
 
 ## HelloWorld
 
@@ -230,6 +212,24 @@ go build .
 ![image](https://user-images.githubusercontent.com/16680818/224407634-3c464a0d-17bb-4f1b-8668-92a54a50d612.png)
 
 # 单实例开发方案(已完成)
+
+## Example
+
+example 是一组简单服务的样例，用来展示M3框架的单实例开发方案。
+
+example/simpleapp 是一个HelloWorld服务。
+
+example/mutilapp 是一个并发服务，提供Hello，TraceHello(链路追踪)，BreakHello(熔断限流) 接口
+
+example/asyncapp 是一个单线程异步服务，提供PostChannel(广播处理)，SSPullChannel(单线程阻塞) 接口
+
+example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。
+
+example/gateapp 是一个网关服务，客户端可以通过gprc-stream方式与网关建立长连接。
+
+example/test 是一个模拟客户端发包程序，内置多个测试用例。
+
+![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/224889189-950ed58b-2b9f-470d-a096-282cd849767e.png)
 
 ## RPC驱动
 
