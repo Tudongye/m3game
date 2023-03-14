@@ -213,24 +213,6 @@ go build .
 
 # 单实例开发方案(已完成)
 
-## Example
-
-example 是一组简单服务的样例，用来展示M3框架的单实例开发方案。
-
-example/simpleapp 是一个HelloWorld服务。
-
-example/mutilapp 是一个并发服务，提供Hello，TraceHello(链路追踪)，BreakHello(熔断限流) 接口
-
-example/asyncapp 是一个单线程异步服务，提供PostChannel(广播处理)，SSPullChannel(单线程阻塞) 接口
-
-example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。
-
-example/gateapp 是一个网关服务，客户端可以通过gprc-stream方式与网关建立长连接。
-
-example/test 是一个模拟客户端发包程序，内置多个测试用例。
-
-![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/224889189-950ed58b-2b9f-470d-a096-282cd849767e.png)
-
 ## RPC驱动
 
 在M3中所有的跨服务调用都依托RPC进行，RPC接口通过pb-grpc生成。M3框架的附加信息都存储在RPC的metadata中。
@@ -572,6 +554,36 @@ type GateReciver interface {
 }
 ```
 
+## Example
+
+example 是一组简单服务的样例，用来展示M3框架的单实例开发方案。
+
+example/simpleapp 是一个HelloWorld服务。
+
+example/mutilapp 是一个并发服务，提供Hello，TraceHello(链路追踪)，BreakHello(熔断限流) 接口
+
+example/asyncapp 是一个单线程异步服务，提供PostChannel(广播处理)，SSPullChannel(单线程阻塞) 接口
+
+example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。
+
+example/gateapp 是一个网关服务，客户端可以通过gprc-stream方式与网关建立长连接。
+
+example/test 是一个模拟客户端发包程序，内置多个测试用例。
+
+![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/224889189-950ed58b-2b9f-470d-a096-282cd849767e.png)
+
+example使用方式
+
+```
+1、修改example/config中 nats和router接口地址
+2、依次启动mutilapp,asyncapp,actorapp,gateapp的main/start.sh
+3、到test/main目录下执行测试用例命令
+./main -testmode Hello -agenturl 127.0.0.1:22000 // helloworld用例
+./main -testmode Trace -agenturl 127.0.0.1:22000 // helloworld链路追踪
+./main -testmode Break -agenturl 127.0.0.1:22000 // helloworld流量治理
+./main -testmode ActorCommon -agenturl 127.0.0.1:22000 // 注册，登陆，改名，升级，服务端到客户端主动通知
+./main -testmode ActorBroadCast -agenturl 127.0.0.1:22000 // 注册，登陆，广播
+```
 
 # 集群化部署方案(进行中)
 
