@@ -189,8 +189,8 @@ digraph go_pkg_relation {
             }}"
         shape = "record"
     ];
-    "mutil" [
-        label = "<head> mutil\l|
+    "multi" [
+        label = "<head> multi\l|
             {|{
                 <runtime> runtime\l|
                 <app> app\l|
@@ -295,10 +295,10 @@ digraph go_pkg_relation {
     actor:server -> server:head[color="green"]
     actor:transport -> transport:head[color="blue"]
     actor:log -> log:head[color="black"]
-    mutil:runtime -> runtime:head[color="blueviolet"]
-    mutil:app -> app:head[color="brown"]
-    mutil:server -> server:head[color="cadetblue"]
-    mutil:transport -> transport:head[color="chocolate"]
+    multi:runtime -> runtime:head[color="blueviolet"]
+    multi:app -> app:head[color="brown"]
+    multi:server -> server:head[color="cadetblue"]
+    multi:transport -> transport:head[color="chocolate"]
     client:proto -> proto:head[color="crimson"]
     client:transport -> transport:head[color="cyan"]
     client:log -> log:head[color="darkgrey"]

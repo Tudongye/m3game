@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/descriptor.proto";
+option go_package = "m3game/meta/metapb";
+
+
+
+extend google.protobuf.MessageOptions {
+    string db_primary_key             = 50001;
+
+    M3GRPCOption rpc_option             = 51001;
+}
+
+message M3GRPCOption {
+    string route_key = 1;
+    bool ntf = 2;
+    bool trace = 3;
+    bool cs = 4;
+}
+
+
+

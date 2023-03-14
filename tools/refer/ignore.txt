@@ -1,7 +1,7 @@
 example
-plugins/agent/httpagent
 plugins/broker/nats
 plugins/db/cache
+plugins/gate/grpcgate
 plugins/log/zap
 plugins/metric/prometheus
 plugins/router/consul

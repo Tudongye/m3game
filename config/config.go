@@ -3,8 +3,8 @@ package config
 import (
 	"flag"
 	"fmt"
+	"m3game/meta"
 	"m3game/plugins/log"
-	"m3game/util"
 	"strings"
 	"sync"
 
@@ -16,10 +16,10 @@ var (
 	_lock    sync.RWMutex
 	_kvCache = make(map[string]interface{})
 
-	_appid   string
-	_svcid   string
-	_worldid string
-	_envid   string
+	_appid   meta.RouteApp
+	_svcid   meta.RouteSvc
+	_worldid meta.RouteWorld
+	_envid   meta.RouteEnv
 )
 
 var (
@@ -77,19 +77,19 @@ func GetIDStr() string {
 	return _rconf.idstr
 }
 
-func GetAppID() string {
+func GetAppID() meta.RouteApp {
 	return _appid
 }
 
-func GetSvcID() string {
+func GetSvcID() meta.RouteSvc {
 	return _svcid
 }
 
-func GetWorldID() string {
+func GetWorldID() meta.RouteWorld {
 	return _worldid
 }
 
-func GetEnvID() string {
+func GetEnvID() meta.RouteEnv {
 	return _envid
 }
 
@@ -97,7 +97,7 @@ func GetEnv(key string) string {
 	return _rconf.envmap[key]
 }
 
-func init() {
+func Init() {
 	_rconf = &m3Config{
 		config:    viper.New(),
 		configBak: viper.New(),
@@ -108,13 +108,13 @@ func init() {
 	flag.StringVar(&_rconf.idstr, "idstr", "", "app idstr env.world.func.ins")
 	flag.Var(&_rconf.envmap, "env", "other config")
 	flag.Parse()
-	_appid = _rconf.idstr
-	if envid, worldid, funcid, _, err := util.AppStr2ID(_appid); err != nil {
-		panic("")
+	_appid = meta.RouteApp(_rconf.idstr)
+	if env, world, fun, _, err := _appid.Parse(); err != nil {
+		panic(fmt.Sprintf("idstr invaild %s", _appid))
 	} else {
-		_svcid = util.SvcID2Str(envid, worldid, funcid)
-		_worldid = util.WorldID2Str(envid, worldid)
-		_envid = util.EnvID2Str(envid)
+		_svcid = meta.GenRouteSvc(env, world, fun)
+		_worldid = meta.GenRouteWorld(env, world)
+		_envid = meta.GenRouteEnv(env)
 	}
 
 	log.Info("CfgPath:%s", _rconf.cfgPath)
