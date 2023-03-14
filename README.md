@@ -4,17 +4,17 @@
 
 A game framework using Golang and Grpc
 
-M3Game是一个采用Golang重构游戏后端框架的尝试，其旨在探索基于Golang的游戏后台开发方案。
+M3Game是一个采用Golang构建游戏后端的尝试，期望能探索出一条Golang游戏后台的开发方案。
 
-框架分为GameLogic，Frame-Runtime，Custom-Plugin三层。Frame-Runtime为框架驱动层，负责消息驱动，服务网格，插件管理等核心驱动工作。Custom-Plugin为自定义插件层，框架层将第三方服务抽象为多种自定义插件接口，插件层根据实际的基础设施来进行实现。GameLogic为游戏逻辑层，用于承载实际的业务逻辑。框架使用protobuf来生成脚手架，通过引入pb.Option等方式将业务逻辑自动注入到框架层中。
+框架分为GameLogic，Frame-Runtime，Custom-Plugin三层。Frame-Runtime为框架驱动层，负责消息驱动，服务网格，插件管理等核心驱动工作。Custom-Plugin为自定义插件层，框架层将第三方服务抽象为多种插件接口，插件层根据实际的基础设施来进行实现。GameLogic为游戏逻辑层，用于承载实际的业务逻辑。框架使用protobuf来生成脚手架，可以通过在pb中添加Option的方式将业务层接口自动注入到框架层。
 
 优势：
 
-1，简单但不简陋。框架包含了一个重度游戏后端的完备实现。
+1，更加贴近实际业务。
 
 2、自动化的逻辑注入。借助pb的自定义选项，业务逻辑只需要很少的代码，就可以自动的注入到框架层
 
-3、没有自定义代码生成器。框架的代码生成和逻辑注入只依赖原生的protobuf和grpc，不需要额外安装定制化工具
+3、更通用的技术和更低的门槛。M3基于golang主流的protobuf和grpc进行构建，没有繁琐的代码生成工具，上手门槛低。
 
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
@@ -44,11 +44,15 @@ DB-Plugin: 存储组件，提供数据存储能力，当前有一个内存数据
 
 Broker-Plugin：消息队列组件，提供针对主题的发布和订阅功能，当前有一个Nats实现
 
-Log-Plugin: 日志组件。
+Log-Plugin: 日志组件，当前有一个Zap实现。
 
-Trace-Plugin: 链路追踪组件
+Trace-Plugin: 链路追踪组件，当前接入opentelemetry标准。
 
-Metric-Plugin: 监控组件
+Metric-Plugin: 监控组件，当前有一个prometheus实现
+
+Shape-Plugin：流量治理组件，当前有一个sentinel实现
+
+Gate-Plugin：服务网关组件，当前有一个grpc-stream实现
 
 ## M3包依赖
 
@@ -66,9 +70,11 @@ example/asyncapp 是一个单线程异步服务，提供PostChannel(广播处理
 
 example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。
 
-example/gateapp 是一个网关服务，对外提供Http接口(服务网关)访问内部服务。
+example/gateapp 是一个网关服务，客户端可以通过gprc-stream方式与网关建立长连接。
 
 example/test 是一个模拟客户端发包程序，内置多个测试用例。
+
+![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/224889189-950ed58b-2b9f-470d-a096-282cd849767e.png)
 
 ## HelloWorld
 
@@ -82,7 +88,6 @@ syntax = "proto3";
 
 package proto;
 
-import "pkg.proto";		// 框架文件
 import "options.proto";		// 框架文件
 
 option go_package = "proto/pb";
@@ -96,12 +101,10 @@ service SimpleSer {
 message HelloWorld {
     option (rpc_option).route_key = "";
     message Req {
-        RouteHead RouteHead = 1;
-        string Req = 2;
+        string Req = 1;
     }
     message Rsp {
-        RouteHead RouteHead = 1;
-        string Rsp = 2;
+        string Rsp = 1;
     }
 }
 
@@ -226,12 +229,14 @@ go build .
 
 ![image](https://user-images.githubusercontent.com/16680818/224407634-3c464a0d-17bb-4f1b-8668-92a54a50d612.png)
 
+# 单实例开发方案(已完成)
 
 ## RPC驱动
 
-在M3中所有的跨服务功能调用都依托RPC进行，RPC接口通过pb-grpc生成
+在M3中所有的跨服务调用都依托RPC进行，RPC接口通过pb-grpc生成。M3框架的附加信息都存储在RPC的metadata中。
 
 如下是一个RPC定义的proto。
+
 ```
 // 定义SimpleSer服务
 service SimpleSer {
@@ -242,29 +247,41 @@ service SimpleSer {
 message HelloWorld {
     option (rpc_option).route_key = "";
     message Req {
-        RouteHead RouteHead = 1;
-        string Req = 2;
+        string Req = 1;
     }
     message Rsp {
-        RouteHead RouteHead = 1;
-        string Rsp = 2;
+        string Rsp = 1;
     }
 }
 ```
-游戏RPC驱动通过ServerInterceptor注入Grpc，
 
-游戏服务端驱动参看 transport/transport.go: RecvInterceptor。
+业务层通过编写rpc_option将RPC接口注入框架层，解析相关逻辑参看runtime/rpc。rpc_option定义如下
 
-![未命名文件 (11)](https://user-images.githubusercontent.com/16680818/222907647-cd2cf32e-c633-4cc8-95f5-187a10251e1f.png)
+```
+message M3GRPCOption {
+    string route_key = 1;	// Hash路由时的key字段名
+    bool ntf = 2;		// 是否是单向Nty
+    bool trace = 3;		// 是否开启链路追踪
+    bool cs = 4;		// 是否支持客户端访问
+}
+```
 
-游戏客户端端驱动参看 client/client.go: SendInterceptor。
+M3框架通过rpc注入和泛型，大大简化了业务层进行RPC调用时的操作，如下是对hello接口进行"随机选址"的RPCCall调用
 
-![未命名文件 (9)](https://user-images.githubusercontent.com/16680818/222907580-1d82955a-ef8f-45da-a897-e99a2f13b55c.png)
-
-其中rpc_option是M3为了减少重复编码而添加的自定义选项，使用反射注入到框架层。自定义选项相关定义参看 options.proto，相关逻辑参看runtime/rpc.
-
-当客户端调用RPCCall时，M3框架会自动根据协议文件内容填充路由参数。
-
+```
+func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (string, error) {
+	var in pb.Hello_Req
+	in.Req = hellostr
+	// RPCCallRandom 接受泛型参数in,返回泛型参数out。
+	// RPCCall通过入参in获取到对应的rpc_option，自动填充选址参数，并对常见RPC异常进行前置处理。
+	out, err := client.RPCCallRandom(_client, _client.Hello, ctx, &in, opts...)
+	if err != nil {
+		return "", err
+	} else {
+		return out.Rsp, nil
+	}
+}
+```
 
 ## 三种业务模型
 
@@ -288,7 +305,7 @@ Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实
 
 M3为每个Actor分配一个执行Goroutine，并引入ActorRuntime和ActorMgr对Actor进行管理，前者用于管理单个Actor的执行Goroutine，后者用于管理整个Actor池。
 
-M3在Actor服务的RPC调用链中加入了Actor管理逻辑，业务层逻辑都在Actor自己的Goroutine中执行。
+M3在Actor服务的RPC调用链中加入了Actor管理逻辑。对于Actor的RPC调用都在Actor自己的Goroutine中执行。
 
 ![未命名文件 (13)](https://user-images.githubusercontent.com/16680818/222914612-a50f88b5-ad3f-4dc9-9b65-35078f83605d.png)
 
@@ -334,11 +351,11 @@ M3对于资源文件格式没有要求，只要求资源管理器提供Load接�
 ![未命名文件 (7)](https://user-images.githubusercontent.com/16680818/224412683-4511817c-55b9-4657-915d-d1d6d55cadec.png)
 
 
-## 存储定义
+## 实体存储
 
-M3采用pb管理游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看example/actorapp/actor
+M3采用pb来定义游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看example/actorapp/actor
 
-当前M3要求DB结构所有一级字段必须是string（必须是主键） 或 proto.Message（pb类型不可重复），且DB结构必须设置一个string类型的主键。
+M3要求实体DB结构的一级字段必须是string（必须是主键） 或 proto.Message（pb类型不可重复），且DB结构必须设置一个string类型的主键。
 
 ```
 
@@ -357,12 +374,11 @@ message ActorInfo {
     int32 Level = 1;
 }
 
-
 ```
 
 ### DB结构注入
 
-M3使用DB插件来进行实体数据的落地，M3通过PbReflect自动感知实体数据的DB结构Meta，DB插件根据Meta来对实体数据进行CRUD操作。DBMeta的生成逻辑参看 db/dbmeta.go
+M3使用DB插件来对实体数据进行落地，M3根据实体的PB结构生成对应的dbmeta，DB插件根据Meta来对实体数据进行CRUD操作。DBMeta的生成逻辑参看 db/dbmeta.go
 
 ```
 type DBMeta[T proto.Message] struct {
@@ -385,7 +401,7 @@ type DB interface {
 
 ### Wraper
 
-Wraper，对数据的ORM级封装，采用pb反射&泛型极大的简化了DB相关操作，同时封装了自动化的置脏管理。example/actorapp/actor是一个基于Wraper的实体样例
+Wraper，对数据的ORM级封装，采用反射&泛型极大的简化了DB操作，同时封装了自动化的置脏管理。example/actorapp/actor是一个基于Wraper的实体样例
 
 如下是Wraper定义
 
@@ -464,7 +480,7 @@ MinRequestNum = 2			// 熔断生效最小请求次数
 
 M3采用Metric组件来进行监控统计，对于统计项分为Counter，Guage，Histogram，Summary四类。
 
-metric/prometheus 是一个基于 prometheus 实现的Metric
+metric/prometheus 是一个基于prometheu 实现的Metric
 
 ```
 type StatCounter interface {	// 计数器
@@ -534,11 +550,30 @@ func ErrorP(plus LogPlus, format string, v ...interface{})
 func FatalP(plus LogPlus, format string, v ...interface{})
 ```
 
-## 异步任务
-
 ## 服务网关
 
-## 压测
+服务网关用于管理与客户端的连接，并将客户端请求转化为Grpc-Reply请求。plugins/gate/grpcgate是一个 基于Grpc-Stream建立的Gate组件。
+
+example/gateapp实现了一套将客户端请求转化为Grpc-Reply请求的通用方案。
+
+```
+type Gate interface {
+	GetConn(playerid string) CSConn
+}
+
+type CSConn interface {
+	Send(ctx context.Context, msg *metapb.CSMsg) error
+	Kick()
+}
+
+type GateReciver interface {
+	AuthCall(*metapb.AuthReq) (*metapb.AuthRsp, error)	// 建立连接时的鉴权接口
+	LogicCall(*metapb.CSMsg) (*metapb.CSMsg, error)		// 将客户端请求转化为Grpc-Reply请求
+}
+```
+
+
+# 集群化部署方案(进行中)
 
 ## Demo(TODO)
 
