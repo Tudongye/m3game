@@ -1,0 +1,1 @@
+./main -idstr example.world1.actor.1 -conf ../../config/actorapp.toml

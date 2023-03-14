@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service MultiSer {
+    rpc Hello(Hello.Req) returns (Hello.Rsp);
+    rpc TraceHello(TraceHello.Req) returns (TraceHello.Rsp);
+    rpc BreakHello(BreakHello.Req) returns (BreakHello.Rsp);
+}
+
+message Hello {
+    option (rpc_option).route_key = "";
+    option (rpc_option).cs = true;
+    message Req {
+        string Req = 1;
+    }
+    message Rsp {
+        string Rsp = 1;
+    }
+}
+
+message TraceHello {
+    option (rpc_option).route_key = "";
+    option (rpc_option).trace = true;
+    option (rpc_option).cs = true;
+    message Req {
+        string Req = 1;
+    }
+    message Rsp {
+        string Rsp = 1;
+    }
+}
+
+message BreakHello {
+    option (rpc_option).route_key = "";
+    option (rpc_option).cs = true;
+    message Req {
+        string Req = 1;
+    }
+    message Rsp {
+        string Rsp = 1;
+    }
+}

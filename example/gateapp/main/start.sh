@@ -1,0 +1,1 @@
+./main -idstr example.world1.gate.1 -conf ../../config/gateapp.toml
