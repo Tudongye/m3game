@@ -575,19 +575,19 @@ type GateReciver interface {
 
 # 集群化部署方案(进行中)
 
-## Demo(TODO)
+## Demo
 
-M3Game是为了解决游戏开发时遇到的具体问题而构建的框架。为了更好的暴露问题,并验证解决方案，M3构建了一个重度游戏后端Demo作为集群化解决方案的载体。
+为了更好的暴露问题,并验证解决方案，M3构建了一个重度游戏后端Demo作为集群化解决方案的载体。
 
-Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，玩家可以自由组建社团(Club)，核心玩法采用跨区匹配(Match)开单局(Fight)方式进行
+Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，玩家可以自由组建社团(Club)，核心玩法采用匹配(Match)开单局(Fight)方式进行
 
-游戏实体可以分为 玩家(Role)，小区(World)，社团(Club)，小区玩家关系(WorldRole)，社团玩家关系(ClubRole)，单局(Fight)
+游戏实体分为 玩家(Role)，小区(World)，社团(Club)，小区玩家关系(WorldRole)，社团玩家关系(ClubRole)，单局(Fight)
 
 ![未命名文件 (3)](https://user-images.githubusercontent.com/16680818/223912107-3d6c8c5c-7eb8-45a1-a820-75c49652257e.png)
 
-服务实例包括DirApp(导航服务)，RoleApp(玩家服务)，ClubApp(社团服务)， ClubRoleApp(社团玩家服务)，WorldApp(小区服务)，WorlRoledApp(小区玩家服务)，MatchApp(匹配服务)，FightApp(战斗服务)，ZoneApp(战斗集群服务)
+服务实例包括GateApp(网关服务), DirApp(导航服务)，RoleApp(玩家服务)，ClubApp(社团服务)， ClubRoleApp(社团玩家服务)，WorldApp(小区服务)，WorlRoledApp(小区玩家服务)，MatchApp(匹配服务)，ZoneApp(战斗集群服务)，FightApp(战斗服务)
 
-其中DirApp，ClubRoleApp，WorldRoleApp，MatchApp，ZoneApp为无状态服务，RoleApp，FightApp为激发式有状态服务(负载受玩家行为影响)，ClubApp 为常驻式动态负载有状态服务(负载不受玩家行为影响，且负载动态可变)，WorldApp为常驻式固定负载有状态服务(负载不受玩家行为影响，且负载固定)
+其中GateApp, DirApp，ClubRoleApp，WorldRoleApp，MatchApp，ZoneApp为无状态服务，RoleApp，FightApp为激发式有状态服务(负载受玩家行为影响)，ClubApp 为常驻式动态负载有状态服务(负载不受玩家行为影响，且负载动态可变)，WorldApp为常驻式固定负载有状态服务(负载不受玩家行为影响，且负载固定)
 
 ![未命名文件 (4)](https://user-images.githubusercontent.com/16680818/223912598-982bc454-409e-46ec-b54b-84238194d582.png)
 
@@ -600,3 +600,5 @@ Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，玩家
 ## 热更新
 
 ## 集群部署
+
+## 自动化测试
