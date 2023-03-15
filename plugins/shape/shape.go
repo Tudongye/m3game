@@ -2,6 +2,7 @@ package shape
 
 import (
 	"context"
+	"m3game/runtime/plugin"
 
 	"google.golang.org/grpc"
 )
@@ -22,6 +23,7 @@ func Get() Shape {
 }
 
 type Shape interface {
+	plugin.PluginIns
 	RegisterRule([]Rule) error
 	ClientInterceptor() grpc.UnaryClientInterceptor
 	ServerInterceptor() grpc.UnaryServerInterceptor

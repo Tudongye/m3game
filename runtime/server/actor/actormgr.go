@@ -3,6 +3,7 @@ package actor
 import (
 	"context"
 	"fmt"
+	"m3game/plugins/log"
 	"sync"
 	"time"
 
@@ -36,14 +37,18 @@ func (am *ActorMgr) createActor(actorid string) (*actorRuntime, error) {
 		return a, nil
 	}
 	actor := am.actorcreater(actorid)
-	if err := actor.OnInit(); err != nil {
-		return nil, err
-	}
-	am.actormap[actorid] = newActorRuntime(actor)
+	ar := newActorRuntime(actor)
+	ctx, cancel := context.WithCancel(context.Background())
+	ar.ctx = ctx
+	ar.cancel = cancel
+	am.actormap[actorid] = ar
 	go func() {
-		am.actormap[actorid].run()
+		if err := am.actormap[actorid].run(); err != nil {
+			log.Error("actor.run() err %s", err.Error())
+		}
 		am.lock.Lock()
 		defer am.lock.Unlock()
+		ar.cancel()
 		delete(am.actormap, actorid)
 	}()
 	return am.actormap[actorid], nil
@@ -70,9 +75,13 @@ func (am *ActorMgr) CallFunc(actorid string, ctx context.Context, req interface{
 	}
 	t := time.NewTimer(time.Duration(_cfg.MaxReqWaitTime) * time.Second)
 	select {
+	case <-ar.ctx.Done():
+		return nil, fmt.Errorf("Actor Close")
 	case rsp := <-actorreq.rspchan:
 		return rsp.rsp, rsp.err
 	case <-t.C:
+		return nil, fmt.Errorf("Wait Rsp TimeOut")
+	case <-ctx.Done():
 		return nil, fmt.Errorf("Wait Rsp TimeOut")
 	}
 }

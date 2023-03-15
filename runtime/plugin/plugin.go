@@ -17,8 +17,9 @@ const (
 	Metric Type = "metric" // 监控
 	Broker Type = "broker" // 消息队列
 	Log    Type = "log"    // 日志
-	Shape  Type = "Shape"  // 流量管理
-	Gate   Type = "Gate"   // CS连接
+	Shape  Type = "shape"  // 流量管理
+	Gate   Type = "gate"   // CS连接
+	Lease  Type = "lease"  // 租约
 )
 
 const (
@@ -26,7 +27,8 @@ const (
 )
 
 var (
-	_factoryMap map[string]Factory
+	_pluginserial = []Type{Log, Broker, Router, Trace, Metric, DB, Lease, Shape, Gate} // Plugin加载顺序
+	_factoryMap   map[string]Factory
 )
 
 func init() {
@@ -62,7 +64,8 @@ func InitPlugins(v viper.Viper) error {
 	if err := v.Unmarshal(&cfg); err != nil {
 		return errors.Wrap(err, "Unmarshal PluginCfg")
 	}
-	for _, tm := range cfg.Plugin {
+	for _, typ := range _pluginserial {
+		tm := cfg.Plugin[string(typ)]
 		for name, nm := range tm {
 			factory, ok := _factoryMap[name]
 			if !ok {
@@ -73,22 +76,12 @@ func InitPlugins(v viper.Viper) error {
 			if err != nil {
 				return errors.Wrapf(err, "Factory %s", name)
 			}
-			if err := registerPluginIns(factory.Type(), name, getPluginTag(nm), pluginIns); err != nil {
+			if err := registerPluginIns(factory.Type(), name, pluginIns); err != nil {
 				return errors.Wrapf(err, "Factory %s", name)
 			}
 		}
 	}
 	return nil
-}
-
-func getPluginTag(m map[string]interface{}) string {
-	if v, ok := m["tag"]; !ok {
-		return _defaulttag
-	} else if tag, ok := v.(string); !ok {
-		return _defaulttag
-	} else {
-		return tag
-	}
 }
 
 func Gett[T PluginIns]() T {

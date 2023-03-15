@@ -1,5 +1,7 @@
 package router
 
+import "m3game/runtime/plugin"
+
 var (
 	_router Router
 )
@@ -11,6 +13,7 @@ type Instance interface {
 }
 
 type Router interface {
+	plugin.PluginIns
 	Register(app string, svc string, addr string) error
 	Deregister(app string, svc string) error
 	GetAllInstances(svcid string) ([]Instance, error)

@@ -1,6 +1,8 @@
 package metric
 
-import "sync"
+import (
+	"sync"
+)
 
 var (
 	_statCounters   sync.Map

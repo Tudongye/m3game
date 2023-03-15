@@ -29,11 +29,15 @@ type Server struct {
 }
 
 type Config struct {
-	ActiveTimeOut  int `mapstructure:"ActiveTimeOut"`
-	SaveTimeInter  int `mapstructure:"SaveTimeInter"`
-	TickTimeInter  int `mapstructure:"TickTimeInter"`
-	MaxReqChanSize int `mapstructure:"MaxReqChanSize"`
-	MaxReqWaitTime int `mapstructure:"MaxReqWaitTime"`
+	ActiveTimeOut        int    `mapstructure:"ActiveTimeOut"`
+	SaveTimeInter        int    `mapstructure:"SaveTimeInter"`
+	TickTimeInter        int    `mapstructure:"TickTimeInter"`
+	MaxReqChanSize       int    `mapstructure:"MaxReqChanSize"`
+	MaxReqWaitTime       int    `mapstructure:"MaxReqWaitTime"`
+	LeaseMode            int    `mapstructure:"LeaseMode"`
+	LeasePrefix          string `mapstructure:"LeasePrefix"`
+	AllocLeaseTimeOut    int    `mapstructure:"AllocLeaseTimeOut"`
+	WaitFreeLeaseTimeOut int    `mapstructure:"WaitFreeLeaseTimeOut"`
 }
 
 func (c *Config) CheckVaild() error {
@@ -51,6 +55,17 @@ func (c *Config) CheckVaild() error {
 	}
 	if c.MaxReqWaitTime <= 0 {
 		return fmt.Errorf("MaxReqWaitTime %d invaild", c.MaxReqWaitTime)
+	}
+	if c.LeaseMode == 1 {
+		if c.LeasePrefix == "" {
+			return fmt.Errorf("LeasePrefix %s invaild", c.LeasePrefix)
+		}
+		if c.AllocLeaseTimeOut == 0 {
+			return fmt.Errorf("AllocLeaseTimeOut %d invaild", c.AllocLeaseTimeOut)
+		}
+		if c.WaitFreeLeaseTimeOut == 0 {
+			return fmt.Errorf("WaitFreeLeaseTimeOut %d invaild", c.WaitFreeLeaseTimeOut)
+		}
 	}
 	return nil
 }
@@ -109,4 +124,8 @@ func (s *Server) ClientInterceptor(ctx context.Context, method string, req, resp
 
 func (s *Server) TransportRegister() func(grpc.ServiceRegistrar) error {
 	return nil
+}
+
+func (s *Server) ActorMgr() *ActorMgr {
+	return s.actormgr
 }

@@ -56,6 +56,11 @@ func ShutDown() error {
 	return nil
 }
 
+func SoftShutDown() error {
+	log.Info("SoftShutDown...")
+	return ShutDown()
+}
+
 func Reload() error {
 	log.Info("Reload...")
 	err := reload()
@@ -189,6 +194,8 @@ func Run(app app.App, servers []server.Server) error {
 				log.Info("Server.Stop %s...", server.Name())
 				server.Stop()
 			}
+			log.Info("Plugin.Stop...")
+			plugin.Destroy()
 			log.Info("Transport.Stop...")
 			transport.ShutDown()
 			log.Info("Doned")

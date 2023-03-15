@@ -3,6 +3,7 @@ package gate
 import (
 	"context"
 	"m3game/meta/metapb"
+	"m3game/runtime/plugin"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -14,6 +15,7 @@ var (
 )
 
 type Gate interface {
+	plugin.PluginIns
 	GetConn(playerid string) CSConn
 }
 
@@ -29,6 +31,10 @@ type GateReciver interface {
 
 func Set(g Gate) {
 	_gate = g
+}
+
+func Get() Gate {
+	return _gate
 }
 
 func GetConn(playerid string) CSConn {

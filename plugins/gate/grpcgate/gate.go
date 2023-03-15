@@ -82,7 +82,10 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	RegisterGateSerServer(_instance.gser, _instance)
 	go func() {
 		log.Info("GrpcGate Listen %s", _cfg.Addr)
-		_instance.gser.Serve(listener)
+		if err := _instance.gser.Serve(listener); err != nil {
+			log.Error("GrpcGate Err %s", err.Error())
+		}
+		_instance.isstoped = true
 	}()
 	gate.Set(_instance)
 	return _instance, nil
@@ -96,16 +99,18 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(plugin.PluginIns) bool {
-	return false
+func (f *Factory) CanDelete(p plugin.PluginIns) bool {
+	g := p.(*Gate)
+	return g.isstoped
 }
 
 type Gate struct {
 	conns map[string]*CSConn
 	gser  *grpc.Server
 	UnimplementedGateSerServer
-	mutex sync.RWMutex
-	no    int
+	mutex    sync.RWMutex
+	isstoped bool
+	no       int
 }
 
 func (g *Gate) Factory() plugin.Factory {
@@ -114,7 +119,10 @@ func (g *Gate) Factory() plugin.Factory {
 func (g *Gate) GetConn(playerid string) gate.CSConn {
 	g.mutex.RLock()
 	defer g.mutex.RUnlock()
-	return g.conns[playerid]
+	if c, ok := g.conns[playerid]; ok {
+		return c
+	}
+	return nil
 }
 func (g *Gate) GenConnID() int {
 	g.mutex.Lock()
@@ -154,7 +162,7 @@ func (g *Gate) CSTransport(srv GateSer_CSTransportServer) error {
 		g.conns[playerid] = &CSConn{
 			srv:      srv,
 			no:       n,
-			sendch:   make(chan *metapb.CSMsg, 1),
+			sendch:   make(chan *metapb.CSMsg, 10),
 			exitch:   make(chan struct{}),
 			isclosed: false,
 			playerid: playerid,
@@ -232,7 +240,8 @@ func (c *CSConn) recvloop() {
 			log.Error("Call Logic %s %s", msg.Method, err.Error())
 			break
 		} else {
-			c.Send(context.Background(), res)
+			log.Debug("Send %s %v", msg.Method, c.Send(context.Background(), res))
+
 		}
 	}
 	c.safeclose()

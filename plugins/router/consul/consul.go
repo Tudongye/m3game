@@ -2,6 +2,7 @@ package consul
 
 import (
 	"fmt"
+	"m3game/config"
 	"m3game/plugins/log"
 	"m3game/plugins/router"
 	"m3game/runtime/plugin"
@@ -73,7 +74,9 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	return _instance, nil
 }
 
-func (f *Factory) Destroy(plugin.PluginIns) error {
+func (f *Factory) Destroy(p plugin.PluginIns) error {
+	r := p.(*Router)
+	r.Deregister(config.GetAppID().String(), config.GetSvcID().String())
 	return nil
 }
 
@@ -81,8 +84,20 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(plugin.PluginIns) bool {
-	return false
+func (f *Factory) CanDelete(p plugin.PluginIns) bool {
+	r := p.(*Router)
+	if inss, err := r.GetAllInstances(config.GetSvcID().String()); err != nil {
+		return true
+	} else if len(inss) == 0 {
+		return true
+	} else {
+		for _, ins := range inss {
+			if ins.GetIDStr() == string(config.GetAppID()) {
+				return false
+			}
+		}
+		return true
+	}
 }
 
 type Router struct {

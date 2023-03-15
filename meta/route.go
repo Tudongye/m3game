@@ -1,9 +1,10 @@
 package meta
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 type RouteType string
