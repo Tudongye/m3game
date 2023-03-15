@@ -54,6 +54,8 @@ Shape-Plugin：流量治理组件，当前有一个sentinel实现
 
 Gate-Plugin：服务网关组件，当前有一个grpc-stream实现
 
+Lease-Plugin：租约管理组件，当前有一个etcd实现
+
 ## M3内部依赖
 
 ![image](https://user-images.githubusercontent.com/16680818/224892560-8904a233-d952-4bba-806e-83ac26c97c4c.png)
@@ -288,6 +290,8 @@ Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实
 M3为每个Actor分配一个执行Goroutine，并引入ActorRuntime和ActorMgr对Actor进行管理，前者用于管理单个Actor的执行Goroutine，后者用于管理整个Actor池。
 
 M3在Actor服务的RPC调用链中加入了Actor管理逻辑。对于Actor的RPC调用都在Actor自己的Goroutine中执行。
+
+引入Lease-plugin可以保证一个Actor在分布式环境下至多只会在一个App上运行。参看rumtime/server/actor
 
 ![未命名文件 (13)](https://user-images.githubusercontent.com/16680818/222914612-a50f88b5-ad3f-4dc9-9b65-35078f83605d.png)
 
@@ -554,6 +558,33 @@ type GateReciver interface {
 }
 ```
 
+## 租约管理
+
+为了解决分布式系统下的数据一致性问题，M3引入了租约(悲观锁)，Lease-plugin，plugins/lease/etcd 是一个基于etcd的实现。
+
+使用租约来保护数据的所有权，可以保证在同一时间，整个分布式系统中最多只会有一个App可以操作该数据。
+
+```
+
+type LeaseMoveOutFunc func(context.Context) ([]byte, error) // 租约退出回调
+
+type Lease interface {
+	plugin.PluginIns
+	AllocLease(ctx context.Context, id string, f LeaseMoveOutFunc) error // 获取租约
+	FreeLease(ctx context.Context, id string) error                      // 释放租约
+	KickLease(ctx context.Context, id string) ([]byte, error)            // 要求释放租约
+	RecvKickLease(ctx context.Context, id string) ([]byte, error)        // 接受释放租约消息
+	GetLease(ctx context.Context, id string) ([]byte, error)	     // 获取租约内容
+}
+
+type LeaseReciver interface {
+	SendKickLease(ctx context.Context, id string, app string) ([]byte, error) // 发送释放租约消息
+}
+```
+
+![未命名文件 (10)](https://user-images.githubusercontent.com/16680818/225224998-70fecb14-d28c-47d7-a49f-16516e3a53ae.png)
+
+
 ## Example
 
 example 是一组简单服务的样例，用来展示M3框架的单实例开发方案。
@@ -583,6 +614,7 @@ example使用方式
 ./main -testmode Break -agenturl 127.0.0.1:22000 // helloworld流量治理
 ./main -testmode ActorCommon -agenturl 127.0.0.1:22000 // 注册，登陆，改名，升级，服务端到客户端主动通知
 ./main -testmode ActorBroadCast -agenturl 127.0.0.1:22000 // 注册，登陆，广播
+./main -testmode ActorMove -agenturl 127.0.0.1:22000 // 测试两个ActorSer之间进行服务迁移（需要启动ActorApp1 和 ActorApp2）
 ```
 
 # 集群化部署方案(进行中)
