@@ -619,22 +619,6 @@ example使用方式
 
 # 集群化部署方案(进行中)
 
-## Demo
-
-为了更好的暴露问题,并验证解决方案，M3构建了一个重度游戏后端Demo作为集群化解决方案的载体。
-
-Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，玩家可以自由组建社团(Club)，核心玩法采用匹配(Match)开单局(Fight)方式进行
-
-游戏实体分为 玩家(Role)，小区(World)，社团(Club)，小区玩家关系(WorldRole)，社团玩家关系(ClubRole)，单局(Fight)
-
-![未命名文件 (3)](https://user-images.githubusercontent.com/16680818/223912107-3d6c8c5c-7eb8-45a1-a820-75c49652257e.png)
-
-服务实例包括GateApp(网关服务), DirApp(导航服务)，RoleApp(玩家服务)，ClubApp(社团服务)， ClubRoleApp(社团玩家服务)，WorldApp(小区服务)，WorlRoledApp(小区玩家服务)，MatchApp(匹配服务)，ZoneApp(战斗集群服务)，FightApp(战斗服务)
-
-其中GateApp, DirApp，ClubRoleApp，WorldRoleApp，MatchApp，ZoneApp为无状态服务，RoleApp，FightApp为激发式有状态服务(负载受玩家行为影响)，ClubApp 为常驻式动态负载有状态服务(负载不受玩家行为影响，且负载动态可变)，WorldApp为常驻式固定负载有状态服务(负载不受玩家行为影响，且负载固定)
-
-![未命名文件 (4)](https://user-images.githubusercontent.com/16680818/223912598-982bc454-409e-46ec-b54b-84238194d582.png)
-
 ## 灰度发布
 
 ## 容灾
@@ -646,3 +630,114 @@ Demo是一个分区式游戏，玩家(Role)数据按小区(World)隔离，玩家
 ## 集群部署
 
 ## 自动化测试
+
+# Demo
+
+为了更好的暴露问题,并验证解决方案，M3构建了一个重度游戏后端Demo作为集群化解决方案的载体。
+
+Demo是一个全服互通游戏，玩家(Role)可以自由组建社团(Club)，核心玩法采用匹配(Match)开单局(Fight)方式进行。
+
+在集群部署上，希望Demo可以通过简单的增删机器，实现任意模块的线上扩缩容和容灾恢复功能。
+
+游戏实体分为 玩家(Role)，社团(Club)，单局(Fight)。玩家(Role)实体只有对应玩家在线时才会激活，社团(Club)实体一经创建常驻激活，直到被解散，单局(Fight)实体在玩家开启单局期间才会激活且激活期间不易发生服务迁移。
+
+服务实例包括GateApp(网关服务), UidApp(id管理服务)，OnlineApp(在线管理服务)，RoleApp(玩家服务)，ClubApp(社团服务)，MatchApp(匹配服务)，ZoneApp(战斗集群服务)，FightApp(战斗服务)
+
+## 简单介绍一下
+
+游戏后台服务一般分为玩法服务和外围服务。
+
+玩法服务指与客户端表现直接关联的状态同步类服务，比如MMO的地图服务，Moba的单局服务等。这类服务同质化高，易于抽象，经常与客户端共用逻辑代码，甚至可以由unity，ue等客户端游戏引擎直接生成。
+
+外围服务指的是玩法服务以外用于承载游戏逻辑的服务，比如吃鸡的大厅服务，好友服务，战队服务等。这类服务以数据管理为核心，与具体的业务逻辑相关比如数值成长，运营活动，很难抽象为通用架构，是游戏后端开发的主要工作。
+
+## 外围服务
+
+在本demo中外围服务包括GateApp, UidApp, OnlineApp, RoleApp, ClubApp组成的部分，管理玩家(Role) 和 社团(Club)数据。
+
+![未命名文件 (11)](https://user-images.githubusercontent.com/16680818/225325356-aa9fe15d-ef20-454b-a9d6-d9a48ec358d2.png)
+
+GateApp: 网关服务，无状态服务，客户端任意链接
+
+UidApp: Id管理服务，包括玩家Openid到RoleId的映射，ClubId的分配。采用主从模式部署，由主备提供单点的无状态服务，RPC采用Single寻路
+
+RoleApp：玩家服务，以Role为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过OnlineApp来维护数据一致性(Role的量比较大不适合租约直接管理)，RPC采用Hash寻路
+
+OnlineApp：在线管理，维护Role在线状态，Role在线状态落地DB存储，实时读取。采用对等部署，RPC采用Random寻路
+
+ClubApp：社团服务，将Club划分为有限个Slot，以Slot为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过租约来维护数据一致性，RPC采用Hash寻路
+
+### 服务接口协议
+
+首先编写服务接口协议
+
+```
+# GateApp
+service GateSer {
+    rpc SendToCli(SendToCli.Req) returns (SendToCli.Rsp);	// 向客户端主动推送
+}
+
+# UidApp
+service UidSer {
+    rpc AllocRoleId(AllocRoleId.Req) returns (AllocRoleId.Rsp); // 分配RoleID
+    rpc AllocClubId(AllocClubId.Req) returns (AllocClubId.Rsp); // 分配ClubID
+}
+
+# RoleApp
+service RoleSer {
+    rpc RoleLogin(RoleLogin.Req) returns (RoleLogin.Rsp);   // 登陆注册
+    rpc RoleGetInfo(RoleGetInfo.Req) returns (RoleGetInfo.Rsp); // 获取详情
+    rpc RoleModifyName(RoleModifyName.Req) returns (RoleModifyName.Rsp);    // 改名
+    rpc RolePowerUp(RolePowerUp.Req) returns (RolePowerUp.Rsp);    // 战力提升
+    rpc RolePostChannel(RolePostChannel.Req) returns (RolePostChannel.Rsp); // 发送广播
+
+    rpc RoleGetClubInfo(RoleGetClubInfo.Req) returns (RoleGetClubInfo.Rsp); // 获取社团信息
+    rpc RoleGetClubList(RoleGetClubList.Req) returns (RoleGetClubList.Rsp); // 获取社团列表
+    rpc RoleGetClubRoleInfo(RoleGetClubRoleInfo.Req) returns (RoleGetClubRoleInfo.Rsp); // 获取玩家社团信息
+    rpc RoleCreateClub(RoleCreateClub.Req) returns (RoleCreateClub.Rsp); // 创建社团
+    rpc RoleJoinClub(RoleJoinClub.Req) returns (RoleJoinClub.Rsp); // 加入社团
+    rpc RoleExitClub(RoleExitClub.Req) returns (RoleExitClub.Rsp); // 退出社团
+    rpc RoleCancelClub(RoleCancelClub.Req) returns (RoleCancelClub.Rsp); // 解散社团
+}
+
+service RoleDaemonSer {
+    rpc RoleRecvChannel(RoleRecvChannel.Req) returns (RoleRecvChannel.Rsp);  // 接受广播
+    rpc RoleKick(RoleKick.Req) returns (RoleKick.Rsp);    // 服务迁移
+}
+
+# OnlineApp
+service OnlineSer {
+    rpc OnlinePost(OnlinePost.Req) returns (OnlinePost.Rsp);   // 上报在线情况
+    rpc OnlineGet(OnlineGet.Req) returns (OnlineGet.Rsp);   // 获取在线情况
+    rpc OnlineKeeplive(OnlineKeeplive.Req) returns (OnlineKeeplive.Rsp);   // Ser心跳
+}
+
+# ClubApp
+service ClubSer {
+    rpc ClubCreate(ClubCreate.Req) returns (ClubCreate.Rsp);   // 创建社团
+    rpc ClubGetInfo(ClubGetInfo.Req) returns (ClubGetInfo.Rsp);   // 创建社团
+    rpc ClubJoin(ClubJoin.Req) returns (ClubJoin.Rsp);   // 加入社团
+    rpc ClubExit(ClubExit.Req) returns (ClubExit.Rsp);   // 退出社团
+    rpc ClubCancel(ClubCancel.Req) returns (ClubCancel.Rsp);   // 解散社团
+}
+
+service ClubDaemonSer {
+    rpc ClubKick(ClubKick.Req) returns (ClubKick.Rsp);    // 服务迁移
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
