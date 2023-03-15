@@ -663,7 +663,7 @@ UidApp: Id管理服务，包括玩家Openid到RoleId的映射，ClubId的分配�
 
 RoleApp：玩家服务，以Role为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过OnlineApp来维护数据一致性(Role的量比较大不适合租约直接管理)，RPC采用Hash寻路
 
-OnlineApp：在线管理，维护Role在线状态，Role在线状态落地DB存储，实时读取。采用对等部署，RPC采用Random寻路
+OnlineApp：在线管理，维护Role在线状态，Role在线状态落地DB存储，提供读缓存。采用主从模式部署，由主备提供单点的无状态服务，RPC采用Single寻路
 
 ClubApp：社团服务，将Club划分为有限个Slot，以Slot为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过租约来维护数据一致性，RPC采用Hash寻路
 
