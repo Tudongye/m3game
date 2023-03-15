@@ -667,7 +667,7 @@ OnlineApp：在线管理，维护Role在线状态，Role在线状态落地DB存�
 
 ClubApp：社团服务，将Club划分为有限个Slot，以Slot为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过租约来维护数据一致性，RPC采用Hash寻路
 
-ClubMgrApp：社团管理服务，提供根据RoleId查询ClubId服务，内存中维护Club列表。采用对等部署，RPC采用Random寻路
+ClubRoleApp：社团玩家服务，管理社团和玩家的关联关系，数据落地存储。采用对等部署，无状态服务，DB操作采用Compare ClubID and Create/Delete。数据一致性由Club保证。
 
 ### 服务接口协议
 
@@ -727,11 +727,11 @@ service ClubDaemonSer {
     rpc ClubKick(ClubKick.Req) returns (ClubKick.Rsp);    // 服务迁移
 }
 
-# ClubMgrApp
-service ClubMgrSer {
-    rpc ClubMgrGetByRoleId(ClubMgrGetByRoleId.Req) returns (ClubMgrGetByRoleId.Rsp);   // 查询Role归属Club
-    rpc ClubMgrPostClubList(ClubMgrPostClubList.Req) returns (ClubMgrPostClubList.Rsp);   // 上报Club列表
-    rpc ClubMgrGetClubs(ClubMgrGetClubs.Req) returns (ClubMgrGetClubs.Rsp);   // 获取Club列表
+# ClubRoleApp
+service ClubRoleSer {
+    rpc ClubRoleRead(ClubRoleRead.Req) returns (ClubRoleRead.Rsp);   // 查询Role归属Club
+    rpc ClubRoleCreate(ClubRoleCreate.Req) returns (ClubRoleCreate.Rsp);   // 创建Role-Club关系
+    rpc ClubRoleDelete(ClubRoleDelete.Req) returns (ClubRoleDelete.Rsp);   // 删除Role-Club关系
 }
 
 
