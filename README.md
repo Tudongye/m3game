@@ -653,7 +653,7 @@ Demo是一个全服互通游戏，玩家(Role)可以自由组建社团(Club)，�
 
 ## 外围服务
 
-在本demo中外围服务包括GateApp, UidApp, OnlineApp, RoleApp, ClubApp组成的部分，管理玩家(Role) 和 社团(Club)数据。
+在本demo中外围服务包括GateApp, UidApp, OnlineApp, RoleApp, ClubApp，ClubMgrApp组成的部分，管理玩家(Role) 和 社团(Club)数据。
 
 ![未命名文件 (11)](https://user-images.githubusercontent.com/16680818/225325356-aa9fe15d-ef20-454b-a9d6-d9a48ec358d2.png)
 
@@ -666,6 +666,8 @@ RoleApp：玩家服务，以Role为单位的Actor服务。采用对等部署，A
 OnlineApp：在线管理，维护Role在线状态，Role在线状态落地DB存储，实时读取。采用对等部署，RPC采用Random寻路
 
 ClubApp：社团服务，将Club划分为有限个Slot，以Slot为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过租约来维护数据一致性，RPC采用Hash寻路
+
+ClubMgrApp：社团管理服务，提供根据RoleId查询ClubId服务，内存中维护Club列表。采用对等部署，RPC采用Random寻路
 
 ### 服务接口协议
 
@@ -723,6 +725,13 @@ service ClubSer {
 
 service ClubDaemonSer {
     rpc ClubKick(ClubKick.Req) returns (ClubKick.Rsp);    // 服务迁移
+}
+
+# ClubMgrApp
+service ClubMgrSer {
+    rpc ClubMgrGetByRoleId(ClubMgrGetByRoleId.Req) returns (ClubMgrGetByRoleId.Rsp);   // 查询Role归属Club
+    rpc ClubMgrPostClubList(ClubMgrPostClubList.Req) returns (ClubMgrPostClubList.Rsp);   // 上报Club列表
+    rpc ClubMgrGetClubs(ClubMgrGetClubs.Req) returns (ClubMgrGetClubs.Rsp);   // 获取Club列表
 }
 
 
