@@ -1,6 +1,7 @@
 package actorregcli
 
 import (
+	"context"
 	"fmt"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
@@ -60,4 +61,11 @@ type Client struct {
 
 func Conn() *grpc.ClientConn {
 	return _client.conn
+}
+
+func Kick(ctx context.Context, id string, app string, opts ...grpc.CallOption) ([]byte, error) {
+	var in pb.Kick_Req
+	in.Leaseid = id
+	_, err := client.RPCCallP2P(_client, _client.Kick, ctx, &in, meta.RouteApp(app), opts...)
+	return nil, err
 }

@@ -30,6 +30,10 @@ var (
 	_err_actor_dberr     = errors.New("_err_actor_dberr")
 )
 
+var (
+	_ser *ActorSer
+)
+
 func init() {
 	if err := rpc.RegisterRPCSvc(pb.File_actor_proto.Services().Get(0)); err != nil {
 		panic(fmt.Sprintf("RegisterRPCSvc Actor %s", err.Error()))
@@ -37,9 +41,17 @@ func init() {
 }
 
 func New() *ActorSer {
-	return &ActorSer{
+	if _ser != nil {
+		return _ser
+	}
+	_ser = &ActorSer{
 		Server: mactor.New("ActorSer", actor.ActorCreater),
 	}
+	return _ser
+}
+
+func Ser() *ActorSer {
+	return _ser
 }
 
 type ActorSer struct {
@@ -56,6 +68,7 @@ func (s *ActorSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 
 func (d *ActorSer) Login(ctx context.Context, in *pb.Login_Req) (*pb.Login_Rsp, error) {
 	out := new(pb.Login_Rsp)
+	log.Info("Login")
 	actor := actor.ConvertActor(ctx)
 	if actor == nil {
 		return out, _err_actor_parsefail
@@ -63,7 +76,7 @@ func (d *ActorSer) Login(ctx context.Context, in *pb.Login_Req) (*pb.Login_Rsp, 
 	if actor.Ready() {
 		return out, _err_actor_readyed
 	}
-	if err := actor.Login(); err != nil {
+	if err := actor.Login(ctx); err != nil {
 		return out, err
 	}
 	if md, ok := metadata.FromIncomingContext(ctx); ok {

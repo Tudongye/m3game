@@ -2,7 +2,6 @@ package actor
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"m3game/example/gateapp/gatecli"
 	"m3game/example/proto/pb"
@@ -11,12 +10,25 @@ import (
 	"m3game/plugins/db/wraper"
 	"m3game/plugins/log"
 	"m3game/runtime/server/actor"
+	"regexp"
+
+	"github.com/pkg/errors"
 )
 
 var (
 	_err_actor_dbplugin = errors.New("_err_actor_dbplugin")
 )
+var (
+	regexLeaseId *regexp.Regexp
+)
 
+func init() {
+	var err error
+	if regexLeaseId, err = regexp.Compile("^/actor/(.+)$"); err != nil {
+		panic(fmt.Sprintf("regexLeaseId.Compile err %s", err))
+	}
+
+}
 func ActorCreater(actorid string) actor.Actor {
 	return &Actor{
 		ActorBase: actor.ActorBaseCreator(actorid),
@@ -31,6 +43,18 @@ func ConvertActor(ctx context.Context) *Actor {
 		return nil
 	}
 	return a.(*Actor)
+}
+
+func GenActorLeaseId(actorid string) string {
+	return fmt.Sprintf("/actor/%s", actorid)
+}
+
+func ParseActorIdFromLeaseId(leaseid string) string {
+	groups := regexLeaseId.FindStringSubmatch(leaseid)
+	if len(groups) == 0 {
+		return ""
+	}
+	return groups[0]
 }
 
 type Actor struct {
@@ -139,7 +163,7 @@ func (a *Actor) Name() string {
 	}
 }
 
-func (a *Actor) Login() error {
+func (a *Actor) Login(ctx context.Context) error {
 	dbplugin := db.Get()
 	if dbplugin == nil {
 		return _err_actor_dbplugin

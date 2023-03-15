@@ -13,38 +13,59 @@ import (
 	_ "m3game/plugins/broker/nats"
 	"m3game/plugins/gate"
 	_ "m3game/plugins/gate/grpcgate"
+	"m3game/plugins/log"
 	_ "m3game/plugins/log/zap"
 	_ "m3game/plugins/metric/prometheus"
+	"m3game/plugins/router"
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
-	mruntime "m3game/runtime"
+	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/rpc"
 	"m3game/runtime/server"
 	"strings"
 	"sync"
+	"time"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 )
 
 var (
-	_listenaddr string
-	_onebuf     = make([]byte, 1)
+	_cfg AppCfg
 )
 
 func newApp() *GateApp {
 	return &GateApp{
-		App: app.New(proto.GateAppFuncID),
+		App:  app.New(proto.GateAppFuncID),
+		exit: make(chan struct{}, 1),
 	}
 }
 
 type GateApp struct {
 	app.App
+	exit chan struct{}
 }
 
-func (d *GateApp) Init(c map[string]interface{}) error {
+type AppCfg struct {
+	PrePareTime int `mapstructure:"PrePareTime"`
+}
 
+func (c *AppCfg) CheckVaild() error {
+	if c.PrePareTime == 0 {
+		return errors.New("PrePareTime cant be 0")
+	}
+	return nil
+}
+
+func (a *GateApp) Init(cfg map[string]interface{}) error {
+	if err := mapstructure.Decode(cfg, &_cfg); err != nil {
+		return errors.Wrap(err, "App Decode Cfg")
+	}
+	if err := _cfg.CheckVaild(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -59,21 +80,62 @@ func (d *GateApp) Start(wg *sync.WaitGroup) error {
 		return err
 	}
 	gate.SetReciver(d)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		log.Info("GateApp PrepareTime %d", _cfg.PrePareTime)
+		time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
+		log.Info("GateApp Ready")
+		t := time.NewTicker(1 * time.Second)
+		for {
+			select {
+			case <-d.exit:
+				return
+			case <-t.C:
+				// 插件检查
+				if router.Get().Factory().CanDelete(router.Get()) {
+					t.Stop()
+					runtime.ShutDown()
+				}
+				if gate.Get().Factory().CanDelete(gate.Get()) {
+					t.Stop()
+					runtime.ShutDown()
+				}
+				continue
+			}
+		}
+	}()
 	return nil
 }
 
+func (d *GateApp) Stop() error {
+	select {
+	case d.exit <- struct{}{}:
+		return nil
+	default:
+		return nil
+	}
+}
 func (d *GateApp) LogicCall(in *metapb.CSMsg) (*metapb.CSMsg, error) {
 	if !rpc.IsCSFullMethod(in.Method) {
 		return nil, fmt.Errorf("Method %s invaild", in.Method)
 	}
+	var out *metapb.CSMsg
+	var err error
 	if strings.HasPrefix(in.Method, "/proto.ActorRegSer") {
-		return gate.CallGrpcCli(context.Background(), actorregcli.Conn(), in)
+		out, err = gate.CallGrpcCli(context.Background(), actorregcli.Conn(), in)
 	}
 	if strings.HasPrefix(in.Method, "/proto.ActorSer") {
-		return gate.CallGrpcCli(context.Background(), actorcli.Conn(), in)
+		out, err = gate.CallGrpcCli(context.Background(), actorcli.Conn(), in)
 	}
 	if strings.HasPrefix(in.Method, "/proto.MultiSer") {
-		return gate.CallGrpcCli(context.Background(), multicli.Conn(), in)
+		out, err = gate.CallGrpcCli(context.Background(), multicli.Conn(), in)
+	}
+	if err != nil {
+		return out, err
+	} else if out != nil {
+		out.Metas = in.Metas
+		return out, nil
 	}
 	return nil, fmt.Errorf("Unknow Method %s", in.Method)
 }
@@ -85,22 +147,11 @@ func (d *GateApp) AuthCall(req *metapb.AuthReq) (*metapb.AuthRsp, error) {
 	return rsp, nil
 }
 
-func (d *GateApp) Stop() error {
-	return nil
-}
-
 func (d *GateApp) HealthCheck() bool {
 	return true
 }
 
 func Run() error {
-	mruntime.Run(newApp(), []server.Server{gateser.New()})
+	runtime.Run(newApp(), []server.Server{gateser.New()})
 	return nil
-}
-
-func CustomMatcher(key string) (string, bool) {
-	if len(key) > 2 && key[:2] == "M3" {
-		return key, true
-	}
-	return runtime.DefaultHeaderMatcher(key)
 }

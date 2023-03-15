@@ -289,6 +289,7 @@ var ActorSer_ServiceDesc = grpc.ServiceDesc{
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ActorRegSerClient interface {
 	Register(ctx context.Context, in *Register_Req, opts ...grpc.CallOption) (*Register_Rsp, error)
+	Kick(ctx context.Context, in *Kick_Req, opts ...grpc.CallOption) (*Kick_Rsp, error)
 }
 
 type actorRegSerClient struct {
@@ -308,11 +309,21 @@ func (c *actorRegSerClient) Register(ctx context.Context, in *Register_Req, opts
 	return out, nil
 }
 
+func (c *actorRegSerClient) Kick(ctx context.Context, in *Kick_Req, opts ...grpc.CallOption) (*Kick_Rsp, error) {
+	out := new(Kick_Rsp)
+	err := c.cc.Invoke(ctx, "/proto.ActorRegSer/Kick", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ActorRegSerServer is the server API for ActorRegSer service.
 // All implementations must embed UnimplementedActorRegSerServer
 // for forward compatibility
 type ActorRegSerServer interface {
 	Register(context.Context, *Register_Req) (*Register_Rsp, error)
+	Kick(context.Context, *Kick_Req) (*Kick_Rsp, error)
 	mustEmbedUnimplementedActorRegSerServer()
 }
 
@@ -322,6 +333,9 @@ type UnimplementedActorRegSerServer struct {
 
 func (UnimplementedActorRegSerServer) Register(context.Context, *Register_Req) (*Register_Rsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}
+func (UnimplementedActorRegSerServer) Kick(context.Context, *Kick_Req) (*Kick_Rsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Kick not implemented")
 }
 func (UnimplementedActorRegSerServer) mustEmbedUnimplementedActorRegSerServer() {}
 
@@ -354,6 +368,24 @@ func _ActorRegSer_Register_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ActorRegSer_Kick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Kick_Req)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ActorRegSerServer).Kick(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.ActorRegSer/Kick",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ActorRegSerServer).Kick(ctx, req.(*Kick_Req))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ActorRegSer_ServiceDesc is the grpc.ServiceDesc for ActorRegSer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -364,6 +396,10 @@ var ActorRegSer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Register",
 			Handler:    _ActorRegSer_Register_Handler,
+		},
+		{
+			MethodName: "Kick",
+			Handler:    _ActorRegSer_Kick_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

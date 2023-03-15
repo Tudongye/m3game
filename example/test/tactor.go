@@ -206,3 +206,87 @@ func TActorBroadCast() {
 	}
 	stream.CloseSend()
 }
+func TActorMove() {
+	log.Println("TActorMove Actor常规用例...")
+	m := make(map[string]string)
+	m["m3routetype"] = "RouteTypeP2P"
+	conn, err := grpc.Dial(
+		_agenturl,
+		grpc.WithInsecure())
+	if err != nil {
+		panic(err.Error())
+	}
+	cli := grpcgate.NewGateSerClient(conn)
+	stream, err := cli.CSTransport(context.Background())
+	if err != nil {
+		panic(err.Error())
+	}
+
+	{
+		log.Println("Call.Auth 建立连接...")
+		in := &metapb.AuthReq{
+			Token: "PlayerTest",
+		}
+		out := &metapb.AuthRsp{}
+		if err := CallGrpcGate(stream, "", m, in, out); err != nil {
+			log.Printf("CallGrpcGate Fail %s", err.Error())
+		}
+		log.Println("PlayerID:", out.PlayerID)
+	}
+	var actorid string
+	m["m3routedstapp"] = "example.world1.actor.2"
+	{
+		log.Println("Call.Register 注册接口,调用ActorApp的ActorRegSer...")
+		out := &pb.Register_Rsp{}
+		in := &pb.Register_Req{
+			Name: "June",
+		}
+		if err := CallGrpcGate(stream, method_register, m, in, out); err != nil {
+			log.Printf("CallGrpcGate Fail %s", err.Error())
+			return
+		}
+		log.Println("Rsp-ActorID:", out.ActorID)
+		actorid = out.ActorID
+	}
+	m["m3actoractorid"] = actorid
+	{
+		log.Println("Call.Login 登陆接口...")
+		out := &pb.Login_Rsp{}
+		in := &pb.Login_Req{
+			ActorID: actorid,
+		}
+		if err := CallGrpcGate(stream, method_login, m, in, out); err != nil {
+			log.Printf("CallGrpcGate Fail %s", err.Error())
+			return
+		}
+		log.Println("Rsp:", out)
+	}
+	m["m3routedstapp"] = "example.world1.actor.1"
+	{
+		log.Println("Call.Register 注册接口,调用ActorApp的ActorRegSer...")
+		out := &pb.Register_Rsp{}
+		in := &pb.Register_Req{
+			Name: "June",
+		}
+		if err := CallGrpcGate(stream, method_register, m, in, out); err != nil {
+			log.Printf("CallGrpcGate Fail %s", err.Error())
+			return
+		}
+		log.Println("Rsp-ActorID:", out.ActorID)
+		actorid = out.ActorID
+	}
+	m["m3actoractorid"] = actorid
+	{
+		log.Println("Call.Login 登陆接口...")
+		out := &pb.Login_Rsp{}
+		in := &pb.Login_Req{
+			ActorID: actorid,
+		}
+		if err := CallGrpcGate(stream, method_login, m, in, out); err != nil {
+			log.Printf("CallGrpcGate Fail %s", err.Error())
+			return
+		}
+		log.Println("Rsp:", out)
+	}
+	stream.CloseSend()
+}

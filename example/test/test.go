@@ -1,19 +1,14 @@
 package test
 
 import (
-	"bytes"
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"m3game/meta/metapb"
 	"m3game/plugins/gate/grpcgate"
-	"net/http"
 	"strings"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -48,8 +43,10 @@ var (
 		"Break":          {Help: "BreakHello RPC, 测试熔断限流", F: TBreak},
 		"ActorCommon":    {Help: "Actor, 测试注册，登陆，改名，升级", F: TActorCommon},
 		"ActorBroadCast": {Help: "Actor, 测试注册，登陆，广播", F: TActorBroadCast},
+		"ActorMove":      {Help: "Actor, 测试两个ActorSer之间进行服务迁移", F: TActorMove},
 	}
-	_agenturl string
+	_agenturl    string
+	clientserial = 1
 )
 
 func Help() string {
@@ -75,31 +72,6 @@ func Start() {
 	}
 }
 
-func CallLogic(method string, req interface{}, rsp interface{}, m map[string]string) error {
-	log.Printf("CallLogic %s,", method)
-	client := &http.Client{}
-	bytesData, _ := json.Marshal(req)
-	if req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", _agenturl, method), bytes.NewReader(bytesData)); err != nil {
-		return errors.Wrap(err, "NewRequest")
-	} else {
-		for k, v := range m {
-			req.Header.Add(k, v)
-		}
-		if r, err := client.Do(req); err != nil {
-			return errors.Wrap(err, "client.Do")
-		} else {
-			rc, _ := io.ReadAll(r.Body)
-			if r.StatusCode != 200 {
-				return fmt.Errorf("RspCode %d %s", r.StatusCode, rc)
-			}
-			if err := json.Unmarshal(rc, rsp); err != nil {
-				return errors.Wrapf(err, "Decode [%s]", rc)
-			}
-			return nil
-		}
-	}
-}
-
 func CallGrpcGate(stream grpcgate.GateSer_CSTransportClient, method string, metas map[string]string, in proto.Message, out proto.Message) error {
 	log.Printf("CallGrpcGate %s\n", method)
 	inbyte, err := proto.Marshal(in)
@@ -114,14 +86,36 @@ func CallGrpcGate(stream grpcgate.GateSer_CSTransportClient, method string, meta
 	for k, v := range metas {
 		inmsg.Metas = append(inmsg.Metas, &metapb.Meta{Key: k, Value: v})
 	}
+	curserial := fmt.Sprintf("%d", clientserial)
+	inmsg.Metas = append(inmsg.Metas, &metapb.Meta{Key: "m3clientserial", Value: curserial})
+	clientserial += 1
+	log.Println("inmsg", inmsg.Metas)
 	stream.Send(inmsg)
-	outmsg, err := stream.Recv()
-	if err != nil {
-		log.Println(err)
-		return err
+	var outmsg *metapb.CSMsg
+	for {
+		var err error
+		outmsg, err = stream.Recv()
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		recvserial := ""
+		log.Println(outmsg.Metas)
+		for _, m := range outmsg.Metas {
+			if m.Key == "m3clientserial" {
+				recvserial = m.Value
+				break
+			}
+		}
+		if recvserial == curserial {
+			break
+		} else {
+			log.Printf("Recv Serial %s But %s Content %s \n", recvserial, curserial, string(outmsg.Content))
+		}
 	}
 	if err := proto.Unmarshal(outmsg.Content, out); err != nil {
 		log.Println(err)
+		log.Println(string(outmsg.Content))
 		return err
 	}
 	return nil

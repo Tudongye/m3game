@@ -30,3 +30,6 @@ Port = 32100
 LogLevel = "DEBUG"
 Encoding = "console"
 
+
+[App]
+PrePareTime = 10 # 启动前准备时长

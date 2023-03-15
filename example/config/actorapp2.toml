@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:22103"
+Addr = "127.0.0.1:22203"
 BroadTimeOut = 5
 
 [Options]
@@ -9,10 +9,6 @@ WatcherInterSecond = 1
 CfgPath = "../../resource"
 [[Options.Shape]]
 RuleConfigFile = "../../resource/rules.toml"
-
-[[Plugin.Log.log_zap]]
-LogLevel = "DEBUG"
-Encoding = "console"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
@@ -26,6 +22,10 @@ ConfigFile = "../../resource/sentinel.yml"
 
 [[Plugin.DB.db_cache]]
 Pass = "1"
+
+[[Plugin.Log.log_zap]]
+LogLevel = "DEBUG"
+Encoding = "console"
 
 [[Plugin.Lease.lease_etcd]]
 Endpoints = "127.0.0.1:2379"

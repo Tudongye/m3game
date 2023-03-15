@@ -18,6 +18,7 @@ service ActorSer {
 
 service ActorRegSer {
     rpc Register(Register.Req) returns (Register.Rsp);
+    rpc Kick(Kick.Req) returns (Kick.Rsp);
 }
 
 message ActorDB {
@@ -43,6 +44,16 @@ message Register {
     }
     message Rsp {
         string ActorID = 1;
+    }
+}
+
+message Kick {
+    option (rpc_option).route_key = "";
+    option (rpc_option).cs = true;
+    message Req {
+        string leaseid = 1;
+    }
+    message Rsp {
     }
 }
 
