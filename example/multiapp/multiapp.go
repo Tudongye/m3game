@@ -1,6 +1,7 @@
 package multiapp
 
 import (
+	"context"
 	"m3game/example/multiapp/multiser"
 	"m3game/example/proto"
 	_ "m3game/plugins/broker/nats"
@@ -12,7 +13,6 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
-	"sync"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -25,14 +25,12 @@ var (
 
 func newApp() *MultiApp {
 	return &MultiApp{
-		App:  app.New(proto.MultiAppFuncID),
-		exit: make(chan struct{}, 1),
+		App: app.New(proto.MultiAppFuncID),
 	}
 }
 
 type MultiApp struct {
 	app.App
-	exit chan struct{}
 }
 type AppCfg struct {
 	PrePareTime int `mapstructure:"PrePareTime"`
@@ -54,37 +52,25 @@ func (a *MultiApp) Init(cfg map[string]interface{}) error {
 	}
 	return nil
 }
-func (d *MultiApp) Start(wg *sync.WaitGroup) error {
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Info("MultiApp PrepareTime %d", _cfg.PrePareTime)
-		time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
-		log.Info("MultiApp Ready")
-		t := time.NewTicker(1 * time.Second)
-		for {
-			select {
-			case <-d.exit:
-				return
-			case <-t.C:
-				// 插件检查
-				if router.Get().Factory().CanDelete(router.Get()) {
-					t.Stop()
-					runtime.ShutDown()
-				}
-				continue
-			}
-		}
-	}()
-	return nil
-}
 
-func (d *MultiApp) Stop() error {
-	select {
-	case d.exit <- struct{}{}:
-		return nil
-	default:
-		return nil
+func (d *MultiApp) Start(ctx context.Context) {
+	log.Info("MultiApp PrepareTime %d", _cfg.PrePareTime)
+	time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
+	log.Info("MultiApp Ready")
+	t := time.NewTicker(1 * time.Second)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			// 插件检查
+			if router.Get().Factory().CanDelete(router.Get()) {
+				runtime.ShutDown()
+				return
+			}
+			continue
+		}
 	}
 }
 
@@ -92,7 +78,7 @@ func (d *MultiApp) HealthCheck() bool {
 	return true
 }
 
-func Run() error {
-	runtime.Run(newApp(), []server.Server{multiser.New()})
+func Run(ctx context.Context) error {
+	runtime.Run(ctx, newApp(), []server.Server{multiser.New()})
 	return nil
 }

@@ -24,7 +24,6 @@ import (
 	"m3game/runtime/rpc"
 	"m3game/runtime/server"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -38,14 +37,12 @@ var (
 
 func newApp() *GateApp {
 	return &GateApp{
-		App:  app.New(proto.GateAppFuncID),
-		exit: make(chan struct{}, 1),
+		App: app.New(proto.GateAppFuncID),
 	}
 }
 
 type GateApp struct {
 	app.App
-	exit chan struct{}
 }
 
 type AppCfg struct {
@@ -69,7 +66,7 @@ func (a *GateApp) Init(cfg map[string]interface{}) error {
 	return nil
 }
 
-func (d *GateApp) Start(wg *sync.WaitGroup) error {
+func (d *GateApp) Prepare(ctx context.Context) error {
 	if err := multicli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
 		return err
 	}
@@ -80,42 +77,34 @@ func (d *GateApp) Start(wg *sync.WaitGroup) error {
 		return err
 	}
 	gate.SetReciver(d)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Info("GateApp PrepareTime %d", _cfg.PrePareTime)
-		time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
-		log.Info("GateApp Ready")
-		t := time.NewTicker(1 * time.Second)
-		for {
-			select {
-			case <-d.exit:
-				return
-			case <-t.C:
-				// 插件检查
-				if router.Get().Factory().CanDelete(router.Get()) {
-					t.Stop()
-					runtime.ShutDown()
-				}
-				if gate.Get().Factory().CanDelete(gate.Get()) {
-					t.Stop()
-					runtime.ShutDown()
-				}
-				continue
-			}
-		}
-	}()
 	return nil
 }
 
-func (d *GateApp) Stop() error {
-	select {
-	case d.exit <- struct{}{}:
-		return nil
-	default:
-		return nil
+func (d *GateApp) Start(ctx context.Context) {
+	log.Info("GateApp PrepareTime %d", _cfg.PrePareTime)
+	time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
+	log.Info("GateApp Ready")
+	t := time.NewTicker(1 * time.Second)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			// 插件检查
+			if router.Get().Factory().CanDelete(router.Get()) {
+				runtime.ShutDown()
+				return
+			}
+			if gate.Get().Factory().CanDelete(gate.Get()) {
+				runtime.ShutDown()
+				return
+			}
+			continue
+		}
 	}
 }
+
 func (d *GateApp) LogicCall(in *metapb.CSMsg) (*metapb.CSMsg, error) {
 	if !rpc.IsCSFullMethod(in.Method) {
 		return nil, fmt.Errorf("Method %s invaild", in.Method)
@@ -151,7 +140,7 @@ func (d *GateApp) HealthCheck() bool {
 	return true
 }
 
-func Run() error {
-	runtime.Run(newApp(), []server.Server{gateser.New()})
+func Run(ctx context.Context) error {
+	runtime.Run(ctx, newApp(), []server.Server{gateser.New()})
 	return nil
 }

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"context"
 	"m3game/example/asyncapp"
 )
 
 func main() {
-	asyncapp.Run()
+	asyncapp.Run(context.TODO())
 }

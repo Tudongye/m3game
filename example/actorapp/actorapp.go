@@ -23,7 +23,6 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
-	"sync"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -32,8 +31,7 @@ import (
 
 func newApp() *ActorApp {
 	return &ActorApp{
-		App:  app.New(proto.ActorAppFuncID),
-		exit: make(chan struct{}, 1),
+		App: app.New(proto.ActorAppFuncID),
 	}
 }
 
@@ -43,7 +41,6 @@ var (
 
 type ActorApp struct {
 	app.App
-	exit chan struct{}
 }
 
 type AppCfg struct {
@@ -66,7 +63,8 @@ func (a *ActorApp) Init(cfg map[string]interface{}) error {
 	}
 	return nil
 }
-func (d *ActorApp) Start(wg *sync.WaitGroup) error {
+
+func (d *ActorApp) Prepare(ctx context.Context) error {
 	if err := asynccli.Init(config.GetAppID()); err != nil {
 		return err
 	}
@@ -77,40 +75,30 @@ func (d *ActorApp) Start(wg *sync.WaitGroup) error {
 		return err
 	}
 	lease.SetReciver(d)
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Info("ActorApp PrepareTime %d", _cfg.PrePareTime)
-		time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
-		log.Info("ActorApp Ready")
-		t := time.NewTicker(1 * time.Second)
-		for {
-			select {
-			case <-d.exit:
-				return
-			case <-t.C:
-				// 插件检查
-				if router.Get().Factory().CanDelete(router.Get()) {
-					t.Stop()
-					runtime.ShutDown()
-				}
-				if lease.Get().Factory().CanDelete(lease.Get()) {
-					t.Stop()
-					runtime.ShutDown()
-				}
-				continue
-			}
-		}
-	}()
 	return nil
 }
 
-func (d *ActorApp) Stop() error {
-	select {
-	case d.exit <- struct{}{}:
-		return nil
-	default:
-		return nil
+func (d *ActorApp) Start(ctx context.Context) {
+	log.Info("ActorApp PrepareTime %d", _cfg.PrePareTime)
+	time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
+	log.Info("ActorApp Ready")
+	t := time.NewTicker(1 * time.Second)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			// 插件检查
+			if router.Get().Factory().CanDelete(router.Get()) {
+				t.Stop()
+				runtime.ShutDown()
+			}
+			if lease.Get().Factory().CanDelete(lease.Get()) {
+				t.Stop()
+				runtime.ShutDown()
+			}
+			continue
+		}
 	}
 }
 
@@ -127,8 +115,8 @@ func (d *ActorApp) SendKickLease(ctx context.Context, id string, app string) ([]
 	return actorregcli.Kick(ctx, id, app)
 }
 
-func Run() error {
+func Run(ctx context.Context) error {
 	loader.RegisterTitleCfg()
-	runtime.Run(newApp(), []server.Server{actorser.New(), actorregser.New()})
+	runtime.Run(ctx, newApp(), []server.Server{actorser.New(), actorregser.New()})
 	return nil
 }

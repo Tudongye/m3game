@@ -49,7 +49,6 @@ message Register {
 
 message Kick {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
     message Req {
         string leaseid = 1;
     }

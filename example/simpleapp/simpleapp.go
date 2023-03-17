@@ -1,6 +1,7 @@
 package simpleapp
 
 import (
+	"context"
 	"m3game/example/proto"
 	"m3game/example/simpleapp/simpleser"
 	_ "m3game/plugins/broker/nats"
@@ -26,8 +27,8 @@ func (d *SimpleApp) HealthCheck() bool {
 	return true
 }
 
-func Run() error {
+func Run(ctx context.Context) error {
 	// 启动一个 包含了simpleser的SimpleApp
-	runtime.Run(newApp(), []server.Server{simpleser.New()})
+	runtime.Run(ctx, newApp(), []server.Server{simpleser.New()})
 	return nil
 }
