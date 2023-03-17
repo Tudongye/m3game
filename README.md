@@ -595,7 +595,7 @@ example/mutilapp 是一个并发服务，提供Hello，TraceHello(链路追踪)�
 
 example/asyncapp 是一个单线程异步服务，提供PostChannel(广播处理)，SSPullChannel(单线程阻塞) 接口
 
-example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。
+example/actorapp 是一个Actor模型服务，提供 Register(一个App部署多个Server)，Login(DB数据加载)，ModifyName(自动置脏标记)，LvUp(自动置脏标记)，GetInfo(资源配置)，PostChannel(广播发送)，PullChannel(服务间RPC调用)。ActorApp加入了租约插件，确保每个Actor最多只会在一个ActorApp上存在
 
 example/gateapp 是一个网关服务，客户端可以通过gprc-stream方式与网关建立长连接。
 
@@ -614,7 +614,7 @@ example使用方式
 ./main -testmode Break -agenturl 127.0.0.1:22000 // helloworld流量治理
 ./main -testmode ActorCommon -agenturl 127.0.0.1:22000 // 注册，登陆，改名，升级，服务端到客户端主动通知
 ./main -testmode ActorBroadCast -agenturl 127.0.0.1:22000 // 注册，登陆，广播
-./main -testmode ActorMove -agenturl 127.0.0.1:22000 // 测试两个ActorSer之间进行服务迁移（需要启动ActorApp1 和 ActorApp2）
+./main -testmode ActorMove -agenturl 127.0.0.1:22000 // 数据一致性，一个Actor两个ActorApp之间进行服务迁移（需要启动ActorApp1 和 ActorApp2）
 ```
 
 # 集群化部署方案(进行中)
@@ -667,7 +667,7 @@ OnlineApp：在线管理，维护Role在线状态，Role在线状态落地DB存�
 
 ClubApp：社团服务，将Club划分为有限个Slot，以Slot为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过租约来维护数据一致性，RPC采用Hash寻路
 
-ClubRoleApp：社团玩家服务，管理社团和玩家的关联关系，数据落地存储。采用对等部署，无状态服务，DB操作采用Compare ClubID and Create/Delete。数据一致性由Club保证。
+ClubRoleApp：社团玩家服务，管理社团和玩家的关联关系，数据落地存储，提供读缓存。采用主从模式部署，由主备提供单点的无状态服务，RPC采用Single寻路
 
 ### 服务接口协议
 
