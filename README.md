@@ -40,7 +40,7 @@ PluginMgr：插件管理器
 
 Router-Plugin： 路由组件，提供服务注册和服务发现的能力。当前有一个Consul实现
 
-DB-Plugin: 存储组件，提供数据存储能力，当前有一个内存数据库实现
+DB-Plugin: 存储组件，提供数据存储能力，当前有一个内存数据库和redis实现
 
 Broker-Plugin：消息队列组件，提供针对主题的发布和订阅功能，当前有一个Nats实现
 
@@ -250,7 +250,7 @@ message M3GRPCOption {
 }
 ```
 
-M3框架通过rpc注入和泛型，大大简化了业务层进行RPC调用时的操作，如下是对hello接口进行"随机选址"的RPCCall调用
+M3框架通过rpc注入和泛型编程，大大简化了业务层进行RPC调用时的操作，如下是对hello接口进行"随机选址"的RPCCall调用
 
 ```
 func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (string, error) {
@@ -341,7 +341,7 @@ M3对于资源文件格式没有要求，只要求资源管理器提供Load接�
 
 M3采用pb来定义游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看example/actorapp/actor
 
-M3要求实体DB结构的一级字段必须是string（必须是主键） 或 proto.Message（pb类型不可重复），且DB结构必须设置一个string类型的主键。
+M3要求实体DB结构的一级字段必须是string（必须是主键） 或 proto.Message（为了区分字段，类型不可重复），且DB结构必须设置一个string类型的主键。
 
 ```
 
@@ -584,6 +584,9 @@ type LeaseReciver interface {
 
 ![未命名文件 (10)](https://user-images.githubusercontent.com/16680818/225224998-70fecb14-d28c-47d7-a49f-16516e3a53ae.png)
 
+## 热更新
+
+## 自动化测试
 
 ## Example
 
@@ -619,17 +622,25 @@ example使用方式
 
 # 集群化部署方案(进行中)
 
+## 集群部署
+
+游戏后端服务的核心功能就是对业务数据进行增删改查。当服务采用多机部署时，就会引入对同一份数据的并发操作问题。而集群化部署所要处理的问题就是在多机环境下，如何分配数据管理权。
+
+无状态服务，其每次请求的处理结果不依赖上下文，不需要长期占有数据的管理权，一般采用加锁 或者 CompareAndSwap来处理并发问题
+
+有状态服务，其每次请求的处理结果依赖上下文，需要长期占有数据的管理权。根据其管理的数据不同，分为三种类型：
+
+1、元数据。这类数据的总量小，数据管理权可以集中在一台机器上处理。集群部署时，一般采用主从模式，当主备宕机时，数据管理权整体迁移到备机。
+
+2、轻量级数据。这类数据的总量大，且数据管理权的跨机迁移成本低（时间成本，资源成本），数据管理权分散在多台机器。集群部署时，一般采用对等部署，基于一致性哈希进行寻址，当机器增减时，数据管理权会动态调整。
+
+3、重量级数据。这类数据的总量大，且数据管理权的跨机迁移成本高，数据管理权分散在多台机器。集群部署时，一般会专门指定一个管理进程（管理进程采用元数据方式部署），用于处理数据管理权的调度，尽量减少跨机的管理权迁移
+
 ## 灰度发布
 
 ## 容灾
 
 ## 动态伸缩
-
-## 热更新
-
-## 集群部署
-
-## 自动化测试
 
 # Demo
 
@@ -637,7 +648,7 @@ example使用方式
 
 Demo是一个全服互通游戏，玩家(Role)可以自由组建社团(Club)，核心玩法采用匹配(Match)开单局(Fight)方式进行。
 
-在集群部署上，希望Demo可以通过简单的增删机器，实现任意模块的线上扩缩容和容灾恢复功能。
+在部署上，所有的服务都采用集群化部署以支持容灾恢复和弹性伸缩能力。
 
 游戏实体分为 玩家(Role)，社团(Club)，单局(Fight)。玩家(Role)实体只有对应玩家在线时才会激活，社团(Club)实体一经创建常驻激活，直到被解散，单局(Fight)实体在玩家开启单局期间才会激活且激活期间不易发生服务迁移。
 
@@ -659,15 +670,15 @@ Demo是一个全服互通游戏，玩家(Role)可以自由组建社团(Club)，�
 
 GateApp: 网关服务，无状态服务，客户端任意链接
 
-UidApp: Id管理服务，包括玩家Openid到RoleId的映射，ClubId的分配。采用主从模式部署，由主备提供单点的无状态服务，RPC采用Single寻路
+UidApp: Id管理服务，包括玩家Openid到RoleId的映射，ClubId的分配
 
-RoleApp：玩家服务，以Role为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过OnlineApp来维护数据一致性(Role的量比较大不适合租约直接管理)，RPC采用Hash寻路
+RoleApp：玩家服务，以Role为单位的Actor服务
 
-OnlineApp：在线管理，维护Role在线状态，Role在线状态落地DB存储，提供读缓存。采用主从模式部署，由主备提供单点的无状态服务，RPC采用Single寻路
+OnlineApp：在线管理，维护Role在线状态，提供大量级租约服务。
 
-ClubApp：社团服务，将Club划分为有限个Slot，以Slot为单位的Actor服务。采用对等部署，Actor可以跨服务动态迁移，通过租约来维护数据一致性，RPC采用Hash寻路
+ClubApp：社团服务，将Club划分为有限个Slot，以Slot为单位的Actor服务。
 
-ClubRoleApp：社团玩家服务，管理社团和玩家的关联关系，数据落地存储，提供读缓存。采用主从模式部署，由主备提供单点的无状态服务，RPC采用Single寻路
+ClubRoleApp：社团玩家服务，管理社团和玩家的关联关系。
 
 ### 服务接口协议
 
@@ -691,7 +702,7 @@ service RoleSer {
     rpc RoleGetInfo(RoleGetInfo.Req) returns (RoleGetInfo.Rsp); // 获取详情
     rpc RoleModifyName(RoleModifyName.Req) returns (RoleModifyName.Rsp);    // 改名
     rpc RolePowerUp(RolePowerUp.Req) returns (RolePowerUp.Rsp);    // 战力提升
-    rpc RolePostChannel(RolePostChannel.Req) returns (RolePostChannel.Rsp); // 发送广播
+    rpc RoleKick(RoleKick.Req) returns (RoleKick.Rsp);    // 服务迁移
 
     rpc RoleGetClubInfo(RoleGetClubInfo.Req) returns (RoleGetClubInfo.Rsp); // 获取社团信息
     rpc RoleGetClubList(RoleGetClubList.Req) returns (RoleGetClubList.Rsp); // 获取社团列表
@@ -700,11 +711,6 @@ service RoleSer {
     rpc RoleJoinClub(RoleJoinClub.Req) returns (RoleJoinClub.Rsp); // 加入社团
     rpc RoleExitClub(RoleExitClub.Req) returns (RoleExitClub.Rsp); // 退出社团
     rpc RoleCancelClub(RoleCancelClub.Req) returns (RoleCancelClub.Rsp); // 解散社团
-}
-
-service RoleDaemonSer {
-    rpc RoleRecvChannel(RoleRecvChannel.Req) returns (RoleRecvChannel.Rsp);  // 接受广播
-    rpc RoleKick(RoleKick.Req) returns (RoleKick.Rsp);    // 服务迁移
 }
 
 # OnlineApp
@@ -734,13 +740,39 @@ service ClubRoleSer {
     rpc ClubRoleDelete(ClubRoleDelete.Req) returns (ClubRoleDelete.Rsp);   // 删除Role-Club关系
 }
 
-
 ```
 
+### UidApp
 
+UidApp 管理玩家OpenId（社交账户Id）到RoleId（游戏角色Id）的映射关系，以及ClubId(社团Id)的生成。其负载与单位时间内玩家登陆次数和创建社团次数相关，署于小负载服务。类比元数据类服务，这里采用主从部署，使用Lease（租约）保证数据一致性，使用Single（最小ID）方式选主。参看 demo/uidapp
 
+### OnlineApp
 
+OnlineApp 管理玩家的在线状态（玩家所处的RoleApp信息），其提供了一种大规模Lease服务，用来保证玩家数据在RoleApp上的一致性，当玩家登陆时RoleApp会先在OnlineApp申请Lease后再提供服务(如果Lease冲突，则把原Lease踢下线)。其负载与单位时间内玩家登陆次数相关，署于小负载服务。类比元数据类服务，这里采用主从部署，使用Lease（租约）保证数据一致性，使用Single（最小ID）方式选主。参看 demo/onlineapp
 
+### RoleApp
+
+RoleApp 持有玩家RoleDB的数据管理权，负责RoleDB层面的游戏逻辑，其负载与单位时间内所有在线玩家的总操作次数相关，署于大负载服务，且数据迁移成本低。类比轻量数据服务，这里采用对等部署，使用OnlineApp提供的Lease服务保证数据一致性，使用Hash（一致性哈希）方式寻址。参看demo/roleapp
+
+### GateApp
+
+GateApp 管理玩家链接，本质上是个代理服务，没有数据管理权需求，署于无状态服务。这里采用对等部署。参看demo/gateapp
+
+### ClubRoleApp
+
+还没做
+
+### ClubApp
+
+还没做
+
+### Test
+
+Test 测试客户端
+
+```
+sh test.sh MutilTest1  // 100TPS 10000次 关键路径（登陆，修改Role数据，拉取Role数据）测试
+```
 
 
 
