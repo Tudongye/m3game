@@ -15,9 +15,9 @@ func TMutilTest1(Token string) error {
 	var wg sync.WaitGroup
 	var mutx sync.Mutex
 	failnum := 0
-	j := time.Now().Unix() % 10000 * 100
-	for i := 0; i < 100; i++ {
-		time.Sleep(1 * time.Second)
+	j := time.Now().Unix() % 10000 * 10000
+	for i := 0; i < 10000; i++ {
+		time.Sleep(10 * time.Millisecond)
 		wg.Add(1)
 		go func(t string) {
 			log.Printf("%s Start...\n", t)

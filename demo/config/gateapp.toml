@@ -1,5 +1,5 @@
 [Transport]
-Addr = "9.135.72.251:32401"
+Addr = "127.0.0.1:32401"
 BroadTimeOut = 5
 
 [Options]
@@ -12,13 +12,13 @@ RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "9.135.72.251:8500"
+ConsulHost = "127.0.0.1:8500"
 
 [[Plugin.Broker.broker_nats]]
-NatsURL = "9.135.72.251:4222"
+NatsURL = "127.0.0.1:4222"
 
 [[Plugin.Gate.gate_grpc]]
-Addr = "9.135.72.251:32451"
+Addr = "127.0.0.1:32451"
 
 [[Plugin.Log.log_zap]]
 LogLevel = "INFO "

@@ -1,5 +1,5 @@
 [Transport]
-Addr = "9.135.72.251:22203"
+Addr = "127.0.0.1:22203"
 BroadTimeOut = 5
 
 [Options]
@@ -12,10 +12,10 @@ RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "9.135.72.251:8500"
+ConsulHost = "127.0.0.1:8500"
 
 [[Plugin.Broker.broker_nats]]
-NatsURL = "9.135.72.251:4222"
+NatsURL = "127.0.0.1:4222"
 
 [[Plugin.Shape.shape_sentinel]]
 ConfigFile = "../../resource/sentinel.yml"
@@ -28,7 +28,7 @@ LogLevel = "DEBUG"
 Encoding = "console"
 
 [[Plugin.Lease.lease_etcd]]
-Endpoints = "9.135.72.251:2379"
+Endpoints = "127.0.0.1:2379"
 DialTimeout = 5
 LeaseKeepLiveTime = 10
 PreExitTime = 5

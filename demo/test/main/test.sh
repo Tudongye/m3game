@@ -1,1 +1,1 @@
-./main -testmode $1 -agenturl 9.135.72.251:32451
+./main -testmode $1 -agenturl 127.0.0.1:32451

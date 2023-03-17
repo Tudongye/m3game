@@ -1,5 +1,5 @@
 [Transport]
-Addr = "9.135.72.251:22105"
+Addr = "127.0.0.1:22105"
 BroadTimeOut = 5
 
 [Options]
@@ -8,10 +8,10 @@ WatcherInterSecond = 1
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "9.135.72.251:8500"
+ConsulHost = "127.0.0.1:8500"
 
 [[Plugin.Broker.broker_nats]]
-NatsURL = "9.135.72.251:4222"
+NatsURL = "127.0.0.1:4222"
 
 [App]
 PrePareTime = 10 # 启动前准备时长
