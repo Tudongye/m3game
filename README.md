@@ -709,9 +709,9 @@ service RoleDaemonSer {
 
 # OnlineApp
 service OnlineSer {
-    rpc OnlinePost(OnlinePost.Req) returns (OnlinePost.Rsp);   // 上报在线情况
-    rpc OnlineGet(OnlineGet.Req) returns (OnlineGet.Rsp);   // 获取在线情况
-    rpc OnlineKeeplive(OnlineKeeplive.Req) returns (OnlineKeeplive.Rsp);   // Ser心跳
+    rpc OnlineCreate(OnlineCreate.Req) returns (OnlineCreate.Rsp);   // 创建在线状态
+    rpc OnlineRead(OnlineRead.Req) returns (OnlineRead.Rsp);   // 获取在线情况
+    rpc OnlineDelete(OnlineDelete.Req) returns (OnlineDelete.Rsp);   // 删除在线状态
 }
 
 # ClubApp
