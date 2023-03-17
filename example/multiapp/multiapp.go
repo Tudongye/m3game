@@ -66,7 +66,7 @@ func (d *MultiApp) Start(ctx context.Context) {
 		case <-t.C:
 			// 插件检查
 			if router.Get().Factory().CanDelete(router.Get()) {
-				runtime.ShutDown()
+				runtime.ShutDown("Router Delete")
 				return
 			}
 			continue

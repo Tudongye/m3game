@@ -93,11 +93,11 @@ func (d *GateApp) Start(ctx context.Context) {
 		case <-t.C:
 			// 插件检查
 			if router.Get().Factory().CanDelete(router.Get()) {
-				runtime.ShutDown()
+				runtime.ShutDown("Router Delete")
 				return
 			}
 			if gate.Get().Factory().CanDelete(gate.Get()) {
-				runtime.ShutDown()
+				runtime.ShutDown("Gate Delete")
 				return
 			}
 			continue
@@ -105,7 +105,7 @@ func (d *GateApp) Start(ctx context.Context) {
 	}
 }
 
-func (d *GateApp) LogicCall(in *metapb.CSMsg) (*metapb.CSMsg, error) {
+func (d *GateApp) LogicCall(s string, in *metapb.CSMsg) (*metapb.CSMsg, error) {
 	if !rpc.IsCSFullMethod(in.Method) {
 		return nil, fmt.Errorf("Method %s invaild", in.Method)
 	}

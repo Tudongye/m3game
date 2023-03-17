@@ -86,7 +86,7 @@ func (d *ActorSer) Login(ctx context.Context, in *pb.Login_Req) (*pb.Login_Rsp, 
 				actor.SetGate(vlist[0])
 			}
 		}
-		if vlist, ok := md[string(meta.M3PlayerID)]; ok {
+		if vlist, ok := md[string(meta.M3ActorActorID)]; ok {
 			if len(vlist) > 0 {
 				log.Debug("Actor %s at PlayerID %s", actor.ActorID(), vlist[0])
 				actor.SetPlayerId(vlist[0])

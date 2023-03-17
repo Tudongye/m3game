@@ -91,11 +91,11 @@ func (d *ActorApp) Start(ctx context.Context) {
 			// 插件检查
 			if router.Get().Factory().CanDelete(router.Get()) {
 				t.Stop()
-				runtime.ShutDown()
+				runtime.ShutDown("Router Delete")
 			}
 			if lease.Get().Factory().CanDelete(lease.Get()) {
 				t.Stop()
-				runtime.ShutDown()
+				runtime.ShutDown("Lease Delete")
 			}
 			continue
 		}
