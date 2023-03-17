@@ -59,19 +59,140 @@ func (*SendToCli) Descriptor() ([]byte, []int) {
 	return file_gate_proto_rawDescGZIP(), []int{0}
 }
 
+type NtyMsg struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Types that are assignable to Msg:
+	//	*NtyMsg_NtyRoleTxt
+	Msg isNtyMsg_Msg `protobuf_oneof:"msg"`
+}
+
+func (x *NtyMsg) Reset() {
+	*x = NtyMsg{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_gate_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NtyMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NtyMsg) ProtoMessage() {}
+
+func (x *NtyMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_gate_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NtyMsg.ProtoReflect.Descriptor instead.
+func (*NtyMsg) Descriptor() ([]byte, []int) {
+	return file_gate_proto_rawDescGZIP(), []int{1}
+}
+
+func (m *NtyMsg) GetMsg() isNtyMsg_Msg {
+	if m != nil {
+		return m.Msg
+	}
+	return nil
+}
+
+func (x *NtyMsg) GetNtyRoleTxt() *NtyRoleTxt {
+	if x, ok := x.GetMsg().(*NtyMsg_NtyRoleTxt); ok {
+		return x.NtyRoleTxt
+	}
+	return nil
+}
+
+type isNtyMsg_Msg interface {
+	isNtyMsg_Msg()
+}
+
+type NtyMsg_NtyRoleTxt struct {
+	NtyRoleTxt *NtyRoleTxt `protobuf:"bytes,1,opt,name=NtyRoleTxt,proto3,oneof"`
+}
+
+func (*NtyMsg_NtyRoleTxt) isNtyMsg_Msg() {}
+
+type NtyRoleTxt struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId  string `protobuf:"bytes,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
+	Content string `protobuf:"bytes,2,opt,name=Content,proto3" json:"Content,omitempty"`
+}
+
+func (x *NtyRoleTxt) Reset() {
+	*x = NtyRoleTxt{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_gate_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NtyRoleTxt) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NtyRoleTxt) ProtoMessage() {}
+
+func (x *NtyRoleTxt) ProtoReflect() protoreflect.Message {
+	mi := &file_gate_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NtyRoleTxt.ProtoReflect.Descriptor instead.
+func (*NtyRoleTxt) Descriptor() ([]byte, []int) {
+	return file_gate_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *NtyRoleTxt) GetRoleId() string {
+	if x != nil {
+		return x.RoleId
+	}
+	return ""
+}
+
+func (x *NtyRoleTxt) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
 type SendToCli_Req struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PlayerID string `protobuf:"bytes,1,opt,name=PlayerID,proto3" json:"PlayerID,omitempty"`
-	Content  string `protobuf:"bytes,2,opt,name=Content,proto3" json:"Content,omitempty"`
+	RoleId string  `protobuf:"bytes,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
+	NtyMsg *NtyMsg `protobuf:"bytes,2,opt,name=NtyMsg,proto3" json:"NtyMsg,omitempty"`
 }
 
 func (x *SendToCli_Req) Reset() {
 	*x = SendToCli_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_gate_proto_msgTypes[1]
+		mi := &file_gate_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -84,7 +205,7 @@ func (x *SendToCli_Req) String() string {
 func (*SendToCli_Req) ProtoMessage() {}
 
 func (x *SendToCli_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_proto_msgTypes[1]
+	mi := &file_gate_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -100,18 +221,18 @@ func (*SendToCli_Req) Descriptor() ([]byte, []int) {
 	return file_gate_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *SendToCli_Req) GetPlayerID() string {
+func (x *SendToCli_Req) GetRoleId() string {
 	if x != nil {
-		return x.PlayerID
+		return x.RoleId
 	}
 	return ""
 }
 
-func (x *SendToCli_Req) GetContent() string {
+func (x *SendToCli_Req) GetNtyMsg() *NtyMsg {
 	if x != nil {
-		return x.Content
+		return x.NtyMsg
 	}
-	return ""
+	return nil
 }
 
 type SendToCli_Rsp struct {
@@ -123,7 +244,7 @@ type SendToCli_Rsp struct {
 func (x *SendToCli_Rsp) Reset() {
 	*x = SendToCli_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_gate_proto_msgTypes[2]
+		mi := &file_gate_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -136,7 +257,7 @@ func (x *SendToCli_Rsp) String() string {
 func (*SendToCli_Rsp) ProtoMessage() {}
 
 func (x *SendToCli_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_gate_proto_msgTypes[2]
+	mi := &file_gate_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -157,18 +278,27 @@ var File_gate_proto protoreflect.FileDescriptor
 var file_gate_proto_rawDesc = []byte{
 	0x0a, 0x0a, 0x67, 0x61, 0x74, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x1a, 0x0d, 0x6f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x22, 0x57, 0x0a, 0x09, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x43, 0x6c, 0x69, 0x1a,
-	0x3b, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x1a, 0x0a, 0x08, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72,
-	0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72,
-	0x49, 0x44, 0x12, 0x18, 0x0a, 0x07, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x07, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x1a, 0x05, 0x0a, 0x03,
-	0x52, 0x73, 0x70, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x10, 0x01, 0x32, 0x42, 0x0a, 0x07, 0x47,
-	0x61, 0x74, 0x65, 0x53, 0x65, 0x72, 0x12, 0x37, 0x0a, 0x09, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f,
-	0x43, 0x6c, 0x69, 0x12, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x53, 0x65, 0x6e, 0x64,
-	0x54, 0x6f, 0x43, 0x6c, 0x69, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x43, 0x6c, 0x69, 0x2e, 0x52, 0x73, 0x70, 0x42,
-	0x0a, 0x5a, 0x08, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x22, 0x60, 0x0a, 0x09, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x43, 0x6c, 0x69, 0x1a,
+	0x44, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x25,
+	0x0a, 0x06, 0x4e, 0x74, 0x79, 0x4d, 0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4e, 0x74, 0x79, 0x4d, 0x73, 0x67, 0x52, 0x06, 0x4e,
+	0x74, 0x79, 0x4d, 0x73, 0x67, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x3a, 0x06, 0xca, 0xf3,
+	0x18, 0x02, 0x10, 0x01, 0x22, 0x44, 0x0a, 0x06, 0x4e, 0x74, 0x79, 0x4d, 0x73, 0x67, 0x12, 0x33,
+	0x0a, 0x0a, 0x4e, 0x74, 0x79, 0x52, 0x6f, 0x6c, 0x65, 0x54, 0x78, 0x74, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x4e, 0x74, 0x79, 0x52, 0x6f,
+	0x6c, 0x65, 0x54, 0x78, 0x74, 0x48, 0x00, 0x52, 0x0a, 0x4e, 0x74, 0x79, 0x52, 0x6f, 0x6c, 0x65,
+	0x54, 0x78, 0x74, 0x42, 0x05, 0x0a, 0x03, 0x6d, 0x73, 0x67, 0x22, 0x3e, 0x0a, 0x0a, 0x4e, 0x74,
+	0x79, 0x52, 0x6f, 0x6c, 0x65, 0x54, 0x78, 0x74, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65,
+	0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64,
+	0x12, 0x18, 0x0a, 0x07, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x07, 0x43, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x32, 0x42, 0x0a, 0x07, 0x47, 0x61,
+	0x74, 0x65, 0x53, 0x65, 0x72, 0x12, 0x37, 0x0a, 0x09, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x43,
+	0x6c, 0x69, 0x12, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x53, 0x65, 0x6e, 0x64, 0x54,
+	0x6f, 0x43, 0x6c, 0x69, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x53, 0x65, 0x6e, 0x64, 0x54, 0x6f, 0x43, 0x6c, 0x69, 0x2e, 0x52, 0x73, 0x70, 0x42, 0x0a,
+	0x5a, 0x08, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -183,20 +313,24 @@ func file_gate_proto_rawDescGZIP() []byte {
 	return file_gate_proto_rawDescData
 }
 
-var file_gate_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_gate_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_gate_proto_goTypes = []interface{}{
 	(*SendToCli)(nil),     // 0: proto.SendToCli
-	(*SendToCli_Req)(nil), // 1: proto.SendToCli.Req
-	(*SendToCli_Rsp)(nil), // 2: proto.SendToCli.Rsp
+	(*NtyMsg)(nil),        // 1: proto.NtyMsg
+	(*NtyRoleTxt)(nil),    // 2: proto.NtyRoleTxt
+	(*SendToCli_Req)(nil), // 3: proto.SendToCli.Req
+	(*SendToCli_Rsp)(nil), // 4: proto.SendToCli.Rsp
 }
 var file_gate_proto_depIdxs = []int32{
-	1, // 0: proto.GateSer.SendToCli:input_type -> proto.SendToCli.Req
-	2, // 1: proto.GateSer.SendToCli:output_type -> proto.SendToCli.Rsp
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: proto.NtyMsg.NtyRoleTxt:type_name -> proto.NtyRoleTxt
+	1, // 1: proto.SendToCli.Req.NtyMsg:type_name -> proto.NtyMsg
+	3, // 2: proto.GateSer.SendToCli:input_type -> proto.SendToCli.Req
+	4, // 3: proto.GateSer.SendToCli:output_type -> proto.SendToCli.Rsp
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_gate_proto_init() }
@@ -218,7 +352,7 @@ func file_gate_proto_init() {
 			}
 		}
 		file_gate_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SendToCli_Req); i {
+			switch v := v.(*NtyMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -230,6 +364,30 @@ func file_gate_proto_init() {
 			}
 		}
 		file_gate_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*NtyRoleTxt); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_gate_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SendToCli_Req); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_gate_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SendToCli_Rsp); i {
 			case 0:
 				return &v.state
@@ -242,13 +400,16 @@ func file_gate_proto_init() {
 			}
 		}
 	}
+	file_gate_proto_msgTypes[1].OneofWrappers = []interface{}{
+		(*NtyMsg_NtyRoleTxt)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_gate_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

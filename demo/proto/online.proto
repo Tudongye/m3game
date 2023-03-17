@@ -7,9 +7,9 @@ import "options.proto";
 option go_package = "proto/pb";
 
 service OnlineSer {
-    rpc OnlineCreate(OnlineCreate.Req) returns (OnlineCreate.Rsp);   // 上报在线情况
+    rpc OnlineCreate(OnlineCreate.Req) returns (OnlineCreate.Rsp);   // 创建在线状态
     rpc OnlineRead(OnlineRead.Req) returns (OnlineRead.Rsp);   // 获取在线情况
-    rpc OnlineDelete(OnlineDelete.Req) returns (OnlineDelete.Rsp);   // 上报在线情况
+    rpc OnlineDelete(OnlineDelete.Req) returns (OnlineDelete.Rsp);   // 删除在线状态
 }
 
 message OnlineRoleDB {

@@ -6,7 +6,7 @@ import (
 	"m3game/demo/onlineapp/onlineser"
 	"m3game/demo/proto"
 	_ "m3game/plugins/broker/nats"
-	_ "m3game/plugins/db/cache"
+	_ "m3game/plugins/db/redis"
 	"m3game/plugins/lease"
 	_ "m3game/plugins/lease/etcd"
 	"m3game/plugins/log"
@@ -81,7 +81,7 @@ func (d *OnlineApp) Start(ctx context.Context) {
 		case <-t.C:
 			// 插件检查
 			if router.Get().Factory().CanDelete(router.Get()) {
-				runtime.ShutDown()
+				runtime.ShutDown("Router Delete")
 				return
 			}
 			// 选主逻辑
@@ -95,6 +95,10 @@ func (d *OnlineApp) Start(ctx context.Context) {
 				if onlineser.Pool().IsOpen() {
 					onlineser.Pool().Close()
 				}
+			}
+			// 更新活跃RoleApp列表
+			if err := onlineser.Pool().LoadAppCache(); err != nil {
+				log.Error("%s", err)
 			}
 			continue
 		}

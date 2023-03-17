@@ -1,0 +1,1 @@
+./main -testmode $1 -agenturl 9.135.72.251:32451

@@ -6,7 +6,7 @@ import (
 	"m3game/demo/proto"
 	"m3game/demo/uidapp/uidser"
 	_ "m3game/plugins/broker/nats"
-	_ "m3game/plugins/db/cache"
+	_ "m3game/plugins/db/redis"
 	"m3game/plugins/lease"
 	_ "m3game/plugins/lease/etcd"
 	"m3game/plugins/log"
@@ -81,7 +81,7 @@ func (d *UidApp) Start(ctx context.Context) {
 		case <-t.C:
 			// 插件检查
 			if router.Get().Factory().CanDelete(router.Get()) {
-				runtime.ShutDown()
+				runtime.ShutDown("Router Delete")
 				return
 			}
 			// 选主逻辑

@@ -66,7 +66,7 @@ func Conn() *grpc.ClientConn {
 func AllocRoleId(ctx context.Context, openid string, opts ...grpc.CallOption) (string, error) {
 	var in pb.AllocRoleId_Req
 	in.OpenId = openid
-	out, err := client.RPCCallRandom(_client, _client.AllocRoleId, ctx, &in, opts...)
+	out, err := client.RPCCallSingle(_client, _client.AllocRoleId, ctx, &in, opts...)
 	if err != nil {
 		return "", err
 	} else {
@@ -77,7 +77,7 @@ func AllocRoleId(ctx context.Context, openid string, opts ...grpc.CallOption) (s
 func AllocClubId(ctx context.Context, roleid string, opts ...grpc.CallOption) (string, error) {
 	var in pb.AllocClubId_Req
 	in.RoleId = roleid
-	out, err := client.RPCCallRandom(_client, _client.AllocClubId, ctx, &in, opts...)
+	out, err := client.RPCCallSingle(_client, _client.AllocClubId, ctx, &in, opts...)
 	if err != nil {
 		return "", err
 	} else {

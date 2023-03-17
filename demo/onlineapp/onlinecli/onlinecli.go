@@ -67,7 +67,7 @@ func OnlineCreate(ctx context.Context, roleid string, appid string, opts ...grpc
 	var in pb.OnlineCreate_Req
 	in.RoleId = roleid
 	in.AppId = appid
-	_, err := client.RPCCallRandom(_client, _client.OnlineCreate, ctx, &in, opts...)
+	_, err := client.RPCCallSingle(_client, _client.OnlineCreate, ctx, &in, opts...)
 	if err != nil {
 		return err
 	} else {
@@ -79,7 +79,7 @@ func OnlineDelete(ctx context.Context, roleid string, appid string, opts ...grpc
 	var in pb.OnlineDelete_Req
 	in.RoleId = roleid
 	in.AppId = appid
-	_, err := client.RPCCallRandom(_client, _client.OnlineDelete, ctx, &in, opts...)
+	_, err := client.RPCCallSingle(_client, _client.OnlineDelete, ctx, &in, opts...)
 	if err != nil {
 		return err
 	} else {
@@ -90,7 +90,7 @@ func OnlineDelete(ctx context.Context, roleid string, appid string, opts ...grpc
 func OnlineRead(ctx context.Context, roleid string, opts ...grpc.CallOption) (string, error) {
 	var in pb.OnlineRead_Req
 	in.RoleId = roleid
-	out, err := client.RPCCallRandom(_client, _client.OnlineRead, ctx, &in, opts...)
+	out, err := client.RPCCallSingle(_client, _client.OnlineRead, ctx, &in, opts...)
 	if err != nil {
 		return "", err
 	} else {

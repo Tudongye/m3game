@@ -156,7 +156,7 @@ func (u *OnlinePool) OnlineRead(roleid string) (string, error) {
 			}
 		}
 		return "", nil
-	} else if !db.IsErrDBNotFindKey(err) {
+	} else if db.IsErrDBNotFindKey(err) {
 		return "", nil
 	} else {
 		return "", err
@@ -194,7 +194,7 @@ func (u *OnlinePool) OnlineDelete(roleid string, appid string) error {
 	return nil
 }
 
-func (u *OnlinePool) LoadAppCache(appids []string) error {
+func (u *OnlinePool) LoadAppCache() error {
 	// 加载App在线信息
 	env, world, _ := config.GetWorldID().Parse()
 	rolesvcid := meta.GenRouteSvc(env, world, proto.RoleFuncID)

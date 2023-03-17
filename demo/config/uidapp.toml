@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:32101"
+Addr = "9.135.72.251:32101"
 BroadTimeOut = 5
 
 [Options]
@@ -12,20 +12,24 @@ RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "127.0.0.1:8500"
+ConsulHost = "9.135.72.251:8500"
 
 [[Plugin.Broker.broker_nats]]
-NatsURL = "127.0.0.1:4222"
+NatsURL = "9.135.72.251:4222"
 
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"
 Encoding = "console"
 
-[[Plugin.DB.db_cache]]
-Pass = "1"
+[[Plugin.DB.db_redis]]
+Host = "9.135.72.251"
+Port = 6379
+Auth = "123456"
+MaxIdle = 100
+MaxActive = 100
 
 [[Plugin.Lease.lease_etcd]]
-Endpoints = "127.0.0.1:2379"
+Endpoints = "9.135.72.251:2379"
 DialTimeout = 5
 LeaseKeepLiveTime = 10
 PreExitTime = 5

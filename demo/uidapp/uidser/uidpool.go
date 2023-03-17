@@ -22,10 +22,9 @@ var (
 func init() {
 	_uidclubiddbmeta = db.NewMeta("uidclubid_table", uidclubidCreater)
 	_uidroleiddbmeta = db.NewMeta("uidroleid_table", uidroleidCreater)
-	_uidmetadbmeta = db.NewMeta("uidroleid_table", uidmetaCreater)
+	_uidmetadbmeta = db.NewMeta("uidmeta_table", uidmetaCreater)
 	_uidpool = &UidPool{
-		metawraper: wraper.New(_uidmetadbmeta, config.GetWorldID().String()),
-		isopen:     false,
+		isopen: false,
 	}
 }
 
@@ -93,6 +92,7 @@ func (u *UidPool) Open() {
 	defer u.mu.Unlock()
 	u.isopen = true
 	u.cache = newCache()
+	u.metawraper = wraper.New(_uidmetadbmeta, config.GetWorldID().String())
 }
 
 func (u *UidPool) IsOpen() bool {

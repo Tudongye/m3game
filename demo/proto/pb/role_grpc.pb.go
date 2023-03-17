@@ -26,7 +26,7 @@ type RoleSerClient interface {
 	RoleGetInfo(ctx context.Context, in *RoleGetInfo_Req, opts ...grpc.CallOption) (*RoleGetInfo_Rsp, error)
 	RoleModifyName(ctx context.Context, in *RoleModifyName_Req, opts ...grpc.CallOption) (*RoleModifyName_Rsp, error)
 	RolePowerUp(ctx context.Context, in *RolePowerUp_Req, opts ...grpc.CallOption) (*RolePowerUp_Rsp, error)
-	RolePostChannel(ctx context.Context, in *RolePostChannel_Req, opts ...grpc.CallOption) (*RolePostChannel_Rsp, error)
+	RoleKick(ctx context.Context, in *RoleKick_Req, opts ...grpc.CallOption) (*RoleKick_Rsp, error)
 	RoleGetClubInfo(ctx context.Context, in *RoleGetClubInfo_Req, opts ...grpc.CallOption) (*RoleGetClubInfo_Rsp, error)
 	RoleGetClubList(ctx context.Context, in *RoleGetClubList_Req, opts ...grpc.CallOption) (*RoleGetClubList_Rsp, error)
 	RoleGetClubRoleInfo(ctx context.Context, in *RoleGetClubRoleInfo_Req, opts ...grpc.CallOption) (*RoleGetClubRoleInfo_Rsp, error)
@@ -80,9 +80,9 @@ func (c *roleSerClient) RolePowerUp(ctx context.Context, in *RolePowerUp_Req, op
 	return out, nil
 }
 
-func (c *roleSerClient) RolePostChannel(ctx context.Context, in *RolePostChannel_Req, opts ...grpc.CallOption) (*RolePostChannel_Rsp, error) {
-	out := new(RolePostChannel_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleSer/RolePostChannel", in, out, opts...)
+func (c *roleSerClient) RoleKick(ctx context.Context, in *RoleKick_Req, opts ...grpc.CallOption) (*RoleKick_Rsp, error) {
+	out := new(RoleKick_Rsp)
+	err := c.cc.Invoke(ctx, "/proto.RoleSer/RoleKick", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ type RoleSerServer interface {
 	RoleGetInfo(context.Context, *RoleGetInfo_Req) (*RoleGetInfo_Rsp, error)
 	RoleModifyName(context.Context, *RoleModifyName_Req) (*RoleModifyName_Rsp, error)
 	RolePowerUp(context.Context, *RolePowerUp_Req) (*RolePowerUp_Rsp, error)
-	RolePostChannel(context.Context, *RolePostChannel_Req) (*RolePostChannel_Rsp, error)
+	RoleKick(context.Context, *RoleKick_Req) (*RoleKick_Rsp, error)
 	RoleGetClubInfo(context.Context, *RoleGetClubInfo_Req) (*RoleGetClubInfo_Rsp, error)
 	RoleGetClubList(context.Context, *RoleGetClubList_Req) (*RoleGetClubList_Rsp, error)
 	RoleGetClubRoleInfo(context.Context, *RoleGetClubRoleInfo_Req) (*RoleGetClubRoleInfo_Rsp, error)
@@ -187,8 +187,8 @@ func (UnimplementedRoleSerServer) RoleModifyName(context.Context, *RoleModifyNam
 func (UnimplementedRoleSerServer) RolePowerUp(context.Context, *RolePowerUp_Req) (*RolePowerUp_Rsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RolePowerUp not implemented")
 }
-func (UnimplementedRoleSerServer) RolePostChannel(context.Context, *RolePostChannel_Req) (*RolePostChannel_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RolePostChannel not implemented")
+func (UnimplementedRoleSerServer) RoleKick(context.Context, *RoleKick_Req) (*RoleKick_Rsp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RoleKick not implemented")
 }
 func (UnimplementedRoleSerServer) RoleGetClubInfo(context.Context, *RoleGetClubInfo_Req) (*RoleGetClubInfo_Rsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RoleGetClubInfo not implemented")
@@ -296,20 +296,20 @@ func _RoleSer_RolePowerUp_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RoleSer_RolePostChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RolePostChannel_Req)
+func _RoleSer_RoleKick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RoleKick_Req)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RoleSerServer).RolePostChannel(ctx, in)
+		return srv.(RoleSerServer).RoleKick(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.RoleSer/RolePostChannel",
+		FullMethod: "/proto.RoleSer/RoleKick",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleSerServer).RolePostChannel(ctx, req.(*RolePostChannel_Req))
+		return srv.(RoleSerServer).RoleKick(ctx, req.(*RoleKick_Req))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -464,8 +464,8 @@ var RoleSer_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _RoleSer_RolePowerUp_Handler,
 		},
 		{
-			MethodName: "RolePostChannel",
-			Handler:    _RoleSer_RolePostChannel_Handler,
+			MethodName: "RoleKick",
+			Handler:    _RoleSer_RoleKick_Handler,
 		},
 		{
 			MethodName: "RoleGetClubInfo",
@@ -494,128 +494,6 @@ var RoleSer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RoleCancelClub",
 			Handler:    _RoleSer_RoleCancelClub_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "role.proto",
-}
-
-// RoleDaemonSerClient is the client API for RoleDaemonSer service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type RoleDaemonSerClient interface {
-	RoleRecvChannel(ctx context.Context, in *RoleRecvChannel_Req, opts ...grpc.CallOption) (*RoleRecvChannel_Rsp, error)
-	RoleKick(ctx context.Context, in *RoleKick_Req, opts ...grpc.CallOption) (*RoleKick_Rsp, error)
-}
-
-type roleDaemonSerClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewRoleDaemonSerClient(cc grpc.ClientConnInterface) RoleDaemonSerClient {
-	return &roleDaemonSerClient{cc}
-}
-
-func (c *roleDaemonSerClient) RoleRecvChannel(ctx context.Context, in *RoleRecvChannel_Req, opts ...grpc.CallOption) (*RoleRecvChannel_Rsp, error) {
-	out := new(RoleRecvChannel_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleDaemonSer/RoleRecvChannel", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *roleDaemonSerClient) RoleKick(ctx context.Context, in *RoleKick_Req, opts ...grpc.CallOption) (*RoleKick_Rsp, error) {
-	out := new(RoleKick_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.RoleDaemonSer/RoleKick", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// RoleDaemonSerServer is the server API for RoleDaemonSer service.
-// All implementations must embed UnimplementedRoleDaemonSerServer
-// for forward compatibility
-type RoleDaemonSerServer interface {
-	RoleRecvChannel(context.Context, *RoleRecvChannel_Req) (*RoleRecvChannel_Rsp, error)
-	RoleKick(context.Context, *RoleKick_Req) (*RoleKick_Rsp, error)
-	mustEmbedUnimplementedRoleDaemonSerServer()
-}
-
-// UnimplementedRoleDaemonSerServer must be embedded to have forward compatible implementations.
-type UnimplementedRoleDaemonSerServer struct {
-}
-
-func (UnimplementedRoleDaemonSerServer) RoleRecvChannel(context.Context, *RoleRecvChannel_Req) (*RoleRecvChannel_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RoleRecvChannel not implemented")
-}
-func (UnimplementedRoleDaemonSerServer) RoleKick(context.Context, *RoleKick_Req) (*RoleKick_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RoleKick not implemented")
-}
-func (UnimplementedRoleDaemonSerServer) mustEmbedUnimplementedRoleDaemonSerServer() {}
-
-// UnsafeRoleDaemonSerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to RoleDaemonSerServer will
-// result in compilation errors.
-type UnsafeRoleDaemonSerServer interface {
-	mustEmbedUnimplementedRoleDaemonSerServer()
-}
-
-func RegisterRoleDaemonSerServer(s grpc.ServiceRegistrar, srv RoleDaemonSerServer) {
-	s.RegisterService(&RoleDaemonSer_ServiceDesc, srv)
-}
-
-func _RoleDaemonSer_RoleRecvChannel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RoleRecvChannel_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RoleDaemonSerServer).RoleRecvChannel(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.RoleDaemonSer/RoleRecvChannel",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleDaemonSerServer).RoleRecvChannel(ctx, req.(*RoleRecvChannel_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _RoleDaemonSer_RoleKick_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RoleKick_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RoleDaemonSerServer).RoleKick(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.RoleDaemonSer/RoleKick",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RoleDaemonSerServer).RoleKick(ctx, req.(*RoleKick_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// RoleDaemonSer_ServiceDesc is the grpc.ServiceDesc for RoleDaemonSer service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var RoleDaemonSer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.RoleDaemonSer",
-	HandlerType: (*RoleDaemonSerServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "RoleRecvChannel",
-			Handler:    _RoleDaemonSer_RoleRecvChannel_Handler,
-		},
-		{
-			MethodName: "RoleKick",
-			Handler:    _RoleDaemonSer_RoleKick_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

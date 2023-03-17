@@ -12,7 +12,7 @@ service RoleSer {
     rpc RoleGetInfo(RoleGetInfo.Req) returns (RoleGetInfo.Rsp); // 获取详情
     rpc RoleModifyName(RoleModifyName.Req) returns (RoleModifyName.Rsp);    // 改名
     rpc RolePowerUp(RolePowerUp.Req) returns (RolePowerUp.Rsp);    // 战力提升
-    rpc RolePostChannel(RolePostChannel.Req) returns (RolePostChannel.Rsp); // 发送广播
+    rpc RoleKick(RoleKick.Req) returns (RoleKick.Rsp);    // 服务迁移
 
     rpc RoleGetClubInfo(RoleGetClubInfo.Req) returns (RoleGetClubInfo.Rsp); // 获取社团信息
     rpc RoleGetClubList(RoleGetClubList.Req) returns (RoleGetClubList.Rsp); // 获取社团列表
@@ -23,16 +23,10 @@ service RoleSer {
     rpc RoleCancelClub(RoleCancelClub.Req) returns (RoleCancelClub.Rsp); // 解散社团
 }
 
-service RoleDaemonSer {
-    rpc RoleRecvChannel(RoleRecvChannel.Req) returns (RoleRecvChannel.Rsp);  // 接受广播
-    rpc RoleKick(RoleKick.Req) returns (RoleKick.Rsp);    // 服务迁移
-}
 
 message RoleLogin {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
     }
     message Rsp {
         RoleDB RoleDB = 1;
@@ -41,10 +35,8 @@ message RoleLogin {
 }
 
 message RoleGetInfo {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
     }
     message Rsp {
         RoleDB RoleDB = 1;
@@ -53,11 +45,9 @@ message RoleGetInfo {
 }
 
 message RoleModifyName {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
-        string NewName = 2;
+        string NewName = 1;
     }
     message Rsp {
         RoleName RoleName = 1;
@@ -65,33 +55,18 @@ message RoleModifyName {
 }
 
 message RolePowerUp {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
-        int32 PowerUp = 2;
+        int32 PowerUp = 1;
     }
     message Rsp {
         RolePower RolePower = 1;
     }
 }
 
-message RolePostChannel {
-    option (rpc_option).route_key = "RoleId";
-    option (rpc_option).cs = true;
-    message Req {
-        string RoleId = 1;
-        string Content = 2;
-    }
-    message Rsp {
-    }
-}
-
 message RoleGetClubRoleInfo {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
     }
     message Rsp {
         ClubRoleDB ClubRoleDB = 1;
@@ -99,10 +74,8 @@ message RoleGetClubRoleInfo {
 }
 
 message RoleGetClubList {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
     }
     message Rsp {
         repeated ClubDB ClubDBs = 1;
@@ -110,10 +83,8 @@ message RoleGetClubList {
 }
 
 message RoleGetClubInfo {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
         string ClubId = 2;
     }
     message Rsp {
@@ -122,10 +93,8 @@ message RoleGetClubInfo {
 }
 
 message RoleCreateClub {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
     }
     message Rsp {
         string ClubId = 2;
@@ -133,10 +102,8 @@ message RoleCreateClub {
 }
 
 message RoleJoinClub {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
         string ClubId = 2;
     }
     message Rsp {
@@ -144,43 +111,28 @@ message RoleJoinClub {
 }
 
 message RoleExitClub {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
-        string ClubId = 2;
+        string ClubId = 1;
     }
     message Rsp {
     }
 }
 
 message RoleCancelClub {
-    option (rpc_option).route_key = "RoleId";
     option (rpc_option).cs = true;
     message Req {
-        string RoleId = 1;
-        string ClubId = 2;
-    }
-    message Rsp {
-    }
-}
-
-message RoleRecvChannel {
-    option (rpc_option).route_key = "";
-    message Req {
-        string RoleId = 1;
-        string Content = 2;
+        string ClubId = 1;
     }
     message Rsp {
     }
 }
 
 message RoleKick {
-    option (rpc_option).route_key = "";
+    option (rpc_option).cs = false;
     message Req {
         string RoleId = 1;
     }
     message Rsp {
-        bytes Content = 1;
     }
 }

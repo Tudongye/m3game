@@ -1,0 +1,29 @@
+[Transport]
+Addr = "9.135.72.251:32401"
+BroadTimeOut = 5
+
+[Options]
+[[Options.Mesh]]
+WatcherInterSecond = 1
+[[Options.Resource]]
+CfgPath = "../../resource"
+[[Options.Shape]]
+RuleConfigFile = "../../resource/rules.toml"
+
+[Plugin]
+[[Plugin.Router.router_consul]]
+ConsulHost = "9.135.72.251:8500"
+
+[[Plugin.Broker.broker_nats]]
+NatsURL = "9.135.72.251:4222"
+
+[[Plugin.Gate.gate_grpc]]
+Addr = "9.135.72.251:32451"
+
+[[Plugin.Log.log_zap]]
+LogLevel = "INFO "
+Encoding = "console"
+
+
+[App]
+PrePareTime = 10 # 启动前准备时长
