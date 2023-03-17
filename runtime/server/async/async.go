@@ -40,12 +40,10 @@ func (s *Server) Name() string {
 	return fmt.Sprintf("%s.%s", server.Async, s.name)
 }
 
-func (s *Server) Start(wg *sync.WaitGroup) error {
+func (s *Server) Prepare(context.Context) error {
 	return nil
 }
-
-func (s *Server) Stop() error {
-	return nil
+func (s *Server) Start(context.Context) {
 }
 
 func (s *Server) Reload(map[string]interface{}) error {

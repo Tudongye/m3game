@@ -7,7 +7,6 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
-	"sync"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
@@ -94,12 +93,11 @@ func (s *Server) Name() string {
 	return fmt.Sprintf("%s.%s", server.Actor, s.name)
 }
 
-func (s *Server) Start(wg *sync.WaitGroup) error {
+func (s *Server) Prepare(context.Context) error {
 	return nil
 }
+func (s *Server) Start(context.Context) {
 
-func (s *Server) Stop() error {
-	return nil
 }
 
 func (s *Server) Reload(map[string]interface{}) error {

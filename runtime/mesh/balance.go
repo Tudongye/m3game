@@ -3,11 +3,9 @@ package mesh
 import (
 	"m3game/meta"
 	"m3game/plugins/log"
-	"math/rand"
 
 	"github.com/pkg/errors"
 
-	"github.com/serialx/hashring"
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/metadata"
@@ -54,9 +52,8 @@ func (p *M3GPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	if len(info.ReadySCs) == 0 {
 		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}
-	singleIDstr := ""
-	var idstrlist []string
 	subConns := make(map[string]balancer.SubConn)
+	routeHelper := NewRouteHelper()
 	for subConn, conInfo := range info.ReadySCs {
 		v := conInfo.Address.BalancerAttributes.Value(BalanceAttrKey)
 		if v == nil {
@@ -64,24 +61,18 @@ func (p *M3GPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 		}
 		idstr := v.(*BalanceAttrValue).IDStr
 		subConns[idstr] = subConn
-		idstrlist = append(idstrlist, idstr)
-		if idstr < singleIDstr || singleIDstr == "" {
-			singleIDstr = idstr
-		}
+		routeHelper.Add(idstr)
 	}
+	routeHelper.Compress()
 	return &M3GPicker{
 		subConns:    subConns,
-		hashRing:    hashring.New(idstrlist),
-		idstrlist:   idstrlist,
-		singleIDstr: singleIDstr,
+		routeHelper: routeHelper,
 	}
 }
 
 type M3GPicker struct {
 	subConns    map[string]balancer.SubConn
-	hashRing    *hashring.HashRing
-	idstrlist   []string
-	singleIDstr string
+	routeHelper *RouteHelper
 }
 
 func (p *M3GPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
@@ -112,45 +103,41 @@ func (p *M3GPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 }
 
 func (p *M3GPicker) pickP2P(md metadata.MD) (balancer.PickResult, error) {
-	var ret balancer.PickResult
 	vlist := md[string(meta.M3RouteDstApp)]
 	if len(vlist) != 1 {
-		return ret, balancer.ErrNoSubConnAvailable
+		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
-	for appid, subConn := range p.subConns {
-		if appid == vlist[0] {
-			return balancer.PickResult{SubConn: subConn}, nil
-		}
+	if dstappid, err := p.routeHelper.RouteP2P(vlist[0]); err != nil {
+		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
+	} else {
+		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
 	}
-	return ret, balancer.ErrNoSubConnAvailable
 }
 
 func (p *M3GPicker) pickRandom(md metadata.MD) (balancer.PickResult, error) {
-	subconn := p.subConns[p.idstrlist[rand.Int()%len(p.idstrlist)]]
-	if subconn == nil {
+	if dstappid, err := p.routeHelper.RouteRandom(); err != nil {
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {
-		return balancer.PickResult{SubConn: subconn}, nil
+		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
 	}
 }
 
 func (p *M3GPicker) pickHash(md metadata.MD) (balancer.PickResult, error) {
-	var ret balancer.PickResult
 	vlist := md[string(meta.M3RouteHashKey)]
 	if len(vlist) != 1 {
-		return ret, balancer.ErrNoSubConnAvailable
+		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
-	if idstr, ok := p.hashRing.GetNode(vlist[0]); ok {
-		return balancer.PickResult{SubConn: p.subConns[idstr]}, nil
+	if dstappid, err := p.routeHelper.RouteHash(vlist[0]); err != nil {
+		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
+	} else {
+		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
 	}
-	return ret, balancer.ErrNoSubConnAvailable
 }
 
 func (p *M3GPicker) pickSingle(md metadata.MD) (balancer.PickResult, error) {
-	subconn := p.subConns[p.singleIDstr]
-	if subconn == nil {
+	if dstappid, err := p.routeHelper.RouteSingle(); err != nil {
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {
-		return balancer.PickResult{SubConn: subconn}, nil
+		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
 	}
 }

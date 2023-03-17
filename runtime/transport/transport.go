@@ -9,7 +9,6 @@ import (
 	"m3game/plugins/log"
 	"net"
 	"regexp"
-	"sync"
 
 	"github.com/pkg/errors"
 
@@ -94,27 +93,26 @@ func RegisterServerInterceptor(f grpc.UnaryServerInterceptor) {
 	_serverInterceptors = append(_serverInterceptors, f)
 }
 
-func Start(wg *sync.WaitGroup) error {
+func Prepare(ctx context.Context) error {
 	log.Info("Transport Listen %s", _cfg.Addr)
 	var err error
 	_tcpAddr, err = net.ResolveTCPAddr("tcp", _cfg.Addr)
 	if err != nil {
 		return errors.Wrap(err, "transport")
 	}
-	listener, err := net.ListenTCP("tcp", _tcpAddr)
+	_instance.listener, err = net.ListenTCP("tcp", _tcpAddr)
 	if err != nil {
 		return errors.Wrap(err, "transport.ListenTCP")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	_instance.cancel = cancel
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		defer listener.Close()
-		_instance.start(ctx, listener)
-		log.Info("Transport.Stoped...")
-	}()
 	return nil
+}
+
+func Start(ctx context.Context) {
+	defer _instance.listener.Close()
+	_instance.start(ctx, _instance.listener)
+	log.Info("Transport.Stoped...")
 }
 
 func ShutDown() {
@@ -180,6 +178,7 @@ type Transport struct {
 	brokerser *brokerSer
 	cancel    context.CancelFunc
 	runtime   RuntimeReciver
+	listener  *net.TCPListener
 }
 
 func (t *Transport) start(ctx context.Context, listener *net.TCPListener) error {

@@ -63,19 +63,19 @@ func (r RouteApp) String() string {
 	return string(r)
 }
 
-func (r *RouteApp) Vaild() bool {
-	groups := regexAppID.FindStringSubmatch(string(*r))
+func (r RouteApp) Vaild() bool {
+	groups := regexAppID.FindStringSubmatch(string(r))
 	if len(groups) == 0 {
 		return false
 	}
 	return true
 }
 
-func (r *RouteApp) Parse() (env string, world string, fun string, ins string, err error) {
+func (r RouteApp) Parse() (env string, world string, fun string, ins string, err error) {
 	err = nil
-	groups := regexAppID.FindStringSubmatch(string(*r))
+	groups := regexAppID.FindStringSubmatch(string(r))
 	if len(groups) == 0 {
-		err = fmt.Errorf("RouteApp Parse fail %s", string(*r))
+		err = fmt.Errorf("RouteApp Parse fail %s", string(r))
 	} else {
 		env = groups[1]
 		world = groups[2]
@@ -94,19 +94,19 @@ type RouteSvc string
 func (r RouteSvc) String() string {
 	return string(r)
 }
-func (r *RouteSvc) Vaild() bool {
-	groups := regexSvcID.FindStringSubmatch(string(*r))
+func (r RouteSvc) Vaild() bool {
+	groups := regexSvcID.FindStringSubmatch(string(r))
 	if len(groups) == 0 {
 		return false
 	}
 	return true
 }
 
-func (r *RouteSvc) Parse() (env string, world string, fun string, err error) {
+func (r RouteSvc) Parse() (env string, world string, fun string, err error) {
 	err = nil
-	groups := regexSvcID.FindStringSubmatch(string(*r))
+	groups := regexSvcID.FindStringSubmatch(string(r))
 	if len(groups) == 0 {
-		err = fmt.Errorf("RouteSvc Parse fail %s", string(*r))
+		err = fmt.Errorf("RouteSvc Parse fail %s", string(r))
 	} else {
 		env = groups[1]
 		world = groups[2]
@@ -124,19 +124,19 @@ type RouteWorld string
 func (r RouteWorld) String() string {
 	return string(r)
 }
-func (r *RouteWorld) Vaild() bool {
-	groups := regexWorldID.FindStringSubmatch(string(*r))
+func (r RouteWorld) Vaild() bool {
+	groups := regexWorldID.FindStringSubmatch(string(r))
 	if len(groups) == 0 {
 		return false
 	}
 	return true
 }
 
-func (r *RouteWorld) Parse() (env string, world string, err error) {
+func (r RouteWorld) Parse() (env string, world string, err error) {
 	err = nil
-	groups := regexWorldID.FindStringSubmatch(string(*r))
+	groups := regexWorldID.FindStringSubmatch(string(r))
 	if len(groups) == 0 {
-		err = fmt.Errorf("RouteWorld Parse fail %s", string(*r))
+		err = fmt.Errorf("RouteWorld Parse fail %s", string(r))
 	} else {
 		env = groups[1]
 		world = groups[2]
@@ -153,19 +153,19 @@ type RouteEnv string
 func (r RouteEnv) String() string {
 	return string(r)
 }
-func (r *RouteEnv) Vaild() bool {
-	if len(*r) == 0 {
+func (r RouteEnv) Vaild() bool {
+	if len(r) == 0 {
 		return false
 	}
 	return true
 }
 
-func (r *RouteEnv) Parse() (env string, world string, err error) {
-	if len(*r) == 0 {
+func (r RouteEnv) Parse() (env string, world string, err error) {
+	if len(r) == 0 {
 		err = errors.New("RouteEnv Parse fail")
 		return
 	}
-	env = string(*r)
+	env = string(r)
 	return
 }
 

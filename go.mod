@@ -4,9 +4,10 @@ go 1.20
 
 require (
 	github.com/alibaba/sentinel-golang v1.0.4
+	github.com/bluele/gcache v0.0.2
+	github.com/deckarep/golang-set/v2 v2.3.0
 	github.com/golang/protobuf v1.5.3
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
-	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/hashicorp/consul/api v1.20.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nats-io/nats.go v1.24.0

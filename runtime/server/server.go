@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"m3game/runtime/app"
-	"sync"
 
 	"google.golang.org/grpc"
 )
@@ -59,8 +58,8 @@ type Server interface {
 	Init(map[string]interface{}, app.App) error                                                                                                                 // 初始化
 	Type() Type                                                                                                                                                 // 类型
 	Name() string                                                                                                                                               // 服务名
-	Start(wg *sync.WaitGroup) error                                                                                                                             // 启动
-	Stop() error                                                                                                                                                // 停止
+	Prepare(context.Context) error                                                                                                                              // 预启动
+	Start(context.Context)                                                                                                                                      // 启动
 	Reload(map[string]interface{}) error                                                                                                                        // 重载
 	ServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error)                // RPC ServerInterceptor
 	ClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error // RPC ClientInterceptor

@@ -10,11 +10,12 @@ type Instance interface {
 	GetHost() string
 	GetPort() uint32
 	GetIDStr() string
+	GetMeta(string) (string, bool)
 }
 
 type Router interface {
 	plugin.PluginIns
-	Register(app string, svc string, addr string) error
+	Register(app string, svc string, addr string, meta map[string]string) error
 	Deregister(app string, svc string) error
 	GetAllInstances(svcid string) ([]Instance, error)
 }
@@ -33,8 +34,8 @@ func Get() Router {
 	return _router
 }
 
-func Register(app string, svc string, addr string) error {
-	return Get().Register(app, svc, addr)
+func Register(app string, svc string, addr string, meta map[string]string) error {
+	return Get().Register(app, svc, addr, meta)
 }
 
 func Deregister(app string, svc string) error {

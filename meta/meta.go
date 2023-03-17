@@ -30,4 +30,7 @@ const (
 	M3ActorActorID M3Meta = "m3actoractorid"
 	M3PlayerID     M3Meta = "m3playerid"
 	M3ClientSerial M3Meta = "m3clientserial" // 客户端序列号
+
+	// Mesh相关
+	M3AppVer M3Meta = "m3appver"
 )

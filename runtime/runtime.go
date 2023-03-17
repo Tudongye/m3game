@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"m3game/config"
+	"m3game/meta"
 	"m3game/plugins/log"
 	"m3game/plugins/router"
 	"m3game/plugins/shape"
@@ -74,8 +75,8 @@ func PreExit() error {
 	return nil
 }
 
-func Run(app app.App, servers []server.Server) error {
-	ctx, cancel := context.WithCancel(context.Background())
+func Run(c context.Context, app app.App, servers []server.Server) error {
+	ctx, cancel := context.WithCancel(c)
 
 	log.Info("config.Init...")
 	config.Init()
@@ -155,29 +156,52 @@ func Run(app app.App, servers []server.Server) error {
 	}
 	var wg sync.WaitGroup
 
-	log.Info("Transport.Start...")
-	if err := transport.Start(&wg); err != nil {
-		log.Error("Transport.Start err %s", err.Error())
+	log.Info("Transport.Prepare...")
+	if err := transport.Prepare(ctx); err != nil {
+		log.Error("Transport.Prepare err %s", err.Error())
 		return err
 	}
 
-	log.Info("Server.Start...")
-	for _, server := range servers {
-		log.Info("Server.Start.%s...", server.Name())
-		if err := server.Start(&wg); err != nil {
-			log.Error("Server.Start %s err %s", err.Error())
+	log.Info("Transport.Start...")
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		transport.Start(ctx)
+	}()
+
+	log.Info("Server.Prepare...")
+	for _, ser := range servers {
+		log.Info("Server.Prepare.%s...", ser.Name())
+		if err := ser.Prepare(ctx); err != nil {
+			log.Error("Server.Prepare %s err %s", err.Error())
 			return err
 		}
 	}
+	log.Info("Server.Start...")
+	for _, ser := range servers {
+		log.Info("Server.Start.%s...", ser.Name())
+		wg.Add(1)
+		go func(s server.Server) {
+			defer wg.Done()
+			s.Start(ctx)
+		}(ser)
+	}
 
-	log.Info("App.Start...")
-	if err := app.Start(&wg); err != nil {
-		log.Error("App.Start err %s", err.Error())
+	log.Info("App.Prepare...")
+	if err := app.Prepare(ctx); err != nil {
+		log.Error("App.Prepare err %s", err.Error())
 		return err
 	}
 
+	log.Info("App.Start...")
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		app.Start(ctx)
+	}()
+
 	log.Info("Router.Register...")
-	if err := router.Register(config.GetAppID().String(), config.GetSvcID().String(), transport.Addr()); err != nil {
+	if err := router.Register(config.GetAppID().String(), config.GetSvcID().String(), transport.Addr(), map[string]string{meta.M3AppVer.String(): config.GetVer()}); err != nil {
 		log.Error("Router.Register err %s", err.Error())
 		return err
 	}
@@ -188,12 +212,6 @@ func Run(app app.App, servers []server.Server) error {
 		select {
 		case <-ctx.Done():
 			log.Info("Recv Done...")
-			log.Info("App.Stop...")
-			_runtime.app.Stop()
-			for _, server := range _runtime.servers {
-				log.Info("Server.Stop %s...", server.Name())
-				server.Stop()
-			}
 			log.Info("Plugin.Stop...")
 			plugin.Destroy()
 			log.Info("Transport.Stop...")

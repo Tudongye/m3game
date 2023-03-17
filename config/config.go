@@ -7,6 +7,7 @@ import (
 	"m3game/plugins/log"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -20,6 +21,7 @@ var (
 	_svcid   meta.RouteSvc
 	_worldid meta.RouteWorld
 	_envid   meta.RouteEnv
+	_ver     string
 )
 
 var (
@@ -96,6 +98,9 @@ func GetEnvID() meta.RouteEnv {
 func GetEnv(key string) string {
 	return _rconf.envmap[key]
 }
+func GetVer() string {
+	return _ver
+}
 
 func Init() {
 	_rconf = &m3Config{
@@ -116,7 +121,8 @@ func Init() {
 		_worldid = meta.GenRouteWorld(env, world)
 		_envid = meta.GenRouteEnv(env)
 	}
-
+	_ver = fmt.Sprintf("%d", time.Now().Unix())
+	log.Info("Ver %s", _ver)
 	log.Info("CfgPath:%s", _rconf.cfgPath)
 	if _rconf.cfgPath == "" {
 		_rconf.cfgPath = _defaultCfgPath

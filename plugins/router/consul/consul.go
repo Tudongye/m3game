@@ -108,7 +108,7 @@ func (r *Router) Factory() plugin.Factory {
 	return _factory
 }
 
-func (r *Router) Register(app string, svc string, addr string) error {
+func (r *Router) Register(app string, svc string, addr string, meta map[string]string) error {
 	ip, port, err := util.Addr2IPPort(addr)
 	if err != nil {
 		return err
@@ -116,12 +116,16 @@ func (r *Router) Register(app string, svc string, addr string) error {
 	interval := time.Duration(10) * time.Second
 	deregister := time.Duration(1) * time.Minute
 	healthmethod := fmt.Sprintf("%v:%v/Health/%v", ip, port, app)
+	if meta == nil {
+		meta = make(map[string]string)
+	}
 	reg := &api.AgentServiceRegistration{
 		ID:      app,        // 服务节点的名称
 		Name:    svc,        // 服务名称
 		Tags:    []string{}, // tag，可以为空
 		Port:    port,       // 服务端口
 		Address: ip,         // 服务 IP
+		Meta:    meta,
 		Check: &api.AgentServiceCheck{ // 健康检查
 			Interval:                       interval.String(),   // 健康检查间隔
 			GRPC:                           healthmethod,        // grpc 支持，执行健康检查的地址，service 会传到 Health.Check 函数中
@@ -147,7 +151,7 @@ func (r *Router) GetAllInstances(svcid string) ([]router.Instance, error) {
 	}
 	var instances []router.Instance
 	for _, service := range services {
-		instances = append(instances, newInstance(service.Service.Address, service.Service.Port, service.Service.ID))
+		instances = append(instances, newInstance(service.Service.Address, service.Service.Port, service.Service.ID, service.Node.Meta))
 	}
 	return instances, nil
 }

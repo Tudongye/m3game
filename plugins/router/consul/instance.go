@@ -8,13 +8,15 @@ type Instance struct {
 	host  string
 	port  uint32
 	idstr string
+	meta  map[string]string
 }
 
-func newInstance(host string, port int, idstr string) *Instance {
+func newInstance(host string, port int, idstr string, meta map[string]string) *Instance {
 	return &Instance{
 		host:  host,
 		port:  uint32(port),
 		idstr: idstr,
+		meta:  meta,
 	}
 }
 
@@ -32,4 +34,9 @@ func (i *Instance) GetPort() uint32 {
 
 func (i *Instance) GetIDStr() string {
 	return i.idstr
+}
+
+func (i *Instance) GetMeta(k string) (string, bool) {
+	v, ok := i.meta[k]
+	return v, ok
 }

@@ -12,6 +12,10 @@ var (
 
 type LeaseMoveOutFunc func(context.Context) ([]byte, error) // 租约退出
 
+func DefaultLeaseMoveOutFunc(context.Context) ([]byte, error) {
+	return nil, nil
+}
+
 type Lease interface {
 	plugin.PluginIns
 	AllocLease(ctx context.Context, id string, f LeaseMoveOutFunc) error // 获取租约

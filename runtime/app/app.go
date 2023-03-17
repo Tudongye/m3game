@@ -1,12 +1,13 @@
 package app
 
 import (
-	"sync"
+	"context"
 )
 
 type App interface {
 	Init(cfg map[string]interface{}) error // 初始化
-	Start(wg *sync.WaitGroup) error        // 启动
+	Prepare(ctx context.Context) error     // 启动
+	Start(ctx context.Context)             // 启动
 	Stop() error                           // 停止
 	Reload(map[string]interface{}) error   // 重载                                                   // RPC主调拦截器
 	HealthCheck() bool                     // 健康检查
@@ -31,8 +32,11 @@ func (a *appBase) Name() string {
 	return ""
 }
 
-func (a *appBase) Start(wg *sync.WaitGroup) error {
+func (a *appBase) Prepare(context.Context) error {
 	return nil
+}
+
+func (a *appBase) Start(context.Context) {
 }
 
 func (a *appBase) Stop() error {
