@@ -156,6 +156,7 @@ func Fatal(format string, v ...interface{}) {
 		return
 	}
 	Get().Output(_outputdepth, LogLvFatal, nil, format, v...)
+	panic("")
 }
 
 func InfoP(plus LogPlus, format string, v ...interface{}) {
@@ -191,4 +192,5 @@ func FatalP(plus LogPlus, format string, v ...interface{}) {
 		return
 	}
 	Get().Output(_outputdepth, LogLvFatal, plus, format, v...)
+	panic("")
 }

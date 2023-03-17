@@ -40,7 +40,7 @@ func FillRouteHeadHash(ctx context.Context, srcapp meta.RouteApp, dstsvc meta.Ro
 
 func FillRouteHeadSingle(ctx context.Context, srcapp meta.RouteApp, dstsvc meta.RouteSvc, isnty meta.IsNty) context.Context {
 	return metadata.AppendToOutgoingContext(ctx,
-		meta.M3RouteType.String(), meta.RouteTypeHash.String(),
+		meta.M3RouteType.String(), meta.RouteTypeSingle.String(),
 		meta.M3RouteSrcApp.String(), srcapp.String(),
 		meta.M3RouteDstSvc.String(), dstsvc.String(),
 		meta.M3RouteIsNty.String(), isnty.String(),

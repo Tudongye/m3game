@@ -151,7 +151,7 @@ func (r *Router) GetAllInstances(svcid string) ([]router.Instance, error) {
 	}
 	var instances []router.Instance
 	for _, service := range services {
-		instances = append(instances, newInstance(service.Service.Address, service.Service.Port, service.Service.ID, service.Node.Meta))
+		instances = append(instances, newInstance(service.Service.Address, service.Service.Port, service.Service.ID, service.Service.Meta))
 	}
 	return instances, nil
 }

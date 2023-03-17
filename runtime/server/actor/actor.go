@@ -26,6 +26,8 @@ type Actor interface {
 	Save() error   // 写回
 	OnMoveIn([]byte) error
 	OnMoveOut() []byte
+	Exit()
+	SetCancel(cancel context.CancelFunc) error
 }
 
 func WithActor(ctx context.Context, actor Actor) context.Context {
@@ -62,6 +64,7 @@ func ActorBaseCreator(actorid string) *ActorBase {
 
 type ActorBase struct {
 	actorid string
+	cancel  context.CancelFunc
 }
 
 func (a *ActorBase) ID() string {
@@ -89,6 +92,15 @@ func (a *ActorBase) OnMoveOut() []byte {
 }
 
 func (a *ActorBase) Save() error {
+	return nil
+}
+
+func (a *ActorBase) Exit() {
+	a.cancel()
+}
+
+func (a *ActorBase) SetCancel(cancel context.CancelFunc) error {
+	a.cancel = cancel
 	return nil
 }
 
@@ -131,6 +143,7 @@ func (ar *actorRuntime) run() error {
 	ar.savetime = now
 	t := time.NewTicker(time.Duration(_cfg.TickTimeInter) * time.Millisecond)
 	defer t.Stop()
+	ar.actor.SetCancel(ar.cancel)
 	for {
 		if !ar.loop(ar.ctx, t) {
 			break

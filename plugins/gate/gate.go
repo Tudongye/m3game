@@ -26,7 +26,7 @@ type CSConn interface {
 
 type GateReciver interface {
 	AuthCall(*metapb.AuthReq) (*metapb.AuthRsp, error)
-	LogicCall(*metapb.CSMsg) (*metapb.CSMsg, error)
+	LogicCall(string, *metapb.CSMsg) (*metapb.CSMsg, error)
 }
 
 func Set(g Gate) {
@@ -45,8 +45,8 @@ func SetReciver(g GateReciver) {
 	_gatereciver = g
 }
 
-func LogicCall(r *metapb.CSMsg) (*metapb.CSMsg, error) {
-	return _gatereciver.LogicCall(r)
+func LogicCall(playerid string, r *metapb.CSMsg) (*metapb.CSMsg, error) {
+	return _gatereciver.LogicCall(playerid, r)
 }
 func AuthCall(r *metapb.AuthReq) (*metapb.AuthRsp, error) {
 	return _gatereciver.AuthCall(r)

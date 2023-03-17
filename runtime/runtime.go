@@ -51,15 +51,10 @@ func ClientInterceptor(ctx context.Context, method string, req, resp interface{}
 	return transport.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
 }
 
-func ShutDown() error {
-	log.Info("ShutDown...")
+func ShutDown(s string) error {
+	log.Info("ShutDown %s...", s)
 	_runtime.cancel()
 	return nil
-}
-
-func SoftShutDown() error {
-	log.Info("SoftShutDown...")
-	return ShutDown()
 }
 
 func Reload() error {
@@ -264,7 +259,7 @@ func signalProc() {
 		log.Info("Recv sig %s", s.String())
 		switch s {
 		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT:
-			ShutDown()
+			ShutDown("Recv Sig")
 		case util.SysCallSIGUSR1():
 			Reload()
 		case util.SysCallSIGUSR2():

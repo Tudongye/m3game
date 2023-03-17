@@ -145,6 +145,7 @@ func (g *Gate) CSTransport(srv GateSer_CSTransportServer) error {
 			return err
 		}
 		if res, err := gate.AuthCall(authreq); err != nil {
+			log.Error("%v", err)
 			return err
 		} else {
 			playerid = res.PlayerID
@@ -233,14 +234,16 @@ func (c *CSConn) recvloop() {
 			break
 		}
 		log.Debug("Recv %s", msg.Method)
-		msg.Metas = append(msg.Metas, &metapb.Meta{Key: meta.M3PlayerID.String(), Value: c.playerid})
+		msg.Metas = append(msg.Metas, &metapb.Meta{Key: meta.M3ActorActorID.String(), Value: c.playerid})
 		msg.Metas = append(msg.Metas, &metapb.Meta{Key: meta.M3RouteSrcApp.String(), Value: config.GetAppID().String()})
-		res, err := gate.LogicCall(msg)
+		res, err := gate.LogicCall(c.playerid, msg)
 		if err != nil {
 			log.Error("Call Logic %s %s", msg.Method, err.Error())
 			break
 		} else {
-			log.Debug("Send %s %v", msg.Method, c.Send(context.Background(), res))
+			if err := c.Send(context.Background(), res); err != nil {
+				log.Error("Send %s %s", msg.Method, err.Error())
+			}
 
 		}
 	}
