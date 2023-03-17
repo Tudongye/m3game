@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service GateSer {
+    rpc SendToCli(SendToCli.Req) returns (SendToCli.Rsp);
+}
+
+message SendToCli {
+    option (rpc_option).ntf = true;
+    message Req {
+        string PlayerID = 1;
+        string Content = 2;
+    }
+    message Rsp {
+
+    }
+}

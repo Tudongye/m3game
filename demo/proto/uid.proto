@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service UidSer {
+    rpc AllocRoleId(AllocRoleId.Req) returns (AllocRoleId.Rsp); // 分配RoleID
+    rpc AllocClubId(AllocClubId.Req) returns (AllocClubId.Rsp); // 分配ClubID
+}
+
+// Uid元数据
+message UidMetaDB {
+    option (db_primary_key) = "WorldId";
+    string WorldId = 1;
+    UidMetaCurRoleId CurRoleId = 2;
+    UidMetaCurClubId CurClubId = 3;
+}
+
+message UidMetaCurRoleId {
+    int64 Value = 1;
+}
+
+message UidMetaCurClubId {
+    int64 Value = 1;
+}
+
+// Uid管理OpenId到RoleId映射关系
+message UidRoleIdDB {
+    option (db_primary_key) = "OpenId";
+    string OpenId = 1;
+    UidRoleIdRoleId RoleId = 2;
+}
+
+message UidRoleIdRoleId {
+    string Value = 1;
+}
+
+// Uid管理OpenId到RoleId映射关系
+message UidClubIdDB {
+    option (db_primary_key) = "ClubId";
+    string ClubId = 1;
+    UidClubIdRoleId RoleId = 2;
+}
+message UidClubIdRoleId {
+    string Value = 1;
+}
+
+message AllocRoleId {
+    option (rpc_option).route_key = "";
+    message Req {
+        string OpenId = 1;
+    }
+    message Rsp {
+        string RoleId = 1;
+    }
+}
+
+message AllocClubId {
+    option (rpc_option).route_key = "";
+    message Req {
+        string RoleId = 1;
+    }
+    message Rsp {
+        string ClubId = 1;
+    }
+}

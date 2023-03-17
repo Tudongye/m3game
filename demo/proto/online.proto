@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service OnlineSer {
+    rpc OnlineCreate(OnlineCreate.Req) returns (OnlineCreate.Rsp);   // 上报在线情况
+    rpc OnlineRead(OnlineRead.Req) returns (OnlineRead.Rsp);   // 获取在线情况
+    rpc OnlineDelete(OnlineDelete.Req) returns (OnlineDelete.Rsp);   // 上报在线情况
+}
+
+message OnlineRoleDB {
+    option (db_primary_key) = "RoleId";
+    string RoleId = 1;  // 唯一
+    OnlineRoleApp App = 2;    // Role所在服务
+} 
+
+message OnlineRoleApp {
+    string AppId = 1; // App名
+    string Ver = 2; // 上报Role的Ser版本号
+}
+
+message OnlineCreate {
+    option (rpc_option).route_key = "";
+    message Req {
+        string RoleId = 1;
+        string AppId = 2;
+    }
+    message Rsp {
+    }
+}
+
+message OnlineRead {
+    option (rpc_option).route_key = "";
+    message Req {
+        string RoleId = 1;
+    }
+    message Rsp {
+        string AppId = 1;
+    }
+}
+
+
+message OnlineDelete {
+    option (rpc_option).route_key = "";
+    message Req {
+        string RoleId = 1;
+        string AppId = 2;
+    }
+    message Rsp {
+    }
+}
