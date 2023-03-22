@@ -6,6 +6,7 @@ import (
 	"m3game/demo/proto/pb"
 	"m3game/runtime/rpc"
 	"m3game/runtime/server/multi"
+	"m3game/util"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
@@ -17,8 +18,8 @@ var (
 )
 
 func init() {
-	if err := rpc.RegisterRPCSvc(pb.File_uid_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("RegisterRPCSvc UidSer %s", err.Error()))
+	if err := rpc.InjectionRPC(pb.File_uid_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("InjectionRPC UidSer %s", err.Error()))
 	}
 }
 
@@ -26,9 +27,9 @@ type UidSerCfg struct {
 	CachePoolSize int `mapstructure:"CachePoolSize"`
 }
 
-func (c UidSerCfg) CheckVaild() error {
-	if c.CachePoolSize == 0 {
-		return errors.New("CachePoolSize cant be 0")
+func (c UidSerCfg) checkValid() error {
+	if err := util.InEqualInt(c.CachePoolSize, 0, "CachePoolSize"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -37,7 +38,7 @@ func Init(cfg map[string]interface{}) error {
 	if err := mapstructure.Decode(cfg, &_cfg); err != nil {
 		return errors.Wrapf(err, "App Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return err
 	}
 	return nil

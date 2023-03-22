@@ -15,8 +15,8 @@ import (
 )
 
 func init() {
-	if err := rpc.RegisterRPCSvc(pb.File_gate_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("RegisterRPCSvc GateSer %s", err.Error()))
+	if err := rpc.InjectionRPC(pb.File_gate_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("InjectionRPC GateSer %s", err.Error()))
 	}
 }
 

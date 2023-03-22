@@ -86,7 +86,7 @@ func (a *Role) OnExit() error {
 	return nil
 }
 
-func (a *Role) Save() error {
+func (a *Role) OnSave() error {
 	log.DebugP(a.logp, "Save")
 	if a.wraper.HasDirty() {
 		log.DebugP(a.logp, "Saving")

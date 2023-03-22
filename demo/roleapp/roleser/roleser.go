@@ -31,8 +31,8 @@ var (
 )
 
 func init() {
-	if err := rpc.RegisterRPCSvc(pb.File_role_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("RegisterRPCSvc Role %s", err.Error()))
+	if err := rpc.InjectionRPC(pb.File_role_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("InjectionRPC Role %s", err.Error()))
 	}
 }
 
