@@ -2,7 +2,7 @@
 
 一个基于Golang和Grpc的游戏后端框架。
 
-A game framework using Golang and Grpc
+A GameServer framework using Golang and Grpc
 
 M3Game是一个采用Golang构建游戏后端的尝试，期望能探索出一条Golang游戏后台的开发方案。
 
