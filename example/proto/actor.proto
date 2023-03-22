@@ -41,9 +41,9 @@ message Register {
     option (rpc_option).cs = true;
     message Req {
         string Name = 1;
+        string PlayerID = 2;
     }
     message Rsp {
-        string ActorID = 1;
     }
 }
 

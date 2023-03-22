@@ -12,8 +12,8 @@ import (
 
 func init() {
 	// 注册RPC信息到框架层
-	if err := rpc.RegisterRPCSvc(pb.File_simple_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("RegisterRPCSvc SimpleSer %s", err.Error()))
+	if err := rpc.InjectionRPC(pb.File_simple_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("InjectionRPC SimpleSer %s", err.Error()))
 	}
 }
 

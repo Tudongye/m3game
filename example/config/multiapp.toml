@@ -1,6 +1,6 @@
 [Transport]
 Addr = "127.0.0.1:22101"
-BroadTimeOut = 5
+BroadcastTimeout = 5
 
 [Options]
 [[Options.Mesh]]

@@ -13,8 +13,8 @@ import (
 )
 
 func init() {
-	if err := rpc.RegisterRPCSvc(pb.File_multi_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("RegisterRPCSvc MultiSer %s", err.Error()))
+	if err := rpc.InjectionRPC(pb.File_multi_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("InjectionRPC MultiSer %s", err.Error()))
 	}
 }
 

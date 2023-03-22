@@ -106,7 +106,7 @@ func (a *Actor) OnExit() error {
 	return nil
 }
 
-func (a *Actor) Save() error {
+func (a *Actor) OnSave() error {
 	log.DebugP(a.logp, "Save")
 	if a.wraper.HasDirty() {
 		log.DebugP(a.logp, "Saving")
@@ -169,7 +169,7 @@ func (a *Actor) Login(ctx context.Context) error {
 		return _err_actor_dbplugin
 	}
 	if err := a.wraper.Read(dbplugin); err != nil {
-		log.Error(err.Error())
+		log.Error("%s %s", err.Error(), a.ActorID())
 		return _err_actor_dbplugin
 	}
 	a.ready = true

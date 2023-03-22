@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
-	"m3game/runtime/transport"
 
 	"m3game/example/proto"
 	"m3game/example/proto/pb"
@@ -24,8 +23,8 @@ var (
 
 func init() {
 	// 注册RPC信息到框架层
-	if err := rpc.RegisterRPCSvc(pb.File_simple_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("RegisterRPCSvc SimpleSer %s", err.Error()))
+	if err := rpc.InjectionRPC(pb.File_simple_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("InjectionRPC SimpleSer %s", err.Error()))
 	}
 }
 
@@ -45,7 +44,7 @@ func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
 	opts = append(opts, grpc.WithInsecure())
 	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`))
-	opts = append(opts, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.ClientInterceptors()...)))
+	opts = append(opts, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)))
 	if _client.conn, err = grpc.Dial(target, opts...); err != nil {
 		return errors.Wrapf(err, "Dial Target %s", target)
 	} else {

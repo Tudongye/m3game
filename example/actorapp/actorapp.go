@@ -23,6 +23,7 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
+	"m3game/util"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -47,9 +48,9 @@ type AppCfg struct {
 	PrePareTime int `mapstructure:"PrePareTime"`
 }
 
-func (c *AppCfg) CheckVaild() error {
-	if c.PrePareTime == 0 {
-		return errors.New("PrePareTime cant be 0")
+func (c *AppCfg) checkValid() error {
+	if err := util.InEqualInt(c.PrePareTime, 0, "PrePareTime"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -58,7 +59,7 @@ func (a *ActorApp) Init(cfg map[string]interface{}) error {
 	if err := mapstructure.Decode(cfg, &_cfg); err != nil {
 		return errors.Wrap(err, "App Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return err
 	}
 	return nil

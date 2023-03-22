@@ -12,8 +12,8 @@ import (
 )
 
 func init() {
-	if err := rpc.RegisterRPCSvc(pb.File_async_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("RegisterRPCSvc AsyncSer %s", err.Error()))
+	if err := rpc.InjectionRPC(pb.File_async_proto.Services().Get(0)); err != nil {
+		panic(fmt.Sprintf("InjectionRPC AsyncSer %s", err.Error()))
 	}
 }
 

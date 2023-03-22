@@ -1,7 +1,6 @@
 package actor
 
 import (
-	"fmt"
 	"m3game/example/proto/pb"
 	"m3game/plugins/db"
 	"m3game/plugins/db/wraper"
@@ -24,14 +23,14 @@ func actorDBCreater() *pb.ActorDB {
 	}
 }
 
-func Register(name string) (string, error) {
-	actorid := fmt.Sprintf("ActorID-%s", name)
+func Register(playerid string, name string) (string, error) {
 	dbplugin := db.Get()
 	if dbplugin == nil {
 		return "", _err_actor_dbplugin
 	}
-	w := wraper.New(actormeta, actorid)
-	if err := wraper.KeySetter(w, actorid); err != nil {
+	log.Debug(playerid)
+	w := wraper.New(actormeta, playerid)
+	if err := wraper.KeySetter(w, playerid); err != nil {
 		log.Error(err.Error())
 		return "", _err_actor_dbplugin
 	}
@@ -47,5 +46,5 @@ func Register(name string) (string, error) {
 		log.Error(err.Error())
 		return "", _err_actor_dbplugin
 	}
-	return actorid, w.Create(dbplugin)
+	return playerid, w.Create(dbplugin)
 }
