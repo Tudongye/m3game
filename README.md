@@ -58,7 +58,13 @@ Lease-Plugin：租约管理组件，当前有一个etcd实现
 
 ## M3内部依赖
 
-![image](https://user-images.githubusercontent.com/16680818/224892560-8904a233-d952-4bba-806e-83ac26c97c4c.png)
+![graphviz](https://user-images.githubusercontent.com/16680818/226848482-d1facfba-8e86-4206-96f8-c786e385e862.png)
+
+## 感谢GPT的CR
+
+在GPT的帮助下，对runtime做了一轮优化
+
+![企业微信截图_167946848074](https://user-images.githubusercontent.com/16680818/226848753-bdae1991-0396-426f-86b9-3bc2cde751e2.png)
 
 ## HelloWorld
 
