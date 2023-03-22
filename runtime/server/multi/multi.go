@@ -3,7 +3,6 @@ package multi
 import (
 	"context"
 	"fmt"
-	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
 
@@ -49,13 +48,11 @@ func (s *Server) Reload(map[string]interface{}) error {
 }
 
 func (s *Server) ServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	sctx := server.GenContext(s)
-	ctx = server.WithContext(ctx, sctx)
 	return handler(ctx, req)
-
 }
+
 func (s *Server) ClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	return runtime.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
+	return invoker(ctx, method, req, resp, cc, opts...)
 }
 
 func (s *Server) TransportRegister() func(grpc.ServiceRegistrar) error {

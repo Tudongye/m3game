@@ -47,6 +47,7 @@ type Resolver struct {
 func (cr *Resolver) watcher() {
 
 	for {
+		<-time.After(time.Second * time.Duration(_cfg.WatcherInterSecond))
 		var newAddrs []resolver.Address
 		instances, err := router.GetAllInstances(cr.svc)
 		if err != nil {
@@ -65,7 +66,6 @@ func (cr *Resolver) watcher() {
 
 		}
 		cr.cc.NewAddress(newAddrs)
-		<-time.NewTicker(time.Second * time.Duration(_cfg.WatcherInterSecond)).C
 	}
 }
 

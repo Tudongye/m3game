@@ -6,6 +6,7 @@ import (
 	"m3game/plugins/db"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
+	"m3game/util"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
@@ -39,18 +40,18 @@ type RedisCfg struct {
 	MaxActive int    `mapstructure:"MaxActive"`
 }
 
-func (c RedisCfg) CheckVaild() error {
-	if c.Host == "" {
-		return errors.New("Host cant be space")
+func (c RedisCfg) checkValid() error {
+	if err := util.InEqualStr(c.Host, "", "Host"); err != nil {
+		return err
 	}
-	if c.Port == 0 {
-		return errors.New("Port cant be 0")
+	if err := util.InEqualInt(c.Port, 0, "Port"); err != nil {
+		return err
 	}
-	if c.MaxIdle == 0 {
-		return errors.New("MaxIdle cant be 0")
+	if err := util.InEqualInt(c.MaxIdle, 0, "MaxIdle"); err != nil {
+		return err
 	}
-	if c.MaxActive == 0 {
-		return errors.New("MaxActive cant be 0")
+	if err := util.InEqualInt(c.MaxActive, 0, "MaxActive"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -72,7 +73,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, errors.Wrap(err, "RedisDB Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return nil, err
 	}
 	_instance = &RedisDB{pool: &redis.Pool{

@@ -34,9 +34,9 @@ type consulRouterCfg struct {
 	ConsulHost string `mapstructure:"ConsulHost"`
 }
 
-func (c *consulRouterCfg) CheckVaild() error {
-	if c.ConsulHost == "" {
-		return errors.New("ConsulHost cant be space")
+func (c *consulRouterCfg) checkValid() error {
+	if err := util.InEqualStr(c.ConsulHost, "", "ConsulHost"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -58,7 +58,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, errors.Wrap(err, "Router Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return nil, err
 	}
 	_instance = &Router{}

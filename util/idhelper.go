@@ -35,3 +35,7 @@ func Addr2IPPort(s string) (ip string, port int, err error) {
 	port, err = strconv.Atoi(groups[2])
 	return
 }
+
+func BrokerSerTopic(s string) string {
+	return fmt.Sprintf("BrokerSer-%s", s)
+}

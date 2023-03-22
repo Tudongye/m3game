@@ -10,79 +10,86 @@ import (
 	"google.golang.org/grpc"
 )
 
-func newActorMgr(creater ActorCreater) *ActorMgr {
+type ActorCreater func(string) Actor
+
+func newActorMgr(creater ActorCreater, cfg *Config) *ActorMgr {
 	return &ActorMgr{
-		actormap:     make(map[string]*actorRuntime),
+		cfg:          cfg,
 		actorcreater: creater,
+		actorreqpool: sync.Pool{
+			New: func() any {
+				return &actorReq{
+					rspchan: make(chan *actorRsp),
+				}
+			},
+		},
 	}
 }
 
 type ActorMgr struct {
-	actormap     map[string]*actorRuntime
-	lock         sync.RWMutex
-	actorcreater ActorCreater
+	cfg           *Config
+	actorcreater  ActorCreater
+	actorruntimes sync.Map
+	actorreqpool  sync.Pool
 }
 
 func (am *ActorMgr) getActor(actorid string) (*actorRuntime, bool) {
-	am.lock.RLock()
-	defer am.lock.RUnlock()
-	a, ok := am.actormap[actorid]
-	return a, ok
+	a, ok := am.actorruntimes.Load(actorid)
+	if !ok {
+		return nil, false
+	}
+	return a.(*actorRuntime), true
 }
 
 func (am *ActorMgr) createActor(actorid string) (*actorRuntime, error) {
-	am.lock.Lock()
-	defer am.lock.Unlock()
-	if a, ok := am.actormap[actorid]; ok {
+	if a, ok := am.getActor(actorid); ok {
 		return a, nil
 	}
-	actor := am.actorcreater(actorid)
-	ar := newActorRuntime(actor)
+	ar := newActorRuntime(am.actorcreater(actorid), am.cfg)
 	ctx, cancel := context.WithCancel(context.Background())
-	ar.ctx = ctx
 	ar.cancel = cancel
-	am.actormap[actorid] = ar
-	go func() {
-		if err := am.actormap[actorid].run(); err != nil {
-			log.Error("actor.run() err %s", err.Error())
-		}
-		am.lock.Lock()
-		defer am.lock.Unlock()
-		ar.cancel()
-		delete(am.actormap, actorid)
-	}()
-	return am.actormap[actorid], nil
+	if a, loaded := am.actorruntimes.LoadOrStore(actorid, ar); loaded {
+		return a.(*actorRuntime), nil
+	} else {
+		ar = a.(*actorRuntime)
+		go am.runActor(ar, ctx, actorid)
+		return ar, nil
+	}
+}
+
+func (am *ActorMgr) runActor(ar *actorRuntime, ctx context.Context, actorid string) {
+	if err := ar.run(ctx); err != nil {
+		log.Error("actor.run() err %s", err.Error())
+	}
+	ar.cancel()
+	am.actorruntimes.Delete(actorid)
 }
 
 func (am *ActorMgr) CallFunc(actorid string, ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	var ar *actorRuntime
-	var ok bool
-	if ar, ok = am.getActor(actorid); !ok {
+
+	ar, ok := am.getActor(actorid)
+	if !ok {
 		var err error
 		if ar, err = am.createActor(actorid); err != nil {
 			return nil, err
 		}
 	}
-	actorreq := &actorReq{
-		ctx:     ctx,
-		req:     req,
-		info:    info,
-		handler: handler,
-		rspchan: make(chan *actorRsp),
-	}
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(am.cfg.MaxReqWaitTime)*time.Second)
+	defer cancel()
+	value := am.actorreqpool.Get()
+	actorreq := value.(*actorReq)
+	actorreq.ctx = ctx
+	actorreq.req = req
+	actorreq.info = info
+	actorreq.handler = handler
 	if err := ar.pushreq(actorreq); err != nil {
 		return nil, err
 	}
-	t := time.NewTimer(time.Duration(_cfg.MaxReqWaitTime) * time.Second)
 	select {
-	case <-ar.ctx.Done():
-		return nil, fmt.Errorf("Actor Close")
 	case rsp := <-actorreq.rspchan:
 		return rsp.rsp, rsp.err
-	case <-t.C:
-		return nil, fmt.Errorf("Wait Rsp TimeOut")
 	case <-ctx.Done():
-		return nil, fmt.Errorf("Wait Rsp TimeOut")
+		return nil, fmt.Errorf("Wait Rsp ctx Done")
 	}
 }
 
@@ -96,9 +103,9 @@ func (am *ActorMgr) KickOne(actorid string) error {
 }
 
 func (am *ActorMgr) KickAll() {
-	am.lock.RLock()
-	defer am.lock.RUnlock()
-	for _, actorrumntime := range am.actormap {
-		actorrumntime.kick()
-	}
+	am.actorruntimes.Range(func(key, value interface{}) bool {
+		ar := value.(*actorRuntime)
+		ar.kick()
+		return true
+	})
 }

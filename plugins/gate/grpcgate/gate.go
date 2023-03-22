@@ -9,6 +9,7 @@ import (
 	"m3game/plugins/gate"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
+	"m3game/util"
 	"net"
 	"sync"
 
@@ -38,9 +39,9 @@ type grpcGateCfg struct {
 	Addr string `mapstructure:"Addr"`
 }
 
-func (c *grpcGateCfg) CheckVaild() error {
-	if c.Addr == "" {
-		return errors.New("Addr cant be space")
+func (c *grpcGateCfg) checkValid() error {
+	if err := util.InEqualStr(c.Addr, "", "Addr"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -62,7 +63,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, errors.Wrap(err, "Gate Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return nil, err
 	}
 	var err error

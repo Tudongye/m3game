@@ -5,8 +5,8 @@ import (
 	"m3game/config"
 	"m3game/plugins/log"
 	"m3game/plugins/metric"
+	"m3game/runtime"
 	"m3game/runtime/plugin"
-	"m3game/runtime/transport"
 	"m3game/util"
 	"net/http"
 	"time"
@@ -53,7 +53,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, errors.Wrap(err, "Router Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return nil, err
 	}
 
@@ -94,9 +94,9 @@ type PromCfg struct {
 	ConsulUrl string `mapstructure:"ConsulHost"` // Consul注册
 }
 
-func (p *PromCfg) CheckVaild() error {
-	if p.Port == 0 {
-		return errors.New("PromCfg.Port cannot = 0")
+func (p *PromCfg) checkValid() error {
+	if err := util.InEqualInt(p.Port, 0, "Pott"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -157,7 +157,7 @@ func registerConsul(consulurl string, svc string, ins string, port int) error {
 	}
 	interval := time.Duration(10) * time.Second
 	deregister := time.Duration(1) * time.Minute
-	addr := transport.Addr()
+	addr := runtime.Addr()
 	ip, _, err := util.Addr2IPPort(addr)
 	if err != nil {
 		return err

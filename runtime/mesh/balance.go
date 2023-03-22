@@ -4,8 +4,6 @@ import (
 	"m3game/meta"
 	"m3game/plugins/log"
 
-	"github.com/pkg/errors"
-
 	"google.golang.org/grpc/balancer"
 	"google.golang.org/grpc/balancer/base"
 	"google.golang.org/grpc/metadata"
@@ -34,11 +32,6 @@ func init() {
 
 const (
 	Balance_m3g = "balance_m3g"
-)
-
-var (
-	_err_parsesenderfail   = errors.New("_err_parsesenderfail")
-	_err_routerheadinvaild = errors.New("_err_routerheadinvaild")
 )
 
 func newM3GPikerBuilder() balancer.Builder {
@@ -76,34 +69,34 @@ type M3GPicker struct {
 }
 
 func (p *M3GPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
-	var ret balancer.PickResult
-	if md, ok := metadata.FromOutgoingContext(info.Ctx); !ok {
-		log.Error("Can't get outgoing ctx")
-		return ret, balancer.ErrNoSubConnAvailable
+	var pickret balancer.PickResult
+	if metad, ok := metadata.FromOutgoingContext(info.Ctx); !ok {
+		log.Error("Can't get outgoing metadata from ctx")
+		return pickret, balancer.ErrNoSubConnAvailable
 	} else {
-		vlist := md[string(meta.M3RouteType)]
+		vlist := metad[string(meta.M3RouteType)]
 		if len(vlist) != 1 {
 			log.Error("M3RouteType is invalid")
-			return ret, balancer.ErrNoSubConnAvailable
+			return pickret, balancer.ErrNoSubConnAvailable
 		}
 		switch vlist[0] {
 		case meta.RouteTypeP2P.String():
-			return p.pickP2P(md)
+			return p.pickP2P(metad)
 		case meta.RouteTypeRandom.String():
-			return p.pickRandom(md)
+			return p.pickRandom(metad)
 		case meta.RouteTypeHash.String():
-			return p.pickHash(md)
+			return p.pickHash(metad)
 		case meta.RouteTypeSingle.String():
-			return p.pickSingle(md)
+			return p.pickSingle(metad)
 		default:
 			log.Error("Unknow RouteType %s", vlist[0])
-			return ret, balancer.ErrNoSubConnAvailable
+			return pickret, balancer.ErrNoSubConnAvailable
 		}
 	}
 }
 
-func (p *M3GPicker) pickP2P(md metadata.MD) (balancer.PickResult, error) {
-	vlist := md[string(meta.M3RouteDstApp)]
+func (p *M3GPicker) pickP2P(metad metadata.MD) (balancer.PickResult, error) {
+	vlist := metad[string(meta.M3RouteDstApp)]
 	if len(vlist) != 1 {
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
@@ -114,7 +107,7 @@ func (p *M3GPicker) pickP2P(md metadata.MD) (balancer.PickResult, error) {
 	}
 }
 
-func (p *M3GPicker) pickRandom(md metadata.MD) (balancer.PickResult, error) {
+func (p *M3GPicker) pickRandom(metad metadata.MD) (balancer.PickResult, error) {
 	if dstappid, err := p.routeHelper.RouteRandom(); err != nil {
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {
@@ -122,8 +115,8 @@ func (p *M3GPicker) pickRandom(md metadata.MD) (balancer.PickResult, error) {
 	}
 }
 
-func (p *M3GPicker) pickHash(md metadata.MD) (balancer.PickResult, error) {
-	vlist := md[string(meta.M3RouteHashKey)]
+func (p *M3GPicker) pickHash(metad metadata.MD) (balancer.PickResult, error) {
+	vlist := metad[string(meta.M3RouteHashKey)]
 	if len(vlist) != 1 {
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
@@ -134,7 +127,7 @@ func (p *M3GPicker) pickHash(md metadata.MD) (balancer.PickResult, error) {
 	}
 }
 
-func (p *M3GPicker) pickSingle(md metadata.MD) (balancer.PickResult, error) {
+func (p *M3GPicker) pickSingle(metad metadata.MD) (balancer.PickResult, error) {
 	if dstappid, err := p.routeHelper.RouteSingle(); err != nil {
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {

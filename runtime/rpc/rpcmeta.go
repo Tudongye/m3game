@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"m3game/meta/metapb"
 	"m3game/plugins/log"
+	"sync"
 
 	"google.golang.org/protobuf/proto"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
-var RPCMetas = make(map[protoreflect.FullName]*RPCMeta)
-var RPCCS = make(map[string]string)
+var (
+	RPCClientMethods = mapset.NewSet[string]()
+	RPCMetas         sync.Map
+)
 
 type RPCMeta struct {
 	rpcname    string
@@ -32,43 +36,55 @@ func (r *RPCMeta) HashKeyd() protoreflect.FieldDescriptor {
 	return r.hashkeyd
 }
 
-func RegisterRPCSvc(serviced protoreflect.ServiceDescriptor) error {
+func InjectionRPC(serviced protoreflect.ServiceDescriptor) error {
 	for i := 0; i < serviced.Methods().Len(); i++ {
 		methodd := serviced.Methods().Get(i)
 		inputd := methodd.Input()
 		inputname := inputd.FullName()
 		rpcde := inputd.Parent()
-		RPCMetas[inputname] = &RPCMeta{
-			rpcname:    string(rpcde.Name()),
+		rpcname := rpcde.Name()
+		servicefullname := serviced.FullName()
+		methodname := methodd.Name()
+		if _, ok := RPCMetas.Load(inputname); ok {
+			continue
+		}
+		meta := &RPCMeta{
+			rpcname:    string(rpcname),
 			grpcoption: nil,
 			hashkeyd:   nil,
 		}
 		// eache Rpc must have rpc_option
 		if v := proto.GetExtension(rpcde.Options(), metapb.E_RpcOption); v == nil {
-			panic(fmt.Sprintf("RPC %s not have E_RpcOption", rpcde.Name()))
+			return fmt.Errorf("RPC %s not have E_RpcOption", rpcname)
 		} else if m3grpcopt, ok := v.(*metapb.M3GRPCOption); !ok {
-			panic(fmt.Sprintf("RPC %s E_RpcOption type err", rpcde.Name()))
+			return fmt.Errorf("RPC %s E_RpcOption type err", rpcname)
 		} else if m3grpcopt == nil {
-			panic(fmt.Sprintf("RPC %s E_RpcOption is nil", rpcde.Name()))
+			return fmt.Errorf("RPC %s E_RpcOption is nil", rpcname)
 		} else {
-			RPCMetas[inputname].grpcoption = m3grpcopt
+			meta.grpcoption = m3grpcopt
 		}
-		if RPCMetas[inputname].grpcoption.Cs {
-			RPCCS[fmt.Sprintf("/%s/%s", serviced.FullName(), methodd.Name())] = ""
+		if meta.grpcoption.Cs {
+			RPCClientMethods.Add(fmt.Sprintf("/%s/%s", servicefullname, methodname))
 		}
-		if fieldd := inputd.Fields().ByName(protoreflect.Name(RPCMetas[inputname].grpcoption.RouteKey)); fieldd != nil {
-			RPCMetas[inputname].hashkeyd = fieldd
+		if fieldd := inputd.Fields().ByName(protoreflect.Name(meta.grpcoption.RouteKey)); fieldd != nil {
+			meta.hashkeyd = fieldd
 		}
-		log.Info("RPC Registor: Svc => %s, Method => %s, Input => %s, RPC => %s", serviced.FullName(), methodd.Name(), inputname, rpcde.Name())
+		if _, ok := RPCMetas.LoadOrStore(inputname, meta); ok {
+			continue
+		}
+		log.Info("RPC Registor: Svc => %s, Method => %s, Input => %s, RPC => %s", servicefullname, methodname, inputname, rpcname)
 	}
 	return nil
 }
 
-func Method(inputname protoreflect.FullName) *RPCMeta {
-	return RPCMetas[inputname]
+func Meta(inputname protoreflect.FullName) *RPCMeta {
+	if v, ok := RPCMetas.Load(inputname); !ok {
+		return nil
+	} else {
+		return v.(*RPCMeta)
+	}
 }
 
-func IsCSFullMethod(method string) bool {
-	_, ok := RPCCS[method]
-	return ok
+func IsRPCClientMethod(method string) bool {
+	return RPCClientMethods.Contains(method)
 }

@@ -22,22 +22,14 @@ const (
 	Lease  Type = "lease"  // 租约
 )
 
-const (
-	_defaulttag = "default"
-)
-
 var (
 	_pluginserial = []Type{Log, Broker, Router, Trace, Metric, DB, Lease, Shape, Gate} // Plugin加载顺序
-	_factoryMap   map[string]Factory
+	_factoryMap   = make(map[string]Factory)
 )
-
-func init() {
-	_factoryMap = make(map[string]Factory)
-}
 
 func RegisterFactory(f Factory) {
 	if _, ok := _factoryMap[f.Name()]; ok {
-		panic(fmt.Sprintf("RegisterFactory factory name repeatad %s", f.Name()))
+		log.Fatal("RegisterFactory factory name repeatad %s", f.Name())
 	}
 	_factoryMap[f.Name()] = f
 }
@@ -65,8 +57,7 @@ func InitPlugins(v viper.Viper) error {
 		return errors.Wrap(err, "Unmarshal PluginCfg")
 	}
 	for _, typ := range _pluginserial {
-		tm := cfg.Plugin[string(typ)]
-		for name, nm := range tm {
+		for name, nm := range cfg.Plugin[string(typ)] {
 			factory, ok := _factoryMap[name]
 			if !ok {
 				return fmt.Errorf("Factory not find %s", name)
@@ -82,10 +73,4 @@ func InitPlugins(v viper.Viper) error {
 		}
 	}
 	return nil
-}
-
-func Gett[T PluginIns]() T {
-	var t T
-	v := getPluginByType(t.Factory().Type())
-	return v.(T)
 }

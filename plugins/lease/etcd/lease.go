@@ -7,6 +7,7 @@ import (
 	"m3game/plugins/lease"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
+	"m3game/util"
 	"strings"
 	"sync"
 	"time"
@@ -38,19 +39,19 @@ type etcdLeaseCfg struct {
 	EndpointsList     []string
 }
 
-func (c *etcdLeaseCfg) CheckVaild() error {
-	if c.Endpoints == "" {
-		return errors.New("Endpoints cant be space")
+func (c *etcdLeaseCfg) checkValid() error {
+	if err := util.InEqualStr(c.Endpoints, "", "Endpoints"); err != nil {
+		return err
 	}
 	c.EndpointsList = strings.Split(c.Endpoints, ",")
-	if c.DialTimeout == 0 {
-		return errors.New("DialTimeout cant be 0")
+	if err := util.InEqualInt(c.DialTimeout, 0, "DialTimeout"); err != nil {
+		return err
 	}
-	if c.LeaseKeepLiveTime == 0 {
-		return errors.New("LeaseKeepLiveTime cant be 0")
+	if err := util.InEqualInt(c.LeaseKeepLiveTime, 0, "LeaseKeepLiveTime"); err != nil {
+		return err
 	}
-	if c.PreExitTime == 0 {
-		return errors.New("PreExitTime cant be 0")
+	if err := util.InEqualInt(c.PreExitTime, 0, "PreExitTime"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -69,7 +70,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, errors.Wrap(err, "Lease Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return nil, err
 	}
 	config := clientv3.Config{

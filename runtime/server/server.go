@@ -14,44 +14,20 @@ const (
 	Actor Type = "actor" // actor model, sync for per actor
 	Async Type = "async" // single thread async
 )
-
 const (
-	_ctxkey = "serverctx"
+	_serctxKey = "_serverctx"
 )
 
-type Context struct {
-	ser Server
-	kv  map[string]interface{}
+func WithServer(ctx context.Context, sctx Server) context.Context {
+	return context.WithValue(ctx, _serctxKey, sctx)
 }
 
-func (c *Context) Server() Server {
-	return c.ser
-}
-
-func (c *Context) Set(key string, value interface{}) {
-	c.kv[key] = value
-}
-
-func (c *Context) Get(key string) interface{} {
-	return c.kv[key]
-}
-
-func GenContext(ser Server) *Context {
-	return &Context{
-		ser: ser,
-		kv:  make(map[string]interface{}),
-	}
-}
-
-func WithContext(ctx context.Context, sctx *Context) context.Context {
-	return context.WithValue(ctx, _ctxkey, sctx)
-}
-
-func ParseContext(ctx context.Context) *Context {
-	if ctx.Value(_ctxkey) == nil {
+func ParseServer(ctx context.Context) Server {
+	if value := ctx.Value(_serctxKey); value == nil {
 		return nil
+	} else {
+		return value.(Server)
 	}
-	return ctx.Value(_ctxkey).(*Context)
 }
 
 type Server interface {

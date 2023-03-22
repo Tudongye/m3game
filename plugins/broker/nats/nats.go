@@ -4,6 +4,7 @@ import (
 	"m3game/plugins/broker"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
+	"m3game/util"
 
 	"github.com/pkg/errors"
 
@@ -32,9 +33,9 @@ type natsBrokerCfg struct {
 	NatsURL string `mapstructure:"NatsURL"`
 }
 
-func (c *natsBrokerCfg) CheckVaild() error {
-	if c.NatsURL == "" {
-		return errors.New("NatsURL cant be space")
+func (c *natsBrokerCfg) checkValid() error {
+	if err := util.InEqualStr(c.NatsURL, "", "NatsURL"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -56,7 +57,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, err
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return nil, err
 	}
 	_instance = &Broker{

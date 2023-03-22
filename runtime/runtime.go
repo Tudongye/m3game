@@ -10,6 +10,7 @@ import (
 	"m3game/plugins/shape"
 	"m3game/plugins/trace"
 	"m3game/runtime/app"
+	"m3game/runtime/client"
 	"m3game/runtime/mesh"
 	"m3game/runtime/plugin"
 	"m3game/runtime/resource"
@@ -47,10 +48,6 @@ type RuntimeCfg struct {
 	Server    map[string]map[string]interface{} `toml:"Server"`
 }
 
-func ClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	return transport.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
-}
-
 func ShutDown(s string) error {
 	log.Info("ShutDown %s...", s)
 	_runtime.cancel()
@@ -59,7 +56,7 @@ func ShutDown(s string) error {
 
 func Reload() error {
 	log.Info("Reload...")
-	err := reload()
+	err := _runtime.reload()
 	if err != nil {
 		log.Error("Runtime.Reload Fail:%s", err.Error())
 	}
@@ -68,6 +65,10 @@ func Reload() error {
 
 func PreExit() error {
 	return nil
+}
+
+func Addr() string {
+	return _runtime.transport.Addr()
 }
 
 func Run(c context.Context, app app.App, servers []server.Server) error {
@@ -102,15 +103,23 @@ func Run(c context.Context, app app.App, servers []server.Server) error {
 	}
 
 	log.Info("Resource.Init...")
-	if err := resource.Init(cfg.Options.Resource); err != nil {
+	if resourcemgr, err := resource.New(cfg.Options.Resource); err != nil {
 		log.Error("Runtime.Resource.Init %s err %s", cfg.Options.Resource, err.Error())
 		return err
+	} else {
+		_runtime.resourcemgr = resourcemgr
+		if err := _runtime.resourcemgr.ReLoad(cfg.Options.Resource); err != nil {
+			log.Error("Runtime.Resource.Reload %s err %s", cfg.Options.Resource, err.Error())
+			return err
+		}
 	}
 
-	log.Info("Transport.Init...")
-	if err := transport.Init(cfg.Transport, _runtime); err != nil {
-		log.Error("Transport.Init err %s", err.Error())
+	log.Info("Transport.New...")
+	if trans, err := transport.New(cfg.Transport, _runtime); err != nil {
+		log.Error("Transport.New err %s", err.Error())
 		return err
+	} else {
+		_runtime.transport = *trans
 	}
 
 	log.Info("Plugins.Init...")
@@ -120,14 +129,8 @@ func Run(c context.Context, app app.App, servers []server.Server) error {
 	}
 
 	log.Info("SetupPluginInterceptor...")
-	if err := setupPluginInterceptor(cfg); err != nil {
+	if err := _runtime.setupPluginInterceptor(cfg); err != nil {
 		log.Error("setupPluginInterceptor err %s", err.Error())
-		return err
-	}
-
-	log.Info("Transport.CreateSer...")
-	if err := transport.CreateSer(); err != nil {
-		log.Error("Transport.CreateSer err %s", err.Error())
 		return err
 	}
 
@@ -136,10 +139,6 @@ func Run(c context.Context, app app.App, servers []server.Server) error {
 		log.Info("Server.Init.%s...", server.Name())
 		if err := server.Init(cfg.Server[string(server.Type())], app); err != nil {
 			log.Error("Server.Init %s err %s", server.Name(), err.Error())
-			return err
-		}
-		if err := transport.RegisterServer(server.TransportRegister()); err != nil {
-			log.Error("Transport.RegisterServer %s err %s", server.Name(), err.Error())
 			return err
 		}
 	}
@@ -152,16 +151,24 @@ func Run(c context.Context, app app.App, servers []server.Server) error {
 	var wg sync.WaitGroup
 
 	log.Info("Transport.Prepare...")
-	if err := transport.Prepare(ctx); err != nil {
+	if err := _runtime.transport.Prepare(ctx); err != nil {
 		log.Error("Transport.Prepare err %s", err.Error())
 		return err
+	}
+
+	log.Info("Server.Register...")
+	for _, server := range servers {
+		if err := _runtime.transport.RegisterServer(server.TransportRegister()); err != nil {
+			log.Error("Transport.RegisterServer %s err %s", server.Name(), err.Error())
+			return err
+		}
 	}
 
 	log.Info("Transport.Start...")
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		transport.Start(ctx)
+		_runtime.transport.Start(ctx)
 	}()
 
 	log.Info("Server.Prepare...")
@@ -196,7 +203,7 @@ func Run(c context.Context, app app.App, servers []server.Server) error {
 	}()
 
 	log.Info("Router.Register...")
-	if err := router.Register(config.GetAppID().String(), config.GetSvcID().String(), transport.Addr(), map[string]string{meta.M3AppVer.String(): config.GetVer()}); err != nil {
+	if err := router.Register(config.GetAppID().String(), config.GetSvcID().String(), _runtime.transport.Addr(), map[string]string{meta.M3AppVer.String(): config.GetVer()}); err != nil {
 		log.Error("Router.Register err %s", err.Error())
 		return err
 	}
@@ -209,8 +216,6 @@ func Run(c context.Context, app app.App, servers []server.Server) error {
 			log.Info("Recv Done...")
 			log.Info("Plugin.Stop...")
 			plugin.Destroy()
-			log.Info("Transport.Stop...")
-			transport.ShutDown()
 			log.Info("Doned")
 		}
 	}()
@@ -222,9 +227,11 @@ func Run(c context.Context, app app.App, servers []server.Server) error {
 }
 
 type Runtime struct {
-	app     app.App
-	servers map[string]server.Server
-	cancel  context.CancelFunc
+	app         app.App
+	servers     map[string]server.Server
+	cancel      context.CancelFunc
+	transport   transport.Transport
+	resourcemgr *resource.ResourceMgr
 }
 
 func (r *Runtime) HealthCheck(idstr string) bool {
@@ -234,20 +241,85 @@ func (r *Runtime) HealthCheck(idstr string) bool {
 	return r.app.HealthCheck()
 }
 
-func (r *Runtime) ServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
-	for _, server := range r.servers {
-		if server == info.Server {
-			return server.ServerInterceptor(ctx, req, info, handler)
-		}
-	}
-	return nil, fmt.Errorf("Can't find Server")
-}
-
 func (r *Runtime) registerServer(s server.Server) error {
 	if _, ok := r.servers[s.Name()]; ok {
 		return fmt.Errorf("Register repeated ServerName %s", string(s.Name()))
 	}
 	r.servers[s.Name()] = s
+	return nil
+}
+
+func (r *Runtime) setupPluginInterceptor(cfg RuntimeCfg) error {
+	client.RegisterClientInterceptor(r.ClientInterceptor)
+
+	log.Info("SetupPluginInterceptor.Shape...")
+	if err := shape.Setup(cfg.Options.Shape); err != nil {
+		return err
+	}
+	_runtime.transport.RegisterServerInterceptor(shape.ServerInterceptor())
+	client.RegisterClientInterceptor(shape.ClientInterceptor())
+
+	log.Info("SetupPluginInterceptor.Trace...")
+	_runtime.transport.RegisterServerInterceptor(trace.ServerInterceptor())
+	client.RegisterClientInterceptor(trace.ClientInterceptor())
+
+	return nil
+}
+
+func (r *Runtime) ServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+	ser := info.Server.(server.Server)
+	ctx = server.WithServer(ctx, ser)
+	return ser.ServerInterceptor(ctx, req, info, handler)
+}
+
+func (r *Runtime) ClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	ser := server.ParseServer(ctx)
+	if ser == nil {
+		// if not server call, direct call transport
+		return _runtime.transport.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
+	}
+	f := func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+		return _runtime.transport.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
+	}
+	return ser.ClientInterceptor(ctx, method, req, resp, cc, f, opts...)
+}
+
+func (r *Runtime) reload() error {
+	log.Info("Runtime.Reload...")
+	log.Info("Config.Reload...")
+	if err := config.Reload(); err != nil {
+		return err
+	}
+	v := *config.GetConfig()
+	var cfg RuntimeCfg
+	if err := v.Unmarshal(&cfg); err != nil {
+		log.Error("UnMarshal RuntimeCfg %s", err.Error())
+		return err
+	}
+
+	log.Info("Resource.Reload...")
+	if err := r.resourcemgr.ReLoad(cfg.Options.Resource); err != nil {
+		return err
+	}
+	log.Info("Transport.Reload...")
+	if err := r.transport.Reload(cfg.Transport); err != nil {
+		return err
+	}
+	log.Info("Plugin.Reload...")
+	if err := plugin.Reload(v); err != nil {
+		return err
+	}
+	log.Info("Server.Reload...")
+	for _, server := range r.servers {
+		if err := server.Reload(cfg.Server[string(server.Type())]); err != nil {
+			return err
+		}
+	}
+	log.Info("App.Reload...")
+	if err := r.app.Reload(cfg.App); err != nil {
+		return err
+	}
+	log.Info("Runtime.Reload Succ...")
 	return nil
 }
 
@@ -266,58 +338,4 @@ func signalProc() {
 			PreExit()
 		}
 	}
-}
-
-func reload() error {
-	log.Info("Runtime.Reload...")
-	log.Info("Config.Reload...")
-	if err := config.Reload(); err != nil {
-		return err
-	}
-	v := *config.GetConfig()
-	var cfg RuntimeCfg
-	if err := v.Unmarshal(&cfg); err != nil {
-		log.Error("UnMarshal RuntimeCfg %s", err.Error())
-		return err
-	}
-
-	log.Info("Resource.Reload...")
-	if err := resource.ReLoad(cfg.Options.Resource); err != nil {
-		return err
-	}
-	log.Info("Transport.Reload...")
-	if err := transport.Reload(cfg.Transport); err != nil {
-		return err
-	}
-	log.Info("Plugin.Reload...")
-	if err := plugin.Reload(v); err != nil {
-		return err
-	}
-	log.Info("Server.Reload...")
-	for _, server := range _runtime.servers {
-		if err := server.Reload(cfg.Server[string(server.Type())]); err != nil {
-			return err
-		}
-	}
-	log.Info("App.Reload...")
-	if err := _runtime.app.Reload(cfg.App); err != nil {
-		return err
-	}
-	log.Info("Runtime.Reload Succ...")
-	return nil
-}
-
-func setupPluginInterceptor(cfg RuntimeCfg) error {
-	log.Info("SetupPluginInterceptor.Shape...")
-	if err := shape.Setup(cfg.Options.Shape); err != nil {
-		return err
-	}
-	transport.RegisterServerInterceptor(shape.ServerInterceptor())
-	transport.RegisterClientInterceptor(shape.ClientInterceptor())
-
-	log.Info("SetupPluginInterceptor.Trace...")
-	transport.RegisterServerInterceptor(trace.ServerInterceptor())
-	transport.RegisterClientInterceptor(trace.ClientInterceptor())
-
-	return nil
 }

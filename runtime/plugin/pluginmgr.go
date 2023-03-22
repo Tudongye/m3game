@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"fmt"
 	"m3game/plugins/log"
 
 	"github.com/pkg/errors"
@@ -55,30 +56,31 @@ func registerPluginIns(typ Type, name string, p PluginIns) error {
 	}
 	if _, ok := _pluginMgr.insMap[typ][name]; !ok {
 		_pluginMgr.insMap[typ][name] = p
+	} else {
+		return fmt.Errorf("Repeated plugin type %s name %s", typ, name)
 	}
-	_pluginMgr.insMap[typ][name] = p
 	return nil
 }
 
-func getPluginByType(typ Type) PluginIns {
+func getPluginByType(typ Type) []PluginIns {
+	var inss []PluginIns
 	if tm, ok := _pluginMgr.insMap[typ]; !ok {
 		return nil
 	} else {
 		for _, p := range tm {
-			return p
+			inss = append(inss, p)
 		}
 	}
-	return nil
+	return inss
 }
 
 func getPluginByName(typ Type, name string) PluginIns {
 	if tm, ok := _pluginMgr.insMap[typ]; !ok {
 		return nil
 	} else {
-		if p, ok := tm[name]; !ok {
-			return nil
-		} else {
+		if p, ok := tm[name]; ok {
 			return p
 		}
+		return nil
 	}
 }

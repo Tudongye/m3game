@@ -38,7 +38,7 @@ func ClientInterceptor() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		if pbmsg, ok := req.(proto.Message); !ok {
 			return invoker(ctx, method, req, reply, cc, opts...)
-		} else if m := rpc.Method(pbmsg.ProtoReflect().Descriptor().FullName()); m == nil {
+		} else if m := rpc.Meta(pbmsg.ProtoReflect().Descriptor().FullName()); m == nil {
 			return invoker(ctx, method, req, reply, cc, opts...)
 		} else if !m.GrpcOption().Trace {
 			return invoker(ctx, method, req, reply, cc, opts...)
@@ -56,7 +56,7 @@ func ServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 		if pbmsg, ok := req.(proto.Message); !ok {
 			return handler(ctx, req)
-		} else if m := rpc.Method(pbmsg.ProtoReflect().Descriptor().FullName()); m == nil {
+		} else if m := rpc.Meta(pbmsg.ProtoReflect().Descriptor().FullName()); m == nil {
 			return handler(ctx, req)
 		} else if !m.GrpcOption().Trace {
 			return handler(ctx, req)

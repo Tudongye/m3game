@@ -43,7 +43,7 @@ type ZlogCfg struct {
 	Compress   bool   `mapstructure:"Compress"`   //default false
 }
 
-func (c *ZlogCfg) CheckVaild() error {
+func (c *ZlogCfg) checkValid() error {
 
 	return nil
 }
@@ -65,7 +65,7 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return nil, errors.Wrap(err, "Zlog Decode Cfg")
 	}
-	if err := _cfg.CheckVaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return nil, err
 	}
 	loglv := log.ConvertLogLv(_cfg.LogLevel)

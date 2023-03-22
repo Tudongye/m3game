@@ -1,7 +1,7 @@
 package mesh
 
 import (
-	"fmt"
+	"m3game/util"
 	"math/rand"
 
 	mapset "github.com/deckarep/golang-set/v2"
@@ -15,12 +15,12 @@ var (
 )
 
 type MeshCfg struct {
-	WatcherInterSecond uint32 `mapstructure:"WatcherInterSecond"`
+	WatcherInterSecond int `mapstructure:"WatcherInterSecond"`
 }
 
-func (c *MeshCfg) checkvaild() error {
-	if c.WatcherInterSecond <= 0 {
-		return fmt.Errorf("WatcherInterSecond %d invaild", c.WatcherInterSecond)
+func (c *MeshCfg) checkValid() error {
+	if err := util.GreatInt(c.WatcherInterSecond, 0, "WatcherInterSecond"); err != nil {
+		return err
 	}
 	return nil
 }
@@ -29,7 +29,7 @@ func Init(c map[string]interface{}) error {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return errors.Wrap(err, "decode cfg")
 	}
-	if err := _cfg.checkvaild(); err != nil {
+	if err := _cfg.checkValid(); err != nil {
 		return err
 	}
 	return nil
@@ -42,9 +42,11 @@ func NewRouteHelper() *RouteHelper {
 }
 
 type RouteHelper struct {
-	appIdSet mapset.Set[string]
-	hashRing *hashring.HashRing
-	minappid string
+	appIdSet  mapset.Set[string]
+	hashRing  *hashring.HashRing
+	minappid  string
+	size      int
+	appIdslic []string
 }
 
 func (r *RouteHelper) Add(appid string) {
@@ -61,14 +63,12 @@ func (r *RouteHelper) Compress() {
 			r.minappid = appid
 		}
 	}
-}
-
-func (r *RouteHelper) Size() int {
-	return r.appIdSet.Cardinality()
+	r.size = r.appIdSet.Cardinality()
+	r.appIdslic = r.appIdSet.ToSlice()
 }
 
 func (r *RouteHelper) RouteP2P(dstappid string) (string, error) {
-	if r.Size() == 0 {
+	if r.size == 0 {
 		return "", errors.New("no avalible dst")
 	}
 	if r.appIdSet.Contains(dstappid) {
@@ -78,14 +78,14 @@ func (r *RouteHelper) RouteP2P(dstappid string) (string, error) {
 }
 
 func (r *RouteHelper) RouteRandom() (string, error) {
-	if r.Size() == 0 {
+	if r.size == 0 {
 		return "", errors.New("no avalible dst")
 	}
-	return r.appIdSet.ToSlice()[rand.Int()%r.Size()], nil
+	return r.appIdslic[rand.Intn(r.size)], nil
 }
 
 func (r *RouteHelper) RouteHash(key string) (string, error) {
-	if r.Size() == 0 {
+	if r.size == 0 {
 		return "", errors.New("no avalible dst")
 	}
 	if dstappid, ok := r.hashRing.GetNode(key); !ok {
@@ -96,7 +96,7 @@ func (r *RouteHelper) RouteHash(key string) (string, error) {
 }
 
 func (r *RouteHelper) RouteSingle() (string, error) {
-	if r.Size() == 0 {
+	if r.size == 0 {
 		return "", errors.New("no avalible dst")
 	}
 	return r.minappid, nil
