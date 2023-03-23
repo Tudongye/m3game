@@ -90,7 +90,7 @@ func (a *Role) OnSave() error {
 	log.DebugP(a.logp, "Save")
 	if a.wraper.HasDirty() {
 		log.DebugP(a.logp, "Saving")
-		dbp := db.Get()
+		dbp := db.Instance()
 		if dbp == nil {
 			log.Error(_err_actor_dbplugin.Error())
 			return _err_actor_dbplugin
@@ -158,9 +158,9 @@ func (a *Role) Login(ctx context.Context) error {
 	if err := onlinecli.OnlineCreate(ctx, a.ActorID(), config.GetAppID().String()); err != nil {
 		return err
 	}
-	dbp := db.Get()
+	dbp := db.Instance()
 	if err := a.wraper.Read(dbp); err != nil {
-		if db.IsErrDBNotFindKey(err) {
+		if db.IsErrKeyNotFound(err) {
 			// 未注册，
 			wraper.Setter(a.wraper, &pb.RoleName{Value: fmt.Sprintf("Role%s", a.ActorID())})
 			wraper.Setter(a.wraper, &pb.RolePower{Value: 0})

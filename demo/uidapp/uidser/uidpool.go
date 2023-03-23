@@ -23,15 +23,22 @@ func init() {
 	_uidclubiddbmeta = db.NewMeta("uidclubid_table", uidclubidCreater)
 	_uidroleiddbmeta = db.NewMeta("uidroleid_table", uidroleidCreater)
 	_uidmetadbmeta = db.NewMeta("uidmeta_table", uidmetaCreater)
+}
+
+func newPool() *UidPool {
+	if _uidpool != nil {
+		return _uidpool
+	}
 	_uidpool = &UidPool{
 		isopen: false,
 	}
+	return _uidpool
 }
 
 func newCache() gcache.Cache {
 	return gcache.New(_cfg.CachePoolSize).LRU().
 		LoaderFunc(func(key interface{}) (interface{}, error) {
-			dbp := db.Get()
+			dbp := db.Instance()
 			openid := key.(string)
 			w := wraper.New(_uidroleiddbmeta, openid)
 			if err := w.Read(dbp); err == nil {
@@ -75,7 +82,7 @@ func Pool() *UidPool {
 
 type UidPool struct {
 	isopen bool
-	mu     sync.Mutex
+	mu     sync.RWMutex
 
 	metawraper *wraper.Wraper[*pb.UidMetaDB]
 	cache      gcache.Cache
@@ -96,14 +103,16 @@ func (u *UidPool) Open() {
 }
 
 func (u *UidPool) IsOpen() bool {
+	u.mu.RLock()
+	defer u.mu.RUnlock()
 	return u.isopen
 }
 
 func (u *UidPool) GetMetaWraper() (*wraper.Wraper[*pb.UidMetaDB], error) {
-	dbp := db.Get()
+	dbp := db.Instance()
 	if err := u.metawraper.Read(dbp); err == nil {
 		return u.metawraper, nil
-	} else if !db.IsErrDBNotFindKey(err) {
+	} else if !db.IsErrKeyNotFound(err) {
 		return nil, err
 	} else {
 		if err := u.metawraper.Create(dbp); err != nil {
@@ -118,17 +127,16 @@ func (u *UidPool) AllocRoleId(openid string) (string, error) {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 	var roldid string
-	roldid = ""
 	if !u.IsOpen() {
 		return roldid, errors.New("UidPool is Close")
 	}
 	// 先查缓存
 	if value, err := u.cache.Get(openid); err == nil {
 		return value.(string), nil
-	} else if !db.IsErrDBNotFindKey(err) {
+	} else if !db.IsErrKeyNotFound(err) {
 		return roldid, err
 	}
-	dbp := db.Get()
+	dbp := db.Instance()
 	// 分配新RoleId
 	if metaw, err := u.GetMetaWraper(); err != nil {
 		return roldid, err
@@ -168,7 +176,7 @@ func (u *UidPool) AllocClubId(roldid string) (string, error) {
 	if !u.IsOpen() {
 		return clubid, errors.New("UidPool is Close")
 	}
-	dbp := db.Get()
+	dbp := db.Instance()
 	// 分配新ClubId
 	if metaw, err := u.GetMetaWraper(); err != nil {
 		return clubid, err

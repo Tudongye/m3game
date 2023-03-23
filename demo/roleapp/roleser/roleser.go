@@ -18,12 +18,8 @@ import (
 
 var (
 	_err_actor_parsefail = errors.New("_err_actor_parsefail")
-	_err_actor_created   = errors.New("_err_actor_created")
 	_err_actor_readyed   = errors.New("_err_actor_readyed")
-	_err_actor_notcreate = errors.New("_err_actor_notcreate")
 	_err_actor_notready  = errors.New("_err_actor_notready")
-	_err_actor_dbnotfind = errors.New("_err_actor_dbnotfind")
-	_err_actor_dberr     = errors.New("_err_actor_dberr")
 )
 
 var (
@@ -43,10 +39,6 @@ func New() *RoleSer {
 	_ser = &RoleSer{
 		Server: mactor.New("RoleSer", role.RoleCreater),
 	}
-	return _ser
-}
-
-func Ser() *RoleSer {
 	return _ser
 }
 

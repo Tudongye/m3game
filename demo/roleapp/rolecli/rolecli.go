@@ -3,8 +3,10 @@ package rolecli
 import (
 	"context"
 	"fmt"
+	"m3game/plugins/log"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
+	"time"
 
 	"m3game/demo/proto/pb"
 
@@ -23,16 +25,16 @@ var (
 
 func init() {
 	if err := rpc.InjectionRPC(pb.File_role_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("InjectionRPC Role %s", err.Error()))
+		log.Fatal("InjectionRPC Role %s", err.Error())
 	}
 }
 
-func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
+func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
-		return nil
+		return _client, nil
 	}
 	if env, world, _, _, err := srcapp.Parse(); err != nil {
-		return nil
+		return nil, nil
 	} else {
 		dstsvc := meta.GenRouteSvc(env, world, proto.RoleFuncID)
 		_client = &Client{
@@ -41,15 +43,22 @@ func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
 	}
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`))
-	opts = append(opts, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)))
+	opts = append(opts,
+		grpc.WithInsecure(),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)),
+		grpc.WithTimeout(time.Second*10),
+	)
 	if _client.conn, err = grpc.Dial(target, opts...); err != nil {
-		return errors.Wrapf(err, "Dial Target %s", target)
+		return nil, errors.Wrapf(err, "Dial Target %s", target)
 	} else {
 		_client.RoleSerClient = pb.NewRoleSerClient(_client.conn)
-		return nil
+		return _client, nil
 	}
+}
+
+func Conn() *grpc.ClientConn {
+	return _client.conn
 }
 
 type Client struct {
@@ -58,9 +67,6 @@ type Client struct {
 	conn *grpc.ClientConn
 }
 
-func Conn() *grpc.ClientConn {
-	return _client.conn
-}
 func RoleKick(ctx context.Context, roleid string, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
 	var in pb.RoleKick_Req
 	in.RoleId = roleid

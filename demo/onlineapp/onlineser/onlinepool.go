@@ -23,13 +23,22 @@ var (
 
 func init() {
 	_onlineroledbmeta = db.NewMeta("onlinerole_table", onlineroleCreater)
-	_onlinepool = &OnlinePool{}
+}
+
+func newPool() *OnlinePool {
+	if _onlinepool != nil {
+		return _onlinepool
+	}
+	_onlinepool = &OnlinePool{
+		isopen: false,
+	}
+	return _onlinepool
 }
 
 func newCache() gcache.Cache {
 	return gcache.New(_cfg.CachePoolSize).LRU().
 		LoaderFunc(func(key interface{}) (interface{}, error) {
-			dbp := db.Get()
+			dbp := db.Instance()
 			openid := key.(string)
 			w := wraper.New(_onlineroledbmeta, openid)
 			if err := w.Read(dbp); err == nil {
@@ -105,7 +114,7 @@ func (u *OnlinePool) OnlineCreate(roleid string, appid string) error {
 			}
 		}
 		created = true
-	} else if !db.IsErrDBNotFindKey(err) {
+	} else if !db.IsErrKeyNotFound(err) {
 		return err
 	}
 	// 查App
@@ -120,7 +129,7 @@ func (u *OnlinePool) OnlineCreate(roleid string, appid string) error {
 		return fmt.Errorf("App %s not alive", appid)
 	}
 	// 写入DB
-	dbp := db.Get()
+	dbp := db.Instance()
 	w := wraper.New(_onlineroledbmeta, roleid)
 	roleapp := &pb.OnlineRoleApp{AppId: appid, Ver: appcache.Ver}
 	if err := wraper.Setter(w, roleapp); err != nil {
@@ -156,7 +165,7 @@ func (u *OnlinePool) OnlineRead(roleid string) (string, error) {
 			}
 		}
 		return "", nil
-	} else if db.IsErrDBNotFindKey(err) {
+	} else if db.IsErrKeyNotFound(err) {
 		return "", nil
 	} else {
 		return "", err
@@ -180,12 +189,12 @@ func (u *OnlinePool) OnlineDelete(roleid string, appid string) error {
 			}
 		}
 		created = true
-	} else if !db.IsErrDBNotFindKey(err) {
+	} else if !db.IsErrKeyNotFound(err) {
 		return err
 	}
 	u.rolecache.Remove(roleid)
 	if created {
-		dbp := db.Get()
+		dbp := db.Instance()
 		w := wraper.New(_onlineroledbmeta, roleid)
 		if err := w.Delete(dbp); err != nil {
 			return err

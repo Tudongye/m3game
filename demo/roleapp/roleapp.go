@@ -17,9 +17,9 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
-	"m3game/util"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
@@ -30,48 +30,39 @@ func newApp() *RoleApp {
 	}
 }
 
-var (
-	_cfg AppCfg
-)
-
 type RoleApp struct {
 	app.App
+	cfg AppCfg
 }
 
 type AppCfg struct {
-	PrePareTime int `mapstructure:"PrePareTime"`
+	PrePareTime int `mapstructure:"PrePareTime" validate:"gt=0"`
 }
 
-func (c *AppCfg) checkValid() error {
-	if err := util.InEqualInt(c.PrePareTime, 0, "PrePareTime"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (a *RoleApp) Init(cfg map[string]interface{}) error {
-	if err := mapstructure.Decode(cfg, &_cfg); err != nil {
+func (a *RoleApp) Init(c map[string]interface{}) error {
+	if err := mapstructure.Decode(c, &a.cfg); err != nil {
 		return errors.Wrap(err, "App Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&a.cfg); err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (d *RoleApp) Prepare(ctx context.Context) error {
-	if err := rolecli.Init(config.GetAppID()); err != nil {
+	if _, err := rolecli.New(config.GetAppID()); err != nil {
 		return err
-	}
-	if err := onlinecli.Init(config.GetAppID()); err != nil {
+	} else if _, err := onlinecli.New(config.GetAppID()); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (d *RoleApp) Start(ctx context.Context) {
-	log.Info("RoleApp PrepareTime %d", _cfg.PrePareTime)
-	time.Sleep(time.Duration(_cfg.PrePareTime) * time.Second)
+func (a *RoleApp) Start(ctx context.Context) {
+	log.Info("RoleApp PrepareTime %d", a.cfg.PrePareTime)
+	time.Sleep(time.Duration(a.cfg.PrePareTime) * time.Second)
 	log.Info("RoleApp Ready")
 	t := time.NewTicker(1 * time.Second)
 	for {
@@ -80,7 +71,7 @@ func (d *RoleApp) Start(ctx context.Context) {
 			return
 		case <-t.C:
 			// 插件检查
-			if router.Get().Factory().CanDelete(router.Get()) {
+			if router.Instance().Factory().CanUnload(router.Instance()) {
 				t.Stop()
 				runtime.ShutDown("Router Delete")
 			}
@@ -89,11 +80,10 @@ func (d *RoleApp) Start(ctx context.Context) {
 	}
 }
 
-func (d *RoleApp) HealthCheck() bool {
+func (a *RoleApp) HealthCheck() bool {
 	return true
 }
 
 func Run(ctx context.Context) error {
-	runtime.Run(ctx, newApp(), []server.Server{roleser.New()})
-	return nil
+	return runtime.Run(ctx, newApp(), []server.Server{roleser.New()})
 }

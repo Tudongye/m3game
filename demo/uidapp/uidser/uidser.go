@@ -2,12 +2,12 @@ package uidser
 
 import (
 	"context"
-	"fmt"
 	"m3game/demo/proto/pb"
+	"m3game/plugins/log"
 	"m3game/runtime/rpc"
 	"m3game/runtime/server/multi"
-	"m3game/util"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -15,44 +15,52 @@ import (
 
 var (
 	_cfg UidSerCfg
+	_ser *UidSer
 )
 
 func init() {
 	if err := rpc.InjectionRPC(pb.File_uid_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("InjectionRPC UidSer %s", err.Error()))
+		log.Fatal("InjectionRPC UidSer %s", err.Error())
 	}
 }
 
 type UidSerCfg struct {
-	CachePoolSize int `mapstructure:"CachePoolSize"`
+	CachePoolSize int `mapstructure:"CachePoolSize" validate:"gt=0"`
 }
 
-func (c UidSerCfg) checkValid() error {
-	if err := util.InEqualInt(c.CachePoolSize, 0, "CachePoolSize"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func Init(cfg map[string]interface{}) error {
-	if err := mapstructure.Decode(cfg, &_cfg); err != nil {
+func Init(c map[string]interface{}) error {
+	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return errors.Wrapf(err, "App Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&_cfg); err != nil {
 		return err
 	}
 	return nil
 }
 
 func New() *UidSer {
-	return &UidSer{
-		Server: multi.New("UidSer"),
+	if _ser != nil {
+		return _ser
 	}
+	_ser = &UidSer{
+		Server: multi.New("UidSer"),
+		pool:   newPool(),
+	}
+	return _ser
 }
 
 type UidSer struct {
 	*multi.Server
 	pb.UnimplementedUidSerServer
+	pool *UidPool
+}
+
+func (s *UidSer) TransportRegister() func(grpc.ServiceRegistrar) error {
+	return func(t grpc.ServiceRegistrar) error {
+		pb.RegisterUidSerServer(t, s)
+		return nil
+	}
 }
 
 func (d *UidSer) AllocRoleId(ctx context.Context, in *pb.AllocRoleId_Req) (*pb.AllocRoleId_Rsp, error) {
@@ -73,11 +81,4 @@ func (d *UidSer) AllocClubId(ctx context.Context, in *pb.AllocClubId_Req) (*pb.A
 		out.ClubId = clubid
 	}
 	return out, nil
-}
-
-func (s *UidSer) TransportRegister() func(grpc.ServiceRegistrar) error {
-	return func(t grpc.ServiceRegistrar) error {
-		pb.RegisterUidSerServer(t, s)
-		return nil
-	}
 }

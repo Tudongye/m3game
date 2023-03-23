@@ -2,7 +2,6 @@ package gateser
 
 import (
 	"context"
-	"fmt"
 	"m3game/demo/proto/pb"
 	"m3game/meta/metapb"
 	"m3game/plugins/gate"
@@ -14,16 +13,24 @@ import (
 	gpb "google.golang.org/protobuf/proto"
 )
 
+var (
+	_ser *GateSer
+)
+
 func init() {
 	if err := rpc.InjectionRPC(pb.File_gate_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("InjectionRPC GateSer %s", err.Error()))
+		log.Fatal("InjectionRPC GateSer %s", err.Error())
 	}
 }
 
 func New() *GateSer {
-	return &GateSer{
+	if _ser != nil {
+		return _ser
+	}
+	_ser = &GateSer{
 		Server: multi.New("GateSer"),
 	}
+	return _ser
 }
 
 type GateSer struct {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
+	"time"
 
 	"m3game/demo/proto"
 	"m3game/demo/proto/pb"
@@ -27,12 +28,12 @@ func init() {
 	}
 }
 
-func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
+func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
-		return nil
+		return _client, nil
 	}
 	if env, world, _, _, err := srcapp.Parse(); err != nil {
-		return nil
+		return nil, nil
 	} else {
 		dstsvc := meta.GenRouteSvc(env, world, proto.GateFuncID)
 		_client = &Client{
@@ -41,25 +42,28 @@ func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
 	}
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`))
-	opts = append(opts, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)))
+	opts = append(opts,
+		grpc.WithInsecure(),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)),
+		grpc.WithTimeout(time.Second*10),
+	)
 	if _client.conn, err = grpc.Dial(target, opts...); err != nil {
-		return errors.Wrapf(err, "Dial Target %s", target)
+		return nil, errors.Wrapf(err, "Dial Target %s", target)
 	} else {
 		_client.GateSerClient = pb.NewGateSerClient(_client.conn)
-		return nil
+		return _client, nil
 	}
+}
+
+func Conn() *grpc.ClientConn {
+	return _client.conn
 }
 
 type Client struct {
 	client.Client
 	pb.GateSerClient
 	conn *grpc.ClientConn
-}
-
-func Conn() *grpc.ClientConn {
-	return _client.conn
 }
 
 func SendToCli(ctx context.Context, roleid string, ntymsg *pb.NtyMsg, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
