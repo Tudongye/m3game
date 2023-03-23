@@ -75,18 +75,13 @@ Step1、定义服务 proto，生成pb文件
 ```
 // example/proto/simpleapp.proto
 syntax = "proto3";
-
 package proto;
-
 import "options.proto";		// 框架文件
-
 option go_package = "proto/pb";
-
 // 定义SimpleSer服务
 service SimpleSer {
     rpc HelloWorld(HelloWorld.Req) returns (HelloWorld.Rsp);	 // 定义接口
 }
-
 // 定义RPC
 message HelloWorld {
     option (rpc_option).route_key = "";
@@ -97,7 +92,6 @@ message HelloWorld {
         string Rsp = 1;
     }
 }
-
 ```
 
 Step2、编写App代码
@@ -105,7 +99,6 @@ Step2、编写App代码
 ```
 // example/simpleapp/simpleapp.go
 package simpleapp
-
 import (
 	"m3game/example/proto"
 	"m3game/example/simpleapp/simpleser"
@@ -115,29 +108,24 @@ import (
 	"m3game/runtime/app"
 	"m3game/runtime/server"
 )
-
 // 创建App实体
 func newApp() *SimpleApp {
 	return &SimpleApp{
 		App: app.New(proto.SimpleAppFuncID), // 指定App的FuncID
 	}
 }
-
 type SimpleApp struct {
 	app.App
 }
-
 // 健康检测
 func (d *SimpleApp) HealthCheck() bool {
 	return true
 }
-
 func Run() error {
 	// 启动一个 包含了simpleser的SimpleApp
 	runtime.Run(newApp(), []server.Server{simpleser.New()})
 	return nil
 }
-
 ```
 
 Step3、定义服务实体simpleser
@@ -145,42 +133,35 @@ Step3、定义服务实体simpleser
 ```
 // example/simpleapp/simpleser
 package simpleser
-
 import (
 	"context"
 	"fmt"
 	"m3game/example/proto/pb"
 	"m3game/runtime/rpc"
 	"m3game/runtime/server/mutil"
-
 	"google.golang.org/grpc"
 )
-
 func init() {
 	// 注册RPC信息到框架层
 	if err := rpc.RegisterRPCSvc(pb.File_simple_proto.Services().Get(0)); err != nil {
 		panic(fmt.Sprintf("RegisterRPCSvc SimpleSer %s", err.Error()))
 	}
 }
-
 func New() *SimpleSer {
 	return &SimpleSer{
 		Server: mutil.New("SimpleSer"), // 以MutilSer为基础构建SimpleSer
 	}
 }
-
 type SimpleSer struct {
 	*mutil.Server
 	pb.UnimplementedSimpleSerServer
 }
-
 // 实现HelloWorld接口
 func (d *SimpleSer) HelloWorld(ctx context.Context, in *pb.HelloWorld_Req) (*pb.HelloWorld_Rsp, error) {
 	out := new(pb.HelloWorld_Rsp)
 	out.Rsp = fmt.Sprintf("HelloWorld , %s", in.Req)
 	return out, nil
 }
-
 // 将SimpleSer注册到grpcser
 func (s *SimpleSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 	return func(t grpc.ServiceRegistrar) error {
@@ -196,15 +177,12 @@ step4 制作配置文件
 [Transport]
 Addr = "127.0.0.1:22105"	// 内部监听端口
 BroadTimeOut = 5		// 广播处理超时
-
 [Options]
 [[Options.Mesh]]
 WatcherInterSecond = 1		// 服务发现间隔
-
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"	
-
 [[Plugin.Broker.broker_nats]]
 NatsURL = "127.0.0.1:4222"
 ```
@@ -213,7 +191,6 @@ Step5 编译运行
 
 ```
 go build .
-
 ./main -idstr example.world1.simple.1 -conf ../../config/simpleapp.toml
 ```
 
@@ -232,7 +209,6 @@ go build .
 service SimpleSer {
     rpc HelloWorld(HelloWorld.Req) returns (HelloWorld.Rsp);	 // 定义接口
 }
-
 // 定义RPC
 message HelloWorld {
     option (rpc_option).route_key = "";
@@ -243,7 +219,7 @@ message HelloWorld {
         string Rsp = 1;
     }
 }
-``
+```
 
 业务层通过编写rpc_option将RPC接口注入框架层，解析相关逻辑参看runtime/rpc。rpc_option定义如下
 
@@ -279,19 +255,19 @@ func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (strin
 
 ### Mutil
 
-Mutil 多线程模型，主要用于无状态服务，M3采用原生Grpc服务实现吗，一般用于推荐服务，SNS服务或者是适配代理类服务比如DB代理，第三方API代理。参考实现 example/mutilapp/mutilser
+Mutil 多线程模型，主要用于无状态服务，M3采用原生Grpc服务实现。参考实现 example/mutilapp/mutilser
 
 ### Async
 
-Async 单线程异步，使用这类模型的服务不允许并发的执行RPC调用，一般用于必须要串行处理的服务，比如地图服务，全服点赞服务等。参考实现 example/asyncapp/asyncser
+Async 单线程异步，使用这类模型的服务不允许并发的执行RPC调用。参考实现 example/asyncapp/asyncser
 
-M3在Async服务的RPC驱动链中加入了资源锁。通过资源锁确保同一时间只有一个RPC调用在执行
+M3在Async服务的RPC驱动链中加入了资源锁。通过资源锁确保同一时间只有一个RPC调用再执行
 
 ![未命名文件 (12)](https://user-images.githubusercontent.com/16680818/222913602-eca183aa-c449-4d30-af10-c2579fdc4346.png)
 
 ### Actor
 
-Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实体内部串行，实体之间并发，一般用于常驻内存的游戏实体的服务，比如玩家服务，社团服务，小区服务等。参考实现 example/actorapp/actorser
+Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实体内部串行，实体之间并发。参考实现 example/actorapp/actorser
 
 M3为每个Actor分配一个执行Goroutine，并引入ActorRuntime和ActorMgr对Actor进行管理，前者用于管理单个Actor的执行Goroutine，后者用于管理整个Actor池。
 
@@ -320,10 +296,6 @@ M3使用Grpc的Resolver & Picker方式将Mesh与RPC路由相关联，相关逻�
 | BroadCast  | 目标服务ID | 对目标服务所有实例广播 |
 | MutilCast  | 目标TopicID | 对订阅目标TopciID的所有实例广播 |
 | Single  | 目标服务ID | 对目标服务中ID最小的实例寻路 |
-
-实例：单个程序实体
-
-服务：一组有相同功能的实例集合
 
 ### 广播
 
@@ -354,22 +326,18 @@ M3采用pb来定义游戏实体的DB存储结构。如下是一个简单实体�
 M3要求实体DB结构的一级字段必须是string（必须是主键） 或 proto.Message（为了区分字段，类型不可重复），且DB结构必须设置一个string类型的主键。
 
 ```
-
 message ActorDB {
     option (db_primary_key) = "ActorID";
     string ActorID = 1;
     ActorName ActorName = 2;
     ActorInfo ActorInfo = 3;
 }
-
 message ActorName {
     string Name = 1;
 }
-
 message ActorInfo {
     int32 Level = 1;
 }
-
 ```
 
 ### DB结构注入
@@ -386,7 +354,6 @@ type DBMeta[T proto.Message] struct {
 	creater   func() T                                // 游戏实体工场
 	fieldds   map[string]protoreflect.FieldDescriptor // 游戏实体字段反射信息
 }
-
 type DB interface {
 	Read(meta DBMetaInter, key string, filters ...string) (proto.Message, error)
 	Update(meta DBMetaInter, key string, obj proto.Message, filters ...string) error
@@ -408,13 +375,10 @@ type Wraper[T proto.Message] struct {
 	meta   *db.DBMeta[T]   // Meta
 	dirtys map[string]bool // 置脏标记
 }
-
-
 func (w *Wraper[T]) Update(db db.DB) error	 // CRUD操作
 func (w *Wraper[T]) Create(db db.DB) error
 func (w *Wraper[T]) Delete(db db.DB) error
 func (w *Wraper[T]) Read(db db.DB) error
-
 func KeySetter[T proto.Message](wraper *Wraper[T], value string) error	 // key字段操作
 func KeyGetter[T proto.Message](wraper *Wraper[T]) (string, error)
 func Setter[P, T proto.Message](wraper *Wraper[T], value P) error	// 普通字段操作
@@ -432,16 +396,13 @@ func actorDBCreater() *pb.ActorDB {
 }
 actormeta := db.NewMeta("actor_table", actorDBCreater)
 wp := wraper.New(actormeta, "ActorID123")	// 构建Wraper
-
 // 读数据
 dbplugin := plugin.GetDBPlugin()
 wp.Read(dbplugin)
-
 // 修改用户名
 actorname, _ := wraper.Getter[*pb.ActorName](wp)	 // 参看前述 要求DB的一级pb字段类型不能重复
 actorname.Name = "王小明"
 wp.Setter(a.wraper, actorname)
-
 // 脏字段写回
 if wp.HasDirty() {
 	wp.Update(dbplugin)
@@ -483,7 +444,6 @@ type StatCounter interface {	// 计数器
 	Add(float64)
 	Inc()
 }
-
 type StatGauge interface {	// 测量器
 	Set(float64)
 	Sub(float64)
@@ -491,11 +451,9 @@ type StatGauge interface {	// 测量器
 	Add(float64)
 	Inc()
 }
-
 type StatHistogram interface {	// 直方图
 	Observe(float64)
 }
-
 type StatSummary interface {	// 点分数
 	Observe(float64)
 }
@@ -532,13 +490,11 @@ type Logger interface {
 	SetLevel(level LogLv)
 	GetLevel() LogLv
 }
-
 func Debug(format string, v ...interface{})	// 调试日志，只在开发环境开启
 func Info(format string, v ...interface{}) 	// 重要行为日志，生产环境开启
 func Warn(format string, v ...interface{}) 	// 警告日志，如果遇到问题，用于辅助检查
 func Error(format string, v ...interface{})	// 错误日志，明确的逻辑异常，高度关注
 func Fatal(format string, v ...interface{})	// 致命错误，必须立机告警处理
-
 func DebugP(plus LogPlus, format string, v ...interface{})
 func InfoP(plus LogPlus, format string, v ...interface{})
 func WarnP(plus LogPlus, format string, v ...interface{})
@@ -556,12 +512,10 @@ example/gateapp实现了一套将客户端请求转化为Grpc-Reply请求的通�
 type Gate interface {
 	GetConn(playerid string) CSConn
 }
-
 type CSConn interface {
 	Send(ctx context.Context, msg *metapb.CSMsg) error
 	Kick()
 }
-
 type GateReciver interface {
 	AuthCall(*metapb.AuthReq) (*metapb.AuthRsp, error)	// 建立连接时的鉴权接口
 	LogicCall(*metapb.CSMsg) (*metapb.CSMsg, error)		// 将客户端请求转化为Grpc-Reply请求
@@ -575,9 +529,7 @@ type GateReciver interface {
 使用租约来保护数据的所有权，可以保证在同一时间，整个分布式系统中最多只会有一个App可以操作该数据。
 
 ```
-
 type LeaseMoveOutFunc func(context.Context) ([]byte, error) // 租约退出回调
-
 type Lease interface {
 	plugin.PluginIns
 	AllocLease(ctx context.Context, id string, f LeaseMoveOutFunc) error // 获取租约
@@ -586,7 +538,6 @@ type Lease interface {
 	RecvKickLease(ctx context.Context, id string) ([]byte, error)        // 接受释放租约消息
 	GetLease(ctx context.Context, id string) ([]byte, error)	     // 获取租约内容
 }
-
 type LeaseReciver interface {
 	SendKickLease(ctx context.Context, id string, app string) ([]byte, error) // 发送释放租约消息
 }
@@ -699,13 +650,11 @@ ClubRoleApp：社团玩家服务，管理社团和玩家的关联关系。
 service GateSer {
     rpc SendToCli(SendToCli.Req) returns (SendToCli.Rsp);	// 向客户端主动推送
 }
-
 # UidApp
 service UidSer {
     rpc AllocRoleId(AllocRoleId.Req) returns (AllocRoleId.Rsp); // 分配RoleID
     rpc AllocClubId(AllocClubId.Req) returns (AllocClubId.Rsp); // 分配ClubID
 }
-
 # RoleApp
 service RoleSer {
     rpc RoleLogin(RoleLogin.Req) returns (RoleLogin.Rsp);   // 登陆注册
@@ -713,7 +662,6 @@ service RoleSer {
     rpc RoleModifyName(RoleModifyName.Req) returns (RoleModifyName.Rsp);    // 改名
     rpc RolePowerUp(RolePowerUp.Req) returns (RolePowerUp.Rsp);    // 战力提升
     rpc RoleKick(RoleKick.Req) returns (RoleKick.Rsp);    // 服务迁移
-
     rpc RoleGetClubInfo(RoleGetClubInfo.Req) returns (RoleGetClubInfo.Rsp); // 获取社团信息
     rpc RoleGetClubList(RoleGetClubList.Req) returns (RoleGetClubList.Rsp); // 获取社团列表
     rpc RoleGetClubRoleInfo(RoleGetClubRoleInfo.Req) returns (RoleGetClubRoleInfo.Rsp); // 获取玩家社团信息
@@ -722,14 +670,12 @@ service RoleSer {
     rpc RoleExitClub(RoleExitClub.Req) returns (RoleExitClub.Rsp); // 退出社团
     rpc RoleCancelClub(RoleCancelClub.Req) returns (RoleCancelClub.Rsp); // 解散社团
 }
-
 # OnlineApp
 service OnlineSer {
     rpc OnlineCreate(OnlineCreate.Req) returns (OnlineCreate.Rsp);   // 创建在线状态
     rpc OnlineRead(OnlineRead.Req) returns (OnlineRead.Rsp);   // 获取在线情况
     rpc OnlineDelete(OnlineDelete.Req) returns (OnlineDelete.Rsp);   // 删除在线状态
 }
-
 # ClubApp
 service ClubSer {
     rpc ClubCreate(ClubCreate.Req) returns (ClubCreate.Rsp);   // 创建社团
@@ -738,18 +684,15 @@ service ClubSer {
     rpc ClubExit(ClubExit.Req) returns (ClubExit.Rsp);   // 退出社团
     rpc ClubCancel(ClubCancel.Req) returns (ClubCancel.Rsp);   // 解散社团
 }
-
 service ClubDaemonSer {
     rpc ClubKick(ClubKick.Req) returns (ClubKick.Rsp);    // 服务迁移
 }
-
 # ClubRoleApp
 service ClubRoleSer {
     rpc ClubRoleRead(ClubRoleRead.Req) returns (ClubRoleRead.Rsp);   // 查询Role归属Club
     rpc ClubRoleCreate(ClubRoleCreate.Req) returns (ClubRoleCreate.Rsp);   // 创建Role-Club关系
     rpc ClubRoleDelete(ClubRoleDelete.Req) returns (ClubRoleDelete.Rsp);   // 删除Role-Club关系
 }
-
 ```
 
 ### UidApp
@@ -783,12 +726,3 @@ Test 测试客户端
 ```
 sh test.sh MutilTest1  // 100TPS 10000次 关键路径（登陆，修改Role数据，拉取Role数据）测试
 ```
-
-
-
-
-
-
-
-
-
