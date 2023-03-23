@@ -2,6 +2,8 @@ package trace
 
 import (
 	"context"
+	"fmt"
+	"m3game/plugins/log"
 	"m3game/runtime/rpc"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -15,18 +17,21 @@ var (
 	_defaulttraceprovider = trace.NewTracerProvider()
 )
 
-func Get() *trace.TracerProvider {
-	if _traceprovider == nil {
-		return _defaulttraceprovider
+func New(me *trace.TracerProvider) (*trace.TracerProvider, error) {
+	if _traceprovider != nil {
+		log.Fatal("Trace Only One")
+		return nil, fmt.Errorf("Trace is newed ")
 	}
-	return _traceprovider
+	_traceprovider = me
+	return _traceprovider, nil
 }
 
-func Set(tp *trace.TracerProvider) {
-	if _traceprovider != nil {
-		panic("Trace only one")
+func Instance() *trace.TracerProvider {
+	if _traceprovider == nil {
+		log.Fatal("Trace not newd")
+		return nil
 	}
-	_traceprovider = tp
+	return _traceprovider
 }
 
 func ClientInterceptor() grpc.UnaryClientInterceptor {

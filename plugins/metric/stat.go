@@ -1,7 +1,14 @@
 package metric
 
 import (
-	"fmt"
+	"sync"
+)
+
+var (
+	_statCounters   sync.Map
+	_statGauges     sync.Map
+	_statHistograms sync.Map
+	_statSummarys   sync.Map
 )
 
 /*
@@ -31,63 +38,39 @@ type StatSummary interface {
 func Counter(key string, v float64) StatCounter {
 	t, ok := _statCounters.Load(key)
 	if ok {
-		if t == nil {
-			panic(fmt.Sprintf("StatCounter Load nil %s", key))
-		}
 		return t.(StatCounter)
 	}
-	c := Get().NewCounter(key, "")
+	c := Instance().NewCounter(key, "")
 	r, _ := _statCounters.LoadOrStore(key, c)
-	if r == nil {
-		panic(fmt.Sprintf("StatCounter Load nil %s", key))
-	}
 	return r.(StatCounter)
 }
 
 func Gauge(key string, v float64) StatGauge {
 	t, ok := _statGauges.Load(key)
 	if ok {
-		if t == nil {
-			panic(fmt.Sprintf("StatGauge Load nil %s", key))
-		}
 		return t.(StatGauge)
 	}
-	c := Get().NewGauge(key, "")
+	c := Instance().NewGauge(key, "")
 	r, _ := _statGauges.LoadOrStore(key, c)
-	if r == nil {
-		panic(fmt.Sprintf("StatGauge Load nil %s", key))
-	}
 	return r.(StatGauge)
 }
 
 func Histogram(key string, v float64) StatHistogram {
 	t, ok := _statHistograms.Load(key)
 	if ok {
-		if t == nil {
-			panic(fmt.Sprintf("StatHistogram Load nil %s", key))
-		}
 		return t.(StatHistogram)
 	}
-	c := Get().NewHistogram(key, "")
+	c := Instance().NewHistogram(key, "")
 	r, _ := _statHistograms.LoadOrStore(key, c)
-	if r == nil {
-		panic(fmt.Sprintf("StatHistogram Load nil %s", key))
-	}
 	return r.(StatHistogram)
 }
 
 func Summary(key string, v float64) StatSummary {
 	t, ok := _statSummarys.Load(key)
 	if ok {
-		if t == nil {
-			panic(fmt.Sprintf("StatHistogram Load nil %s", key))
-		}
 		return t.(StatSummary)
 	}
-	c := Get().NewSummary(key, "")
+	c := Instance().NewSummary(key, "")
 	r, _ := _statSummarys.LoadOrStore(key, c)
-	if r == nil {
-		panic(fmt.Sprintf("StatHistogram Load nil %s", key))
-	}
 	return r.(StatSummary)
 }

@@ -7,20 +7,19 @@ import (
 	"m3game/plugins/lease"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
-	"m3game/util"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 var (
-	_instance *Lease
-	_cfg      etcdLeaseCfg
-	_factory  = &Factory{}
+	_etcdlease *Lease
+	_factory   = &Factory{}
 )
 
 func init() {
@@ -28,32 +27,15 @@ func init() {
 }
 
 const (
-	_factoryname = "lease_etcd"
+	_name = "lease_etcd"
 )
 
 type etcdLeaseCfg struct {
-	Endpoints         string `mapstructure:"Endpoints"`
-	DialTimeout       int    `mapstructure:"DialTimeout"`
-	LeaseKeepLiveTime int    `mapstructure:"LeaseKeepLiveTime"`
-	PreExitTime       int    `mapstructure:"PreExitTime"`
+	Endpoints         string `mapstructure:"Endpoints" validate:"required"`
+	DialTimeout       int    `mapstructure:"DialTimeout" validate:"gt=0"`
+	LeaseKeepLiveTime int    `mapstructure:"LeaseKeepLiveTime" validate:"gt=0"`
+	PreExitTime       int    `mapstructure:"PreExitTime" validate:"gt=0"`
 	EndpointsList     []string
-}
-
-func (c *etcdLeaseCfg) checkValid() error {
-	if err := util.InEqualStr(c.Endpoints, "", "Endpoints"); err != nil {
-		return err
-	}
-	c.EndpointsList = strings.Split(c.Endpoints, ",")
-	if err := util.InEqualInt(c.DialTimeout, 0, "DialTimeout"); err != nil {
-		return err
-	}
-	if err := util.InEqualInt(c.LeaseKeepLiveTime, 0, "LeaseKeepLiveTime"); err != nil {
-		return err
-	}
-	if err := util.InEqualInt(c.PreExitTime, 0, "PreExitTime"); err != nil {
-		return err
-	}
-	return nil
 }
 
 type Factory struct {
@@ -63,62 +45,67 @@ func (f *Factory) Type() plugin.Type {
 	return plugin.Lease
 }
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
-	if err := mapstructure.Decode(c, &_cfg); err != nil {
+	var cfg etcdLeaseCfg
+	if err := mapstructure.Decode(c, &cfg); err != nil {
 		return nil, errors.Wrap(err, "Lease Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
+	cfg.EndpointsList = strings.Split(cfg.Endpoints, ",")
 	config := clientv3.Config{
-		Endpoints:   _cfg.EndpointsList,
-		DialTimeout: time.Duration(_cfg.DialTimeout) * time.Second,
+		Endpoints:   cfg.EndpointsList,
+		DialTimeout: time.Duration(cfg.DialTimeout) * time.Second,
 	}
-	_instance = &Lease{
+	_etcdlease = &Lease{
 		leasemap: make(map[string]lease.LeaseMoveOutFunc),
 	}
 	var err error
-	if _instance.client, err = clientv3.New(config); err != nil {
+	if _etcdlease.client, err = clientv3.New(config); err != nil {
 		return nil, err
 	}
-	_instance.lease = clientv3.NewLease(_instance.client)
-	if leaseGrantResp, err := _instance.lease.Grant(context.Background(), int64(_cfg.LeaseKeepLiveTime)); err != nil {
+	_etcdlease.lease = clientv3.NewLease(_etcdlease.client)
+	if leaseGrantResp, err := _etcdlease.lease.Grant(context.Background(), int64(cfg.LeaseKeepLiveTime)); err != nil {
 		return nil, err
 	} else {
-		_instance.leaseId = leaseGrantResp.ID
+		_etcdlease.leaseId = leaseGrantResp.ID
 	}
 	var keepRespChan <-chan *clientv3.LeaseKeepAliveResponse
 	ctx, cancel := context.WithCancel(context.Background())
-	_instance.cancel = cancel
-	if keepRespChan, err = _instance.lease.KeepAlive(ctx, _instance.leaseId); err != nil {
+	_etcdlease.cancel = cancel
+	if keepRespChan, err = _etcdlease.lease.KeepAlive(ctx, _etcdlease.leaseId); err != nil {
 		return nil, err
 	}
 	go func() {
 		t := time.NewTicker(1 * time.Second)
-		_instance.timeout = time.Now().Unix()
+		_etcdlease.timeout = time.Now().Unix()
 		for {
 			select {
 			case keepResp, ok := <-keepRespChan:
 				if !ok || keepResp == nil {
-					_instance.safecancel(context.Background())
+					_etcdlease.safecancel(context.Background())
 					return
 				}
-				_instance.timeout = time.Now().Unix() + keepResp.TTL
+				_etcdlease.timeout = time.Now().Unix() + keepResp.TTL
 			case <-t.C:
-				if _instance.timeout < time.Now().Unix()+int64(_cfg.PreExitTime) {
-					_instance.safecancel(context.Background())
+				if _etcdlease.timeout < time.Now().Unix()+int64(cfg.PreExitTime) {
+					_etcdlease.safecancel(context.Background())
 					return
 				}
 			}
 		}
 	}()
-	_instance.kv = clientv3.NewKV(_instance.client)
-	lease.Set(_instance)
+	_etcdlease.kv = clientv3.NewKV(_etcdlease.client)
+	if _, err := lease.New(_etcdlease); err != nil {
+		return nil, err
+	}
 	log.Info("EtcdLease...........")
-	return _instance, nil
+	return _etcdlease, nil
 }
 
 func (f *Factory) Destroy(p plugin.PluginIns) error {
@@ -131,7 +118,7 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(p plugin.PluginIns) bool {
+func (f *Factory) CanUnload(p plugin.PluginIns) bool {
 	l := p.(*Lease)
 	return l.isstoped
 }

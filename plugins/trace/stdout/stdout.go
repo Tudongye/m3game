@@ -17,7 +17,7 @@ var (
 )
 
 const (
-	_factoryname = "trace_stdout"
+	_name = "trace_stdout"
 )
 
 func init() {
@@ -32,7 +32,7 @@ func (f *Factory) Type() plugin.Type {
 }
 
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
@@ -50,7 +50,9 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	)
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
-	trace.Set(tp)
+	if _, err := trace.New(tp); err != nil {
+		return nil, err
+	}
 	return _instance, nil
 }
 
@@ -62,7 +64,7 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(plugin.PluginIns) bool {
+func (f *Factory) CanUnload(plugin.PluginIns) bool {
 	return false
 }
 

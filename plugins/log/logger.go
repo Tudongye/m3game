@@ -5,6 +5,33 @@ import (
 	golog "log"
 )
 
+var (
+	_logger        Logger
+	_defaultlogger = newDefaultLogger()
+)
+
+type Logger interface {
+	Output(depth Depth, lv LogLv, plus LogPlus, format string, v ...interface{})
+	SetLevel(level LogLv)
+	GetLevel() LogLv
+}
+
+func Instance() Logger {
+	if _logger == nil {
+		return _defaultlogger
+	}
+	return _logger
+}
+
+func New(logger Logger) (Logger, error) {
+	if _logger != nil {
+		Fatal("Gate Only One")
+		return nil, fmt.Errorf("_logger is newed")
+	}
+	_logger = logger
+	return _logger, nil
+}
+
 func newDefaultLogger() *defaultLogger {
 	return &defaultLogger{
 		lv: LogLvDebug,

@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"m3game/meta"
-	"m3game/plugins/broker"
 	"m3game/util"
 
 	"google.golang.org/grpc/metadata"
@@ -61,7 +60,7 @@ func FillRouteHeadBroad(ctx context.Context, srcapp meta.RouteApp, dstsvc meta.R
 		meta.M3RouteType.String(), meta.RouteTypeBroad.String(),
 		meta.M3RouteSrcApp.String(), srcapp.String(),
 		meta.M3RouteDstSvc.String(), dstsvc.String(),
-		meta.M3RouteTopic.String(), broker.GenTopic(util.BrokerSerTopic(dstsvc.String())),
+		meta.M3RouteTopic.String(), util.BrokerSerTopic(dstsvc.String()),
 		meta.M3RouteIsNty.String(), meta.IsNtyTrue.String(),
 	)
 }

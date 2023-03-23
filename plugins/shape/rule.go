@@ -8,10 +8,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	_cfg ShapeCfg
-)
-
 type ShapeRuleFile struct {
 	Rules []Rule `toml:"Rules"`
 }
@@ -62,16 +58,17 @@ type ShapeCfg struct {
 }
 
 func Setup(c map[string]interface{}) error {
-	if Get() == nil {
+	if Instance() == nil {
 		log.Info("Shape.Setup.NoShape...")
 		return nil
 	}
-	if err := mapstructure.Decode(c, &_cfg); err != nil {
+	var scfg ShapeCfg
+	if err := mapstructure.Decode(c, &scfg); err != nil {
 		return errors.Wrap(err, "Shape Decode Cfg")
 	}
 	var cfg ShapeRuleFile
 	v := viper.New()
-	v.SetConfigFile(_cfg.RuleConfigFile)
+	v.SetConfigFile(scfg.RuleConfigFile)
 	v.SetConfigType("toml")
 	if err := v.ReadInConfig(); err != nil {
 		return err
@@ -80,5 +77,5 @@ func Setup(c map[string]interface{}) error {
 		log.Error("UnMarshal ShapeRuleFile %s", err.Error())
 		return err
 	}
-	return Get().RegisterRule(cfg.Rules)
+	return Instance().RegisterRule(cfg.Rules)
 }

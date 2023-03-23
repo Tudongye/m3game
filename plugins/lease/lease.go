@@ -2,6 +2,9 @@ package lease
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 )
 
@@ -29,16 +32,25 @@ type LeaseReciver interface {
 	SendKickLease(ctx context.Context, id string, app string) ([]byte, error) // 发送释放租约消息
 }
 
-func Set(l Lease) {
-	_lease = l
+func New(lease Lease) (Lease, error) {
+	if _lease != nil {
+		log.Fatal("Lease Only One")
+		return nil, fmt.Errorf("Lease is newed %s", _lease.Factory().Name())
+	}
+	_lease = lease
+	return _lease, nil
+}
+
+func Instance() Lease {
+	if _lease == nil {
+		log.Fatal("Lease not newd")
+		return nil
+	}
+	return _lease
 }
 
 func SetReciver(l LeaseReciver) {
 	_leasereciver = l
-}
-
-func Get() Lease {
-	return _lease
 }
 
 func GetReciver() LeaseReciver {
@@ -46,20 +58,36 @@ func GetReciver() LeaseReciver {
 }
 
 func AllocLease(ctx context.Context, id string, f LeaseMoveOutFunc) error {
-	return Get().AllocLease(ctx, id, f)
+	if _lease == nil {
+		return errors.New("Lease is not initialized")
+	}
+	return _lease.AllocLease(ctx, id, f)
 }
 
 func FreeLease(ctx context.Context, id string) error {
-	return Get().FreeLease(ctx, id)
+	if _lease == nil {
+		return errors.New("Lease is not initialized")
+	}
+	return _lease.FreeLease(ctx, id)
 }
 
 func KickLease(ctx context.Context, id string) ([]byte, error) {
-	return Get().KickLease(ctx, id)
+	if _lease == nil {
+		return nil, errors.New("Lease is not initialized")
+	}
+	return _lease.KickLease(ctx, id)
 }
 
 func RecvKickLease(ctx context.Context, id string) ([]byte, error) {
-	return Get().RecvKickLease(ctx, id)
+	if _lease == nil {
+		return nil, errors.New("Lease is not initialized")
+	}
+	return _lease.RecvKickLease(ctx, id)
 }
+
 func GetLease(ctx context.Context, id string) ([]byte, error) {
-	return Get().GetLease(ctx, id)
+	if _lease == nil {
+		return nil, errors.New("Lease is not initialized")
+	}
+	return _lease.GetLease(ctx, id)
 }

@@ -10,3 +10,7 @@ signal
 viper
 protoreflect
 protoimpl
+metadata
+v3
+v2
+proto

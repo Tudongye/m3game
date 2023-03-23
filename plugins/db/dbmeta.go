@@ -66,15 +66,15 @@ func NewMeta[T proto.Message](table string, creater func() T) *DBMeta[T] {
 	messagename := messaged.Name()
 	messageopts := messaged.Options()
 	if messageopts == nil {
-		panic(fmt.Sprintf("DB %s not have MessageOptions", messagename))
+		log.Fatal("DB %s not have MessageOptions", messagename)
 	}
 	meta.objName = string(messagename)
 	// game entity pb.message must have option E_DbPrimaryKey
 	keyfield := ""
 	if v := proto.GetExtension(messageopts, metapb.E_DbPrimaryKey); v == nil {
-		panic(fmt.Sprintf("DB %s not have E_DbPrimaryKey", messagename))
+		log.Fatal("DB %s not have E_DbPrimaryKey", messagename)
 	} else if v, ok := v.(string); !ok {
-		panic(fmt.Sprintf("DB %s E_DbPrimaryKey type err", messagename))
+		log.Fatal("DB %s E_DbPrimaryKey type err", messagename)
 	} else {
 		keyfield = v
 	}
@@ -88,21 +88,21 @@ func NewMeta[T proto.Message](table string, creater func() T) *DBMeta[T] {
 		// 当前一级结构仅支持string和message
 		if fieldd.Kind() != protoreflect.StringKind &&
 			fieldd.Kind() != protoreflect.MessageKind {
-			panic(fmt.Sprintf("DB %s field %s Kind not vaild", messagename, fieldname))
+			log.Fatal("DB %s field %s Kind not vaild", messagename, fieldname)
 		}
 		if fieldname == keyfield {
 			if fieldd.Kind() != protoreflect.StringKind {
-				panic(fmt.Sprintf("DB %s KeyField %s Kind must be string", messagename, fieldname))
+				log.Fatal("DB %s KeyField %s Kind must be string", messagename, fieldname)
 			}
 			meta.keyField = keyfield
 			log.Info("DB %s KeyField => %s", messagename, keyfield)
 
 		} else {
 			if fieldd.Kind() != protoreflect.MessageKind {
-				panic(fmt.Sprintf("DB %s Field %s Kind must be pb.Message", messagename, fieldname))
+				log.Fatal("DB %s Field %s Kind must be pb.Message", messagename, fieldname)
 			}
 			if _, ok := meta.allPBName[string(fieldd.Message().FullName())]; ok {
-				panic(fmt.Sprintf("DB %s field %s FullName %s repeated", messagename, fieldname, fieldd.Message().FullName()))
+				log.Fatal("DB %s field %s FullName %s repeated", messagename, fieldname, fieldd.Message().FullName())
 			}
 			meta.allPBName[string(fieldd.Message().FullName())] = fieldname
 			log.Info("DB %s PBField => %s", messagename, fieldname)
@@ -112,7 +112,7 @@ func NewMeta[T proto.Message](table string, creater func() T) *DBMeta[T] {
 		log.Info("DB %s AllField => %s", messagename, fieldname)
 	}
 	if meta.keyField == "" {
-		panic(fmt.Sprintf("DB %s not find KeyField", messagename))
+		log.Fatal("DB %s not find KeyField", messagename)
 	}
 	return meta
 }
@@ -176,12 +176,15 @@ func (meta *DBMeta[T]) HasField(field string) bool {
 func (meta *DBMeta[T]) ObjName() string {
 	return meta.objName
 }
+
 func (meta *DBMeta[T]) Table() string {
 	return meta.table
 }
+
 func (meta *DBMeta[T]) KeyField() string {
 	return meta.keyField
 }
+
 func (meta *DBMeta[T]) AllFields() []string {
 	return meta.allFields
 }

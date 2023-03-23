@@ -1,10 +1,10 @@
 package mesh
 
 import (
-	"m3game/util"
 	"math/rand"
 
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/serialx/hashring"
@@ -15,21 +15,15 @@ var (
 )
 
 type MeshCfg struct {
-	WatcherInterSecond int `mapstructure:"WatcherInterSecond"`
-}
-
-func (c *MeshCfg) checkValid() error {
-	if err := util.GreatInt(c.WatcherInterSecond, 0, "WatcherInterSecond"); err != nil {
-		return err
-	}
-	return nil
+	WatcherInterSecond int `mapstructure:"WatcherInterSecond"  validate:"gt=0"`
 }
 
 func Init(c map[string]interface{}) error {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return errors.Wrap(err, "decode cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&_cfg); err != nil {
 		return err
 	}
 	return nil

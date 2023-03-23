@@ -41,25 +41,23 @@ var (
 
 func (n *brokerSer) registerBroker(b broker.Broker) error {
 	n.broker = b
-	if err := n.broker.Subscribe(broker.GenTopic(util.BrokerSerTopic(string(config.GetAppID()))), n.recvbytes); err != nil {
-		return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.BrokerSerTopic(string(config.GetAppID()))))
+	if err := n.broker.Subscribe(util.BrokerSerTopic(string(config.GetAppID())), n.recvbytes); err != nil {
+		return errors.Wrapf(err, "Subscribe %s", util.BrokerSerTopic(string(config.GetAppID())))
 	}
-	if err := n.broker.Subscribe(broker.GenTopic(util.BrokerSerTopic(string(config.GetSvcID()))), n.recvbytes); err != nil {
-		return errors.Wrapf(err, "Subscribe %s", broker.GenTopic(util.BrokerSerTopic(string(config.GetSvcID()))))
+	if err := n.broker.Subscribe(util.BrokerSerTopic(string(config.GetSvcID())), n.recvbytes); err != nil {
+		return errors.Wrapf(err, "Subscribe %s", util.BrokerSerTopic(string(config.GetSvcID())))
 	}
 
 	return nil
 }
 
-func (n *brokerSer) recvbytes(bytes []byte) {
+func (n *brokerSer) recvbytes(bytes []byte) error {
 	bmsg := &metapb.BrokerMsg{}
 	if err := proto.Unmarshal(bytes, bmsg); err != nil {
-		log.Error("Unmarshal bytes err %s", err.Error())
-		return
+		return fmt.Errorf("Unmarshal bytes err %s", err.Error())
 	}
 	if value, ok := n.handlermap.Load(bmsg.Method); !ok {
-		log.Error("not find method %s", bmsg.Method)
-		return
+		return fmt.Errorf("not find method %s", bmsg.Method)
 	} else {
 		handlerfunc := value.(brokerhandlerFunc)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(n.cfg.BroadcastTimeout))
@@ -70,11 +68,12 @@ func (n *brokerSer) recvbytes(bytes []byte) {
 		}
 		md := metadata.New(metad)
 		ctx = metadata.NewIncomingContext(ctx, md)
-		handlerfunc(ctx,
+		_, err := handlerfunc(ctx,
 			func(pkg interface{}) error {
 				return proto.Unmarshal(bmsg.Content, pkg.(proto.Message))
 			},
 			n.serverinterceptor)
+		return err
 	}
 }
 

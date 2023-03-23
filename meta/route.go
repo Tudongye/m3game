@@ -2,6 +2,7 @@ package meta
 
 import (
 	"fmt"
+	"m3game/plugins/log"
 	"regexp"
 
 	"github.com/pkg/errors"
@@ -43,16 +44,16 @@ var (
 func init() {
 	var err error
 	if regexAppID, err = regexp.Compile("^([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)$"); err != nil {
-		panic(fmt.Sprintf("regexAppID.Compile err %s", err))
+		log.Fatal("regexAppID.Compile err %s", err)
 	}
 	if regexSvcID, err = regexp.Compile("^([^\\.]+)\\.([^\\.]+)\\.([^\\.]+)$"); err != nil {
-		panic(fmt.Sprintf("regexSvcID.Compile err %s", err))
+		log.Fatal("regexSvcID.Compile err %s", err)
 	}
 	if regexWorldID, err = regexp.Compile("^([^\\.]+)\\.([^\\.]+)$"); err != nil {
-		panic(fmt.Sprintf("regexWorldID.Compile err %s", err))
+		log.Fatal("regexWorldID.Compile err %s", err)
 	}
 	if regexEnvID, err = regexp.Compile("^([^\\.]+)$"); err != nil {
-		panic(fmt.Sprintf("regexEnvID.Compile err %s", err))
+		log.Fatal("regexEnvID.Compile err %s", err)
 	}
 
 }

@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 
 	"google.golang.org/protobuf/proto"
@@ -20,28 +21,36 @@ var (
 	_db DB
 )
 
-func Get() DB {
+func New(db DB) (DB, error) {
+	if _db != nil {
+		return nil, fmt.Errorf("db is newed %s", _db.Factory().Name())
+	}
+	_db = db
+	return _db, nil
+}
+
+func Instance() DB {
+	if _db == nil {
+		log.Fatal("DB not newd")
+		return nil
+	}
 	return _db
 }
 
-func Set(d DB) {
-	_db = d
-}
-
 var (
-	Err_DB_notfindkey  = fmt.Errorf("Err_DB_notfindkey")
-	Err_DB_repeatedkey = fmt.Errorf("Err_DB_repeatedkey")
+	Err_KeyNotFound    = fmt.Errorf("Err_KeyNotFound")
+	Err_DuplicateEntry = fmt.Errorf("Err_DuplicateEntry")
 )
 
-func IsErrDBNotFindKey(e error) bool {
-	if e == Err_DB_notfindkey {
+func IsErrKeyNotFound(e error) bool {
+	if e == Err_KeyNotFound {
 		return true
 	}
 	return false
 }
 
-func IsErrDBRepeatedKey(e error) bool {
-	if e == Err_DB_repeatedkey {
+func IsErrDuplicateEntry(e error) bool {
+	if e == Err_DuplicateEntry {
 		return true
 	}
 	return false

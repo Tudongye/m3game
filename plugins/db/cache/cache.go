@@ -12,15 +12,15 @@ import (
 )
 
 var (
-	_         db.DB            = (*CacheDB)(nil)
-	_         plugin.Factory   = (*Factory)(nil)
-	_         plugin.PluginIns = (*CacheDB)(nil)
-	_instance *CacheDB
-	_factory  = &Factory{}
+	_        db.DB            = (*CacheDB)(nil)
+	_        plugin.Factory   = (*Factory)(nil)
+	_        plugin.PluginIns = (*CacheDB)(nil)
+	_cachedb *CacheDB
+	_factory = &Factory{}
 )
 
 const (
-	_factoryname = "db_cache"
+	_name = "db_cache"
 )
 
 func init() {
@@ -34,18 +34,20 @@ func (f *Factory) Type() plugin.Type {
 	return plugin.DB
 }
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
-	if _instance != nil {
-		return _instance, nil
+	if _cachedb != nil {
+		return _cachedb, nil
 	}
-	_instance = &CacheDB{
+	_cachedb = &CacheDB{
 		cache: make(map[string][]byte),
 	}
-	db.Set(_instance)
-	return _instance, nil
+	if _, err := db.New(_cachedb); err != nil {
+		return nil, err
+	}
+	return _cachedb, nil
 }
 
 func (f *Factory) Destroy(plugin.PluginIns) error {
@@ -56,7 +58,7 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(plugin.PluginIns) bool {
+func (f *Factory) CanUnload(plugin.PluginIns) bool {
 	return false
 }
 
@@ -75,7 +77,7 @@ func (c *CacheDB) Read(meta db.DBMetaInter, key string, filters ...string) (prot
 	obj := meta.Creater()()
 	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; !ok {
-		return nil, db.Err_DB_notfindkey
+		return nil, db.Err_KeyNotFound
 	}
 	var fields []string
 	if len(filters) == 0 {
@@ -104,7 +106,7 @@ func (c *CacheDB) Update(meta db.DBMetaInter, key string, obj proto.Message, fil
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; !ok {
-		return db.Err_DB_notfindkey
+		return db.Err_KeyNotFound
 	}
 	var fields []string
 	if len(filters) == 0 {
@@ -132,7 +134,7 @@ func (c *CacheDB) Create(meta db.DBMetaInter, key string, obj proto.Message, fil
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; ok {
-		return db.Err_DB_repeatedkey
+		return db.Err_DuplicateEntry
 	}
 	var fields []string
 	if len(filters) == 0 {
@@ -160,7 +162,7 @@ func (c *CacheDB) Delete(meta db.DBMetaInter, key string) error {
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	if _, ok := c.cache[fieldname]; ok {
-		return db.Err_DB_notfindkey
+		return db.Err_KeyNotFound
 	}
 	for _, field := range meta.AllFields() {
 		fieldname := genCacheKey(key, meta.Table(), field)

@@ -2,7 +2,9 @@ package gate
 
 import (
 	"context"
+	"fmt"
 	"m3game/meta/metapb"
+	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 
 	"google.golang.org/grpc"
@@ -29,11 +31,20 @@ type GateReciver interface {
 	LogicCall(string, *metapb.CSMsg) (*metapb.CSMsg, error)
 }
 
-func Set(g Gate) {
+func New(g Gate) (Gate, error) {
+	if _gate != nil {
+		log.Fatal("Gate Only One")
+		return nil, fmt.Errorf("gate is newed %s", _gate.Factory().Name())
+	}
 	_gate = g
+	return _gate, nil
 }
 
-func Get() Gate {
+func Instance() Gate {
+	if _gate == nil {
+		log.Fatal("Gate not newd")
+		return nil
+	}
 	return _gate
 }
 
@@ -45,11 +56,11 @@ func SetReciver(g GateReciver) {
 	_gatereciver = g
 }
 
-func LogicCall(playerid string, r *metapb.CSMsg) (*metapb.CSMsg, error) {
-	return _gatereciver.LogicCall(playerid, r)
+func LogicCall(playerid string, req *metapb.CSMsg) (*metapb.CSMsg, error) {
+	return _gatereciver.LogicCall(playerid, req)
 }
-func AuthCall(r *metapb.AuthReq) (*metapb.AuthRsp, error) {
-	return _gatereciver.AuthCall(r)
+func AuthCall(req *metapb.AuthReq) (*metapb.AuthRsp, error) {
+	return _gatereciver.AuthCall(req)
 }
 
 func CallGrpcCli(ctx context.Context, c grpc.ClientConnInterface, in *metapb.CSMsg, opts ...grpc.CallOption) (*metapb.CSMsg, error) {

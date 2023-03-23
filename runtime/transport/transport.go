@@ -9,6 +9,7 @@ import (
 	"net"
 	"regexp"
 
+	validator "github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
@@ -40,6 +41,11 @@ func init() {
 	}
 }
 
+type TransportCfg struct {
+	Addr             string `mapstructure:"Addr" validate:"required,tcp4_addr"`
+	BroadcastTimeout int    `mapstructure:"BroadcastTimeout" validate:"gt=0"`
+}
+
 func New(c map[string]interface{}, runtimeReciver RuntimeReciver) (*Transport, error) {
 	if _regexHealth == nil {
 		return nil, errors.New("_regexHealth is nil")
@@ -48,7 +54,8 @@ func New(c map[string]interface{}, runtimeReciver RuntimeReciver) (*Transport, e
 	if err := mapstructure.Decode(c, &cfg); err != nil {
 		return nil, errors.Wrap(err, "decode cfg")
 	}
-	if err := cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
 	transport := &Transport{
@@ -57,18 +64,6 @@ func New(c map[string]interface{}, runtimeReciver RuntimeReciver) (*Transport, e
 	}
 	transport.RegisterServerInterceptor(transport.serverInterceptor)
 	return transport, nil
-}
-
-type TransportCfg struct {
-	Addr             string `mapstructure:"Addr"`
-	BroadcastTimeout int    `mapstructure:"BroadcastTimeout"`
-}
-
-func (t *TransportCfg) checkValid() error {
-	if _, _, err := net.SplitHostPort(t.Addr); err != nil {
-		return errors.Wrap(err, "TransportCfg.Addr")
-	}
-	return nil
 }
 
 type Transport struct {
@@ -141,7 +136,7 @@ func (t *Transport) Prepare(ctx context.Context) error {
 		t.cfg,
 		grpc_middleware.ChainUnaryServer(t.serverInterceptors...),
 	)
-	brokerins := broker.Get()
+	brokerins := broker.Instance()
 	if brokerins == nil {
 		return errors.New("Broker-Plugin not find")
 	}

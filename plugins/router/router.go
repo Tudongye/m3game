@@ -1,12 +1,16 @@
 package router
 
-import "m3game/runtime/plugin"
+import (
+	"fmt"
+	"m3game/plugins/log"
+	"m3game/runtime/plugin"
+)
 
 var (
 	_router Router
 )
 
-type Instance interface {
+type Ins interface {
 	GetHost() string
 	GetPort() uint32
 	GetIDStr() string
@@ -17,31 +21,34 @@ type Router interface {
 	plugin.PluginIns
 	Register(app string, svc string, addr string, meta map[string]string) error
 	Deregister(app string, svc string) error
-	GetAllInstances(svcid string) ([]Instance, error)
+	GetAllInstances(svcid string) ([]Ins, error)
 }
 
-func Set(r Router) {
+func New(me Router) (Router, error) {
 	if _router != nil {
-		panic("Router Only One")
+		log.Fatal("Metric Only One")
+		return nil, fmt.Errorf("Metric is newed %s", me.Factory().Name())
 	}
-	_router = r
+	_router = me
+	return _router, nil
 }
 
-func Get() Router {
+func Instance() Router {
 	if _router == nil {
-		panic("Router Mush Have One")
+		log.Fatal("Router not newd")
+		return nil
 	}
 	return _router
 }
 
 func Register(app string, svc string, addr string, meta map[string]string) error {
-	return Get().Register(app, svc, addr, meta)
+	return Instance().Register(app, svc, addr, meta)
 }
 
 func Deregister(app string, svc string) error {
-	return Get().Deregister(app, svc)
+	return Instance().Deregister(app, svc)
 }
 
-func GetAllInstances(svcid string) ([]Instance, error) {
-	return Get().GetAllInstances(svcid)
+func GetAllInstances(svcid string) ([]Ins, error) {
+	return Instance().GetAllInstances(svcid)
 }

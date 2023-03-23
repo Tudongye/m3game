@@ -9,10 +9,10 @@ import (
 	"m3game/plugins/gate"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
-	"m3game/util"
 	"net"
 	"sync"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	grpc "google.golang.org/grpc"
@@ -22,13 +22,12 @@ import (
 var (
 	_         plugin.Factory   = (*Factory)(nil)
 	_         plugin.PluginIns = (*Gate)(nil)
-	_instance *Gate
+	_grpcgate *Gate
 	_factory  = &Factory{}
-	_cfg      grpcGateCfg
 )
 
 const (
-	_factoryname = "gate_grpc"
+	_name = "gate_grpc"
 )
 
 func init() {
@@ -36,14 +35,7 @@ func init() {
 }
 
 type grpcGateCfg struct {
-	Addr string `mapstructure:"Addr"`
-}
-
-func (c *grpcGateCfg) checkValid() error {
-	if err := util.InEqualStr(c.Addr, "", "Addr"); err != nil {
-		return err
-	}
-	return nil
+	Addr string `mapstructure:"Addr" validate:"required,tcp4_addr"`
 }
 
 type Factory struct {
@@ -53,21 +45,23 @@ func (f *Factory) Type() plugin.Type {
 	return plugin.Gate
 }
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
-	if _instance != nil {
-		return _instance, nil
+	if _grpcgate != nil {
+		return _grpcgate, nil
 	}
-	if err := mapstructure.Decode(c, &_cfg); err != nil {
+	var cfg grpcGateCfg
+	if err := mapstructure.Decode(c, &cfg); err != nil {
 		return nil, errors.Wrap(err, "Gate Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
 	var err error
-	tcpAddr, err := net.ResolveTCPAddr("tcp", _cfg.Addr)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", cfg.Addr)
 	if err != nil {
 		return nil, errors.Wrap(err, "transport")
 	}
@@ -75,21 +69,22 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "transport.ListenTCP")
 	}
-	_instance := &Gate{
-		gser:  grpc.NewServer(),
-		conns: make(map[string]*CSConn),
-		no:    1,
+	_grpcgate = &Gate{
+		gser: grpc.NewServer(),
+		no:   1,
 	}
-	RegisterGateSerServer(_instance.gser, _instance)
+	RegisterGateSerServer(_grpcgate.gser, _grpcgate)
 	go func() {
-		log.Info("GrpcGate Listen %s", _cfg.Addr)
-		if err := _instance.gser.Serve(listener); err != nil {
+		log.Info("GrpcGate Listen %s", cfg.Addr)
+		if err := _grpcgate.gser.Serve(listener); err != nil {
 			log.Error("GrpcGate Err %s", err.Error())
 		}
-		_instance.isstoped = true
+		_grpcgate.isstoped = true
 	}()
-	gate.Set(_instance)
-	return _instance, nil
+	if _, err := gate.New(_grpcgate); err != nil {
+		return nil, err
+	}
+	return _grpcgate, nil
 }
 
 func (f *Factory) Destroy(plugin.PluginIns) error {
@@ -100,13 +95,13 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(p plugin.PluginIns) bool {
+func (f *Factory) CanUnload(p plugin.PluginIns) bool {
 	g := p.(*Gate)
 	return g.isstoped
 }
 
 type Gate struct {
-	conns map[string]*CSConn
+	conns sync.Map
 	gser  *grpc.Server
 	UnimplementedGateSerServer
 	mutex    sync.RWMutex
@@ -118,10 +113,8 @@ func (g *Gate) Factory() plugin.Factory {
 	return _factory
 }
 func (g *Gate) GetConn(playerid string) gate.CSConn {
-	g.mutex.RLock()
-	defer g.mutex.RUnlock()
-	if c, ok := g.conns[playerid]; ok {
-		return c
+	if c, ok := g.conns.Load(playerid); ok {
+		return c.(gate.CSConn)
 	}
 	return nil
 }
@@ -135,50 +128,56 @@ func (g *Gate) GenConnID() int {
 func (g *Gate) CSTransport(srv GateSer_CSTransportServer) error {
 	log.Debug("Recv CSTransport")
 	var playerid string
-	{
-		// 连接鉴权
-		msg, err := srv.Recv()
-		if err != nil {
-			return err
-		}
-		authreq := &metapb.AuthReq{}
-		if err := proto.Unmarshal(msg.Content, authreq); err != nil {
-			return err
-		}
-		if res, err := gate.AuthCall(authreq); err != nil {
-			log.Error("%v", err)
-			return err
-		} else {
-			playerid = res.PlayerID
-			msg.Content, _ = proto.Marshal(res)
-			srv.Send(msg)
-		}
+
+	// 连接鉴权
+	msg, err := srv.Recv()
+	if err != nil {
+		return err
 	}
+	authreq := &metapb.AuthReq{}
+	if err := proto.Unmarshal(msg.Content, authreq); err != nil {
+		return err
+	}
+	if res, err := gate.AuthCall(authreq); err != nil {
+		log.Error("%v", err)
+		return err
+	} else {
+		playerid = res.PlayerID
+		msg.Content, _ = proto.Marshal(res)
+		srv.Send(msg)
+	}
+
 	no := g.GenConnID()
 	csconn := func(n int) *CSConn {
 		g.mutex.Lock()
 		defer g.mutex.Unlock()
-		if c, ok := g.conns[playerid]; ok {
-			c.Kick()
+		if c, ok := g.conns.Load(playerid); ok {
+			c.(gate.CSConn).Kick()
+			g.conns.Delete(playerid)
 		}
-		g.conns[playerid] = &CSConn{
+		ctx, cancel := context.WithCancel(context.Background())
+		csconn := &CSConn{
 			srv:      srv,
 			no:       n,
 			sendch:   make(chan *metapb.CSMsg, 10),
-			exitch:   make(chan struct{}),
 			isclosed: false,
 			playerid: playerid,
+			ctx:      ctx,
+			cancel:   cancel,
 		}
-		return g.conns[playerid]
+		g.conns.Store(playerid, csconn)
+		return csconn
 	}(no)
 	go csconn.recvloop()
 	go csconn.sendloop()
-	<-csconn.exitch
+
+	<-csconn.ctx.Done()
+
 	g.mutex.Lock()
 	defer g.mutex.Unlock()
-	if c, ok := g.conns[playerid]; ok {
-		if c.no == csconn.no {
-			delete(g.conns, playerid)
+	if c, ok := g.conns.Load(playerid); ok {
+		if c.(*CSConn).no == csconn.no {
+			g.conns.Delete(playerid)
 		}
 	}
 	return nil
@@ -187,11 +186,12 @@ func (g *Gate) CSTransport(srv GateSer_CSTransportServer) error {
 type CSConn struct {
 	srv      GateSer_CSTransportServer
 	sendch   chan *metapb.CSMsg
-	exitch   chan struct{}
 	isclosed bool
 	no       int
 	playerid string
 	mutex    sync.Mutex
+	ctx      context.Context
+	cancel   context.CancelFunc
 }
 
 func (c *CSConn) Send(ctx context.Context, msg *metapb.CSMsg) error {
@@ -199,7 +199,7 @@ func (c *CSConn) Send(ctx context.Context, msg *metapb.CSMsg) error {
 		return errors.New("CSConn closed")
 	}
 	select {
-	case <-c.exitch:
+	case <-c.ctx.Done():
 		return errors.New("CSConn closed")
 	case c.sendch <- msg:
 		return nil
@@ -221,7 +221,7 @@ func (c *CSConn) safeclose() {
 		return
 	}
 	c.isclosed = true
-	close(c.exitch)
+	c.cancel()
 }
 
 func (c *CSConn) recvloop() {

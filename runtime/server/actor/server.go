@@ -6,8 +6,8 @@ import (
 	"m3game/meta"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
-	"m3game/util"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -15,46 +15,15 @@ import (
 )
 
 type Config struct {
-	ActiveTimeOut        int    `mapstructure:"ActiveTimeOut"`
-	SaveTimeInter        int    `mapstructure:"SaveTimeInter"`
-	TickTimeInter        int    `mapstructure:"TickTimeInter"`
-	MaxReqChanSize       int    `mapstructure:"MaxReqChanSize"`
-	MaxReqWaitTime       int    `mapstructure:"MaxReqWaitTime"`
-	LeaseMode            int    `mapstructure:"LeaseMode"`
-	LeasePrefix          string `mapstructure:"LeasePrefix"`
-	AllocLeaseTimeOut    int    `mapstructure:"AllocLeaseTimeOut"`
-	WaitFreeLeaseTimeOut int    `mapstructure:"WaitFreeLeaseTimeOut"`
-}
-
-func (c *Config) checkValid() error {
-	if err := util.GreatInt(c.ActiveTimeOut, 0, "ActiveTimeOut"); err != nil {
-		return err
-	}
-	if err := util.GreatInt(c.SaveTimeInter, 0, "SaveTimeInter"); err != nil {
-		return err
-	}
-	if err := util.GreatInt(c.TickTimeInter, 0, "TickTimeInter"); err != nil {
-		return err
-	}
-	if err := util.GreatInt(c.MaxReqChanSize, 0, "MaxReqChanSize"); err != nil {
-		return err
-	}
-	if err := util.GreatInt(c.MaxReqWaitTime, 0, "MaxReqWaitTime"); err != nil {
-		return err
-	}
-
-	if c.LeaseMode == 1 {
-		if err := util.InEqualStr(c.LeasePrefix, "", "LeasePrefix"); err != nil {
-			return err
-		}
-		if err := util.InEqualInt(c.AllocLeaseTimeOut, 0, "AllocLeaseTimeOut"); err != nil {
-			return err
-		}
-		if err := util.InEqualInt(c.WaitFreeLeaseTimeOut, 0, "WaitFreeLeaseTimeOut"); err != nil {
-			return err
-		}
-	}
-	return nil
+	ActiveTimeOut        int    `mapstructure:"ActiveTimeOut" validate:"gt=0"`
+	SaveTimeInter        int    `mapstructure:"SaveTimeInter" validate:"gt=0"`
+	TickTimeInter        int    `mapstructure:"TickTimeInter" validate:"gt=0"`
+	MaxReqChanSize       int    `mapstructure:"MaxReqChanSize" validate:"gt=0"`
+	MaxReqWaitTime       int    `mapstructure:"MaxReqWaitTime" validate:"gt=0"`
+	LeaseMode            int    `mapstructure:"LeaseMode" validate:"gte=0,lte=1"`
+	LeasePrefix          string `mapstructure:"LeasePrefix" validate:"gt=0"`
+	AllocLeaseTimeOut    int    `mapstructure:"AllocLeaseTimeOut" validate:"required"`
+	WaitFreeLeaseTimeOut int    `mapstructure:"WaitFreeLeaseTimeOut" validate:"gt=0"`
 }
 
 func New(name string, creater ActorCreater) *Server {
@@ -81,7 +50,8 @@ func (s *Server) Init(c map[string]interface{}, app app.App) error {
 	if err := mapstructure.Decode(c, &s.cfg); err != nil {
 		return errors.Wrap(err, "Actor.Cfg Decode")
 	}
-	if err := s.cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&s.cfg); err != nil {
 		return err
 	}
 	s.actormgr = newActorMgr(s.creater, &s.cfg)

@@ -6,8 +6,8 @@ import (
 	"m3game/plugins/db"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
-	"m3game/util"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
 
@@ -16,16 +16,15 @@ import (
 )
 
 var (
-	_         db.DB            = (*RedisDB)(nil)
-	_         plugin.Factory   = (*Factory)(nil)
-	_         plugin.PluginIns = (*RedisDB)(nil)
-	_cfg                       = RedisCfg{}
-	_instance *RedisDB
-	_factory  = &Factory{}
+	_        db.DB            = (*RedisDB)(nil)
+	_        plugin.Factory   = (*Factory)(nil)
+	_        plugin.PluginIns = (*RedisDB)(nil)
+	_redisdb *RedisDB
+	_factory = &Factory{}
 )
 
 const (
-	_factoryname = "db_redis"
+	_name = "db_redis"
 )
 
 func init() {
@@ -33,27 +32,11 @@ func init() {
 }
 
 type RedisCfg struct {
-	Host      string `mapstructure:"Host"`
-	Port      int    `mapstructure:"Port"`
+	Host      string `mapstructure:"Host" validate:"required"`
+	Port      int    `mapstructure:"Port" validate:"gt=0"`
 	Auth      string `mapstructure:"Auth"`
-	MaxIdle   int    `mapstructure:"MaxIdle"`
-	MaxActive int    `mapstructure:"MaxActive"`
-}
-
-func (c RedisCfg) checkValid() error {
-	if err := util.InEqualStr(c.Host, "", "Host"); err != nil {
-		return err
-	}
-	if err := util.InEqualInt(c.Port, 0, "Port"); err != nil {
-		return err
-	}
-	if err := util.InEqualInt(c.MaxIdle, 0, "MaxIdle"); err != nil {
-		return err
-	}
-	if err := util.InEqualInt(c.MaxActive, 0, "MaxActive"); err != nil {
-		return err
-	}
-	return nil
+	MaxIdle   int    `mapstructure:"MaxIdle" validate:"gt=0"`
+	MaxActive int    `mapstructure:"MaxActive" validate:"gt=0"`
 }
 
 type Factory struct {
@@ -62,41 +45,48 @@ type Factory struct {
 func (f *Factory) Type() plugin.Type {
 	return plugin.DB
 }
+
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
-	if _instance != nil {
-		return _instance, nil
+	if _redisdb != nil {
+		return _redisdb, nil
 	}
-	if err := mapstructure.Decode(c, &_cfg); err != nil {
+	var cfg RedisCfg
+	if err := mapstructure.Decode(c, &cfg); err != nil {
 		return nil, errors.Wrap(err, "RedisDB Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
-	_instance = &RedisDB{pool: &redis.Pool{
-		MaxIdle:   _cfg.MaxIdle,
-		MaxActive: _cfg.MaxActive,
-		Dial: func() (redis.Conn, error) {
-			addrStr := fmt.Sprintf("%s:%d", _cfg.Host, _cfg.Port)
-			c, err := redis.Dial("tcp", addrStr)
-			if err != nil {
-				log.Fatal("error:%s", err.Error())
-			}
-			if _cfg.Auth != "" {
-				if _, err := c.Do("AUTH", _cfg.Auth); err != nil {
-					c.Close()
-					log.Fatal("AUTH error:%s", err.Error())
+	_redisdb = &RedisDB{
+		cfg: cfg,
+		pool: &redis.Pool{
+			MaxIdle:   cfg.MaxIdle,
+			MaxActive: cfg.MaxActive,
+			Dial: func() (redis.Conn, error) {
+				addrStr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+				c, err := redis.Dial("tcp", addrStr)
+				if err != nil {
+					log.Fatal("error:%s", err.Error())
 				}
-			}
-			return c, err
-		},
-	}}
-	db.Set(_instance)
+				if cfg.Auth != "" {
+					if _, err := c.Do("AUTH", cfg.Auth); err != nil {
+						c.Close()
+						log.Fatal("AUTH error:%s", err.Error())
+					}
+				}
+				return c, err
+			},
+		}}
+	if _, err := db.New(_redisdb); err != nil {
+		return nil, err
+	}
 	log.Info("RedisDB...")
-	return _instance, nil
+	return _redisdb, nil
 }
 
 func (f *Factory) Destroy(plugin.PluginIns) error {
@@ -107,11 +97,12 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(plugin.PluginIns) bool {
+func (f *Factory) CanUnload(plugin.PluginIns) bool {
 	return false
 }
 
 type RedisDB struct {
+	cfg  RedisCfg
 	pool *redis.Pool
 }
 
@@ -124,29 +115,37 @@ func (c *RedisDB) Read(meta db.DBMetaInter, key string, filters ...string) (prot
 	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	rc := c.pool.Get()
 	defer rc.Close()
-	if v, err := rc.Do("GET", fieldname); err == redis.ErrNil || v == nil {
-		return nil, db.Err_DB_notfindkey
+	if v, err := rc.Do("GET", fieldname); err == redis.ErrNil || v == nil || len(v.([]byte)) == 0 {
+		return nil, db.Err_KeyNotFound
 	} else if err != nil {
 		return nil, err
 	}
 
+	var args []interface{}
 	var fields []string
 	if len(filters) == 0 {
-		fields = meta.AllFields()
+		for _, field := range meta.AllFields() {
+			fields = append(fields, field)
+			fieldname := genCacheKey(key, meta.Table(), field)
+			args = append(args, fieldname)
+		}
 	} else {
 		for _, field := range filters {
 			if !meta.HasField(field) {
 				log.Error("Obj %s not have field %s in filter", meta.ObjName, field)
 			}
 			fields = append(fields, field)
+			fieldname := genCacheKey(key, meta.Table(), field)
+			args = append(args, fieldname)
 		}
 	}
-	for _, field := range fields {
-		fieldname := genCacheKey(key, meta.Table(), field)
-		if v, err := redis.Bytes(rc.Do("GET", fieldname)); err != nil {
-			log.Error(err.Error())
-			continue
-		} else if err := meta.Decode(obj, field, v); err != nil {
+	values, err := redis.Values(rc.Do("MGET", redis.Args{}.AddFlat(args)...))
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+	for i, v := range values {
+		if err := meta.Decode(obj, fields[i], v.([]byte)); err != nil {
 			return nil, err
 		}
 	}
@@ -158,30 +157,36 @@ func (c *RedisDB) Update(meta db.DBMetaInter, key string, obj proto.Message, fil
 	rc := c.pool.Get()
 	defer rc.Close()
 	if v, err := rc.Do("GET", fieldname); err == redis.ErrNil || v == nil {
-		return db.Err_DB_notfindkey
+		return db.Err_KeyNotFound
 	} else if err != nil {
 		return err
 	}
-	var fields []string
+	var args []interface{}
 	if len(filters) == 0 {
-		fields = meta.AllFields()
+		for _, field := range meta.AllFields() {
+			fieldname := genCacheKey(key, meta.Table(), field)
+			if v, err := meta.Encode(obj, field); err != nil {
+				return err
+			} else {
+				args = append(args, fieldname, v)
+			}
+		}
 	} else {
 		for _, field := range filters {
 			if !meta.HasField(field) {
 				log.Error("Obj %s not have field %s in filter", meta.ObjName, field)
 			}
-			fields = append(fields, field)
-		}
-	}
-	for _, field := range fields {
-		if v, err := meta.Encode(obj, field); err != nil {
-			return err
-		} else {
 			fieldname := genCacheKey(key, meta.Table(), field)
-			if _, err := rc.Do("Set", fieldname, v); err != nil {
-				log.Error("Redis Set %s = %s Fail %s", fieldname, v, err.Error())
+			if v, err := meta.Encode(obj, field); err != nil {
+				return err
+			} else {
+				args = append(args, fieldname, v)
 			}
 		}
+	}
+	_, err := rc.Do("MSET", args...)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -190,48 +195,63 @@ func (c *RedisDB) Create(meta db.DBMetaInter, key string, obj proto.Message, fil
 	rc := c.pool.Get()
 	defer rc.Close()
 	if v, err := rc.Do("GET", fieldname); v != nil && err != redis.ErrNil {
-		return db.Err_DB_repeatedkey
+		return db.Err_DuplicateEntry
 	}
 
-	var fields []string
+	var args []interface{}
 	if len(filters) == 0 {
-		fields = meta.AllFields()
+		for _, field := range meta.AllFields() {
+			fieldname := genCacheKey(key, meta.Table(), field)
+			if v, err := meta.Encode(obj, field); err != nil {
+				return err
+			} else {
+				args = append(args, fieldname, v)
+			}
+		}
 	} else {
 		for _, field := range filters {
 			if !meta.HasField(field) {
 				log.Error("Obj %s not have field %s in filter", meta.ObjName, field)
 			}
-			fields = append(fields, field)
-		}
-	}
-
-	for _, field := range fields {
-		if v, err := meta.Encode(obj, field); err != nil {
-			return err
-		} else {
 			fieldname := genCacheKey(key, meta.Table(), field)
-			if _, err := rc.Do("Set", fieldname, v); err != nil {
-				log.Error("Redis Set %s = %s Fail %s", fieldname, v, err.Error())
+			if v, err := meta.Encode(obj, field); err != nil {
+				return err
+			} else {
+				args = append(args, fieldname, v)
 			}
 		}
 	}
+	_, err := rc.Do("MSET", args...)
+	if err != nil {
+		return err
+	}
 	return nil
 }
+
 func (c *RedisDB) Delete(meta db.DBMetaInter, key string) error {
 	fieldname := genCacheKey(key, meta.Table(), meta.KeyField())
 	rc := c.pool.Get()
 	defer rc.Close()
 	if v, err := rc.Do("GET", fieldname); err == redis.ErrNil || v == nil {
-		return db.Err_DB_notfindkey
+		return db.Err_KeyNotFound
 	} else if err != nil {
 		return err
 	}
 
+	var args []interface{}
+	fieldnum := 0
 	for _, field := range meta.AllFields() {
 		fieldname := genCacheKey(key, meta.Table(), field)
-		if _, err := rc.Do("Del", fieldname); err != nil {
-			log.Error("Redis Del %s  Fail %s", fieldname, err.Error())
-		}
+		args = append(args, fieldname)
+		fieldnum += 1
+	}
+
+	count, err := redis.Int(rc.Do("DEL", args...))
+	if err != nil {
+		return err
+	}
+	if count != fieldnum {
+		return fmt.Errorf("Del %d but want %d", count, fieldnum)
 	}
 	return nil
 }

@@ -1,7 +1,9 @@
 package broker
 
 import (
+	"errors"
 	"fmt"
+	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 )
 
@@ -11,31 +13,37 @@ var (
 
 type Broker interface {
 	plugin.PluginIns
-	Publish(topic string, m []byte) error
-	Subscribe(topic string, h func([]byte)) error
+	Publish(topic string, bytes []byte) error
+	Subscribe(topic string, handler func([]byte) error) error
 }
 
-func GenTopic(c string) string {
-	return fmt.Sprintf("Topic.%s", c)
-}
-func Set(r Broker) {
+func New(b Broker) (Broker, error) {
 	if _broker != nil {
-		panic("Broker Only One")
+		log.Fatal("Broker Only One")
+		return nil, fmt.Errorf("broker is newed %s", _broker.Factory().Name())
 	}
-	_broker = r
+	_broker = b
+	return _broker, nil
 }
 
-func Get() Broker {
+func Instance() Broker {
 	if _broker == nil {
-		panic("Broker Mush Have One")
+		log.Fatal("Broker not newd")
+		return nil
 	}
 	return _broker
 }
 
-func Publish(topic string, m []byte) error {
-	return Get().Publish(topic, m)
+func Publish(topic string, bytes []byte) error {
+	if _broker == nil {
+		return errors.New("broker is nil")
+	}
+	return _broker.Publish(topic, bytes)
 }
 
-func Subscribe(topic string, h func([]byte)) error {
-	return Get().Subscribe(topic, h)
+func Subscribe(topic string, h func([]byte) error) error {
+	if _broker == nil {
+		return errors.New("broker is nil")
+	}
+	return _broker.Subscribe(topic, h)
 }

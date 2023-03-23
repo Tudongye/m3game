@@ -1,14 +1,8 @@
 package metric
 
 import (
-	"sync"
-)
-
-var (
-	_statCounters   sync.Map
-	_statGauges     sync.Map
-	_statHistograms sync.Map
-	_statSummarys   sync.Map
+	"fmt"
+	"m3game/plugins/log"
 )
 
 var (
@@ -16,14 +10,16 @@ var (
 	_defaultmetric = &defaultMetric{}
 )
 
-func Set(m Metric) {
+func New(me Metric) (Metric, error) {
 	if _metric != nil {
-		panic("Metric only one")
+		log.Fatal("Metric Only One")
+		return nil, fmt.Errorf("Metric is newed ")
 	}
-	_metric = m
+	_metric = me
+	return _metric, nil
 }
 
-func Get() Metric {
+func Instance() Metric {
 	if _metric == nil {
 		return _defaultmetric
 	}
@@ -35,9 +31,6 @@ type Metric interface {
 	NewGauge(key string, group string) StatGauge
 	NewHistogram(key string, group string) StatHistogram
 	NewSummary(key string, group string) StatSummary
-}
-
-type defaultMetric struct {
 }
 
 type defaultStat struct {
@@ -62,6 +55,10 @@ func (*defaultStat) Dec() {
 func (*defaultStat) Observe(float64) {
 
 }
+
+type defaultMetric struct {
+}
+
 func (*defaultMetric) NewCounter(key string, group string) StatCounter {
 	return &defaultStat{}
 }

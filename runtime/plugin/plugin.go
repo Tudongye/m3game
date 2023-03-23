@@ -44,7 +44,7 @@ type Factory interface {
 	Setup(map[string]interface{}) (PluginIns, error)
 	Destroy(PluginIns) error
 	Reload(PluginIns, map[string]interface{}) error
-	CanDelete(PluginIns) bool
+	CanUnload(PluginIns) bool
 }
 
 type config struct {

@@ -24,7 +24,7 @@ var (
 	_ App = (*appBase)(nil)
 )
 
-func (a *appBase) Init(cfg map[string]interface{}) error {
+func (a *appBase) Init(c map[string]interface{}) error {
 	return nil
 }
 

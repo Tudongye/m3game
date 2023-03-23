@@ -9,17 +9,17 @@ import (
 	"m3game/util"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/consul/api"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
 
 var (
-	_         router.Router  = (*Router)(nil)
-	_         plugin.Factory = (*Factory)(nil)
-	_cfg                     = consulRouterCfg{}
-	_instance *Router
-	_factory  = &Factory{}
+	_             router.Router  = (*Router)(nil)
+	_             plugin.Factory = (*Factory)(nil)
+	_consulrouter *Router
+	_factory      = &Factory{}
 )
 
 func init() {
@@ -27,18 +27,11 @@ func init() {
 }
 
 const (
-	_factoryname = "router_consul"
+	_name = "router_consul"
 )
 
 type consulRouterCfg struct {
-	ConsulHost string `mapstructure:"ConsulHost"`
-}
-
-func (c *consulRouterCfg) checkValid() error {
-	if err := util.InEqualStr(c.ConsulHost, "", "ConsulHost"); err != nil {
-		return err
-	}
-	return nil
+	ConsulHost string `mapstructure:"ConsulHost" validate:"required"`
 }
 
 type Factory struct {
@@ -48,30 +41,34 @@ func (f *Factory) Type() plugin.Type {
 	return plugin.Router
 }
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
-	if _instance != nil {
-		return _instance, nil
+	if _consulrouter != nil {
+		return _consulrouter, nil
 	}
-	if err := mapstructure.Decode(c, &_cfg); err != nil {
+	var cfg consulRouterCfg
+	if err := mapstructure.Decode(c, &cfg); err != nil {
 		return nil, errors.Wrap(err, "Router Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
-	_instance = &Router{}
+	_consulrouter = &Router{}
 	consulConfig := api.DefaultConfig()
-	consulConfig.Address = _cfg.ConsulHost
+	consulConfig.Address = cfg.ConsulHost
 	if client, err := api.NewClient(consulConfig); err != nil {
 		return nil, errors.Wrapf(err, "Consul.Api.NewClient Add %s", consulConfig.Address)
 	} else {
-		_instance.client = client
+		_consulrouter.client = client
 	}
 
-	router.Set(_instance)
-	return _instance, nil
+	if _, err := router.New(_consulrouter); err != nil {
+		return nil, err
+	}
+	return _consulrouter, nil
 }
 
 func (f *Factory) Destroy(p plugin.PluginIns) error {
@@ -84,7 +81,7 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(p plugin.PluginIns) bool {
+func (f *Factory) CanUnload(p plugin.PluginIns) bool {
 	r := p.(*Router)
 	if inss, err := r.GetAllInstances(config.GetSvcID().String()); err != nil {
 		return true
@@ -144,12 +141,12 @@ func (r *Router) Deregister(app string, svc string) error {
 	return nil
 }
 
-func (r *Router) GetAllInstances(svcid string) ([]router.Instance, error) {
-	services, _, err := _instance.client.Health().Service(svcid, "", true, nil)
+func (r *Router) GetAllInstances(svcid string) ([]router.Ins, error) {
+	services, _, err := _consulrouter.client.Health().Service(svcid, "", true, nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Consul.Health.Service %s fail", svcid)
 	}
-	var instances []router.Instance
+	var instances []router.Ins
 	for _, service := range services {
 		instances = append(instances, newInstance(service.Service.Address, service.Service.Port, service.Service.ID, service.Service.Meta))
 	}

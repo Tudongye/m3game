@@ -61,9 +61,19 @@ digraph go_pkg_relation {
         label = "<head> db\l|
             {|{
                 <plugin> plugin\l|
-                <proto> proto\l|
                 <metapb> metapb\l|
                 <log> log\l|
+            }}"
+        shape = "record"
+    ];
+    "redis" [
+        label = "<head> redis\l|
+            {|{
+                <db> db\l|
+                <log> log\l|
+                <plugin> plugin\l|
+                <util> util\l|
+                <redis> redis\l|
             }}"
         shape = "record"
     ];
@@ -71,7 +81,6 @@ digraph go_pkg_relation {
         label = "<head> wraper\l|
             {|{
                 <db> db\l|
-                <proto> proto\l|
             }}"
         shape = "record"
     ];
@@ -94,25 +103,37 @@ digraph go_pkg_relation {
             }}"
         shape = "record"
     ];
+    "lease" [
+        label = "<head> lease\l|
+            {|{
+                <plugin> plugin\l|
+            }}"
+        shape = "record"
+    ];
+    "etcd" [
+        label = "<head> etcd\l|
+            {|{
+                <config> config\l|
+                <lease> lease\l|
+                <log> log\l|
+                <plugin> plugin\l|
+                <util> util\l|
+            }}"
+        shape = "record"
+    ];
     "trace" [
         label = "<head> trace\l|
             {|{
                 <rpc> rpc\l|
                 <otelgrpc> otelgrpc\l|
                 <trace> trace\l|
-                <proto> proto\l|
-            }}"
-        shape = "record"
-    ];
-    "store" [
-        label = "<head> store\l|
-            {|{
             }}"
         shape = "record"
     ];
     "shape" [
         label = "<head> shape\l|
             {|{
+                <plugin> plugin\l|
                 <log> log\l|
             }}"
         shape = "record"
@@ -121,7 +142,7 @@ digraph go_pkg_relation {
         label = "<head> gate\l|
             {|{
                 <metapb> metapb\l|
-                <metadata> metadata\l|
+                <plugin> plugin\l|
             }}"
         shape = "record"
     ];
@@ -129,11 +150,13 @@ digraph go_pkg_relation {
         label = "<head> runtime\l|
             {|{
                 <config> config\l|
+                <meta> meta\l|
                 <log> log\l|
                 <router> router\l|
                 <shape> shape\l|
                 <trace> trace\l|
                 <app> app\l|
+                <client> client\l|
                 <mesh> mesh\l|
                 <plugin> plugin\l|
                 <resource> resource\l|
@@ -152,6 +175,7 @@ digraph go_pkg_relation {
     "resource" [
         label = "<head> resource\l|
             {|{
+                <atomic> atomic\l|
             }}"
         shape = "record"
     ];
@@ -165,7 +189,6 @@ digraph go_pkg_relation {
     "async" [
         label = "<head> async\l|
             {|{
-                <runtime> runtime\l|
                 <app> app\l|
                 <server> server\l|
             }}"
@@ -174,19 +197,18 @@ digraph go_pkg_relation {
     "actor" [
         label = "<head> actor\l|
             {|{
+                <lease> lease\l|
+                <log> log\l|
                 <meta> meta\l|
-                <runtime> runtime\l|
                 <app> app\l|
                 <server> server\l|
-                <metadata> metadata\l|
-                <log> log\l|
+                <util> util\l|
             }}"
         shape = "record"
     ];
     "multi" [
         label = "<head> multi\l|
             {|{
-                <runtime> runtime\l|
                 <app> app\l|
                 <server> server\l|
             }}"
@@ -196,13 +218,9 @@ digraph go_pkg_relation {
         label = "<head> client\l|
             {|{
                 <meta> meta\l|
-                <runtime> runtime\l|
                 <rpc> rpc\l|
-                <server> server\l|
-                <transport> transport\l|
-                <proto> proto\l|
                 <broker> broker\l|
-                <metadata> metadata\l|
+                <util> util\l|
             }}"
         shape = "record"
     ];
@@ -213,8 +231,7 @@ digraph go_pkg_relation {
                 <metapb> metapb\l|
                 <broker> broker\l|
                 <log> log\l|
-                <metadata> metadata\l|
-                <proto> proto\l|
+                <util> util\l|
                 <meta> meta\l|
             }}"
         shape = "record"
@@ -224,7 +241,6 @@ digraph go_pkg_relation {
             {|{
                 <metapb> metapb\l|
                 <log> log\l|
-                <proto> proto\l|
             }}"
         shape = "record"
     ];
@@ -234,8 +250,8 @@ digraph go_pkg_relation {
                 <meta> meta\l|
                 <log> log\l|
                 <balancer> balancer\l|
-                <metadata> metadata\l|
                 <router> router\l|
+                <util> util\l|
             }}"
         shape = "record"
     ];
@@ -252,51 +268,65 @@ digraph go_pkg_relation {
     db:plugin -> plugin:head[color="blue"]
     db:metapb -> metapb:head[color="black"]
     db:log -> log:head[color="blueviolet"]
-    wraper:db -> db:head[color="brown"]
-    broker:plugin -> plugin:head[color="cadetblue"]
-    trace:rpc -> rpc:head[color="chocolate"]
-    trace:trace -> trace:head[color="crimson"]
-    shape:log -> log:head[color="cyan"]
-    gate:metapb -> metapb:head[color="darkgrey"]
+    redis:db -> db:head[color="brown"]
+    redis:log -> log:head[color="cadetblue"]
+    redis:plugin -> plugin:head[color="chocolate"]
+    redis:util -> util:head[color="crimson"]
+    redis:redis -> redis:head[color="cyan"]
+    wraper:db -> db:head[color="darkgrey"]
+    broker:plugin -> plugin:head[color="deeppink"]
+    lease:plugin -> plugin:head[color="darkred"]
+    etcd:config -> config:head[color="red"]
+    etcd:lease -> lease:head[color="green"]
+    etcd:log -> log:head[color="blue"]
+    etcd:plugin -> plugin:head[color="black"]
+    etcd:util -> util:head[color="blueviolet"]
+    trace:rpc -> rpc:head[color="brown"]
+    trace:trace -> trace:head[color="cadetblue"]
+    shape:plugin -> plugin:head[color="chocolate"]
+    shape:log -> log:head[color="crimson"]
+    gate:metapb -> metapb:head[color="cyan"]
+    gate:plugin -> plugin:head[color="darkgrey"]
     runtime:config -> config:head[color="deeppink"]
-    runtime:log -> log:head[color="darkred"]
-    runtime:router -> router:head[color="red"]
-    runtime:shape -> shape:head[color="green"]
-    runtime:trace -> trace:head[color="blue"]
-    runtime:app -> app:head[color="black"]
-    runtime:mesh -> mesh:head[color="blueviolet"]
-    runtime:plugin -> plugin:head[color="brown"]
-    runtime:resource -> resource:head[color="cadetblue"]
-    runtime:server -> server:head[color="chocolate"]
-    runtime:transport -> transport:head[color="crimson"]
-    runtime:util -> util:head[color="cyan"]
-    server:app -> app:head[color="darkgrey"]
-    async:runtime -> runtime:head[color="deeppink"]
-    async:app -> app:head[color="darkred"]
-    async:server -> server:head[color="red"]
-    actor:meta -> meta:head[color="green"]
-    actor:runtime -> runtime:head[color="blue"]
-    actor:app -> app:head[color="black"]
-    actor:server -> server:head[color="blueviolet"]
-    actor:log -> log:head[color="brown"]
-    multi:runtime -> runtime:head[color="cadetblue"]
-    multi:app -> app:head[color="chocolate"]
-    multi:server -> server:head[color="crimson"]
-    client:meta -> meta:head[color="cyan"]
-    client:runtime -> runtime:head[color="darkgrey"]
+    runtime:meta -> meta:head[color="darkred"]
+    runtime:log -> log:head[color="red"]
+    runtime:router -> router:head[color="green"]
+    runtime:shape -> shape:head[color="blue"]
+    runtime:trace -> trace:head[color="black"]
+    runtime:app -> app:head[color="blueviolet"]
+    runtime:client -> client:head[color="brown"]
+    runtime:mesh -> mesh:head[color="cadetblue"]
+    runtime:plugin -> plugin:head[color="chocolate"]
+    runtime:resource -> resource:head[color="crimson"]
+    runtime:server -> server:head[color="cyan"]
+    runtime:transport -> transport:head[color="darkgrey"]
+    runtime:util -> util:head[color="deeppink"]
+    server:app -> app:head[color="darkred"]
+    async:app -> app:head[color="red"]
+    async:server -> server:head[color="green"]
+    actor:lease -> lease:head[color="blue"]
+    actor:log -> log:head[color="black"]
+    actor:meta -> meta:head[color="blueviolet"]
+    actor:app -> app:head[color="brown"]
+    actor:server -> server:head[color="cadetblue"]
+    actor:util -> util:head[color="chocolate"]
+    multi:app -> app:head[color="crimson"]
+    multi:server -> server:head[color="cyan"]
+    client:meta -> meta:head[color="darkgrey"]
     client:rpc -> rpc:head[color="deeppink"]
-    client:server -> server:head[color="darkred"]
-    client:transport -> transport:head[color="red"]
-    client:broker -> broker:head[color="green"]
-    transport:config -> config:head[color="blue"]
-    transport:metapb -> metapb:head[color="black"]
-    transport:broker -> broker:head[color="blueviolet"]
-    transport:log -> log:head[color="brown"]
+    client:broker -> broker:head[color="darkred"]
+    client:util -> util:head[color="red"]
+    transport:config -> config:head[color="green"]
+    transport:metapb -> metapb:head[color="blue"]
+    transport:broker -> broker:head[color="black"]
+    transport:log -> log:head[color="blueviolet"]
+    transport:util -> util:head[color="brown"]
     transport:meta -> meta:head[color="cadetblue"]
     rpc:metapb -> metapb:head[color="chocolate"]
     rpc:log -> log:head[color="crimson"]
     mesh:meta -> meta:head[color="cyan"]
     mesh:log -> log:head[color="darkgrey"]
     mesh:router -> router:head[color="deeppink"]
-    plugin:log -> log:head[color="darkred"]
+    mesh:util -> util:head[color="darkred"]
+    plugin:log -> log:head[color="red"]
 }

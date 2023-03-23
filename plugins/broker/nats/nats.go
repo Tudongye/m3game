@@ -4,8 +4,8 @@ import (
 	"m3game/plugins/broker"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
-	"m3game/util"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
 	"github.com/mitchellh/mapstructure"
@@ -13,16 +13,15 @@ import (
 )
 
 var (
-	_         broker.Broker    = (*Broker)(nil)
-	_         plugin.PluginIns = (*Broker)(nil)
-	_         plugin.Factory   = (*Factory)(nil)
-	_cfg                       = natsBrokerCfg{}
-	_instance *Broker
-	_factory  = &Factory{}
+	_        broker.Broker    = (*Broker)(nil)
+	_        plugin.PluginIns = (*Broker)(nil)
+	_        plugin.Factory   = (*Factory)(nil)
+	_broker  *Broker
+	_factory = &Factory{}
 )
 
 const (
-	_factoryname = "broker_nats"
+	_name = "broker_nats"
 )
 
 func init() {
@@ -30,14 +29,7 @@ func init() {
 }
 
 type natsBrokerCfg struct {
-	NatsURL string `mapstructure:"NatsURL"`
-}
-
-func (c *natsBrokerCfg) checkValid() error {
-	if err := util.InEqualStr(c.NatsURL, "", "NatsURL"); err != nil {
-		return err
-	}
-	return nil
+	URL string `mapstructure:"URL" validate:"required"`
 }
 
 type Factory struct {
@@ -47,34 +39,38 @@ func (f *Factory) Type() plugin.Type {
 	return plugin.Broker
 }
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
-	if _instance != nil {
-		return _instance, nil
+	if _broker != nil {
+		return _broker, nil
 	}
-	if err := mapstructure.Decode(c, &_cfg); err != nil {
+	var cfg natsBrokerCfg
+	if err := mapstructure.Decode(c, &cfg); err != nil {
 		return nil, err
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
-	_instance = &Broker{
+	_broker = &Broker{
 		subs: make(map[string]*nats.Subscription),
 	}
-	if nc, err := nats.Connect(_cfg.NatsURL); err != nil {
-		return nil, errors.Wrapf(err, "Nats.Conntect %s", _cfg.NatsURL)
+	if nc, err := nats.Connect(cfg.URL); err != nil {
+		return nil, errors.Wrapf(err, "Nats.Conntect %s", cfg.URL)
 	} else {
-		_instance.nc = nc
+		_broker.nc = nc
 		if js, err := nc.JetStream(nats.PublishAsyncMaxPending(256)); err != nil {
-			return nil, errors.Wrapf(err, "nc.JetStream %s", _cfg.NatsURL)
+			return nil, errors.Wrapf(err, "nc.JetStream %s", cfg.URL)
 		} else {
-			_instance.js = js
+			_broker.js = js
 		}
 	}
-	broker.Set(_instance)
-	return _instance, nil
+	if _, err := broker.New(_broker); err != nil {
+		return nil, err
+	}
+	return _broker, nil
 }
 
 func (f *Factory) Destroy(plugin.PluginIns) error {
@@ -85,7 +81,7 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(plugin.PluginIns) bool {
+func (f *Factory) CanUnload(plugin.PluginIns) bool {
 	return false
 }
 
@@ -104,10 +100,12 @@ func (b *Broker) Publish(topic string, m []byte) error {
 	return err
 }
 
-func (b *Broker) Subscribe(topic string, h func([]byte)) error {
+func (b *Broker) Subscribe(topic string, h func([]byte) error) error {
 	log.Info("Subscribe %s", topic)
 	_, err := b.nc.Subscribe(topic, func(m *nats.Msg) {
-		h(m.Data)
+		if err := h(m.Data); err != nil {
+			log.Error("broker subscribe %s handler err %s", topic, err.Error())
+		}
 	})
 	return err
 }

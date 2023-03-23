@@ -15,17 +15,16 @@ import (
 )
 
 var (
-	_         log.Logger       = (*Zlog)(nil)
-	_         plugin.Factory   = (*Factory)(nil)
-	_         plugin.PluginIns = (*Zlog)(nil)
-	_instance *Zlog
-	_factory  = &Factory{}
-	_cfg      ZlogCfg
+	_          log.Logger       = (*Zlog)(nil)
+	_          plugin.Factory   = (*Factory)(nil)
+	_          plugin.PluginIns = (*Zlog)(nil)
+	_zaplogger *Zlog
+	_factory   = &Factory{}
 )
 
 const (
-	_factoryname = "log_zap"
-	_logtmfmt    = "2006-01-02 15:04:05.001"
+	_name     = "log_zap"
+	_logtmfmt = "2006-01-02 15:04:05.001"
 )
 
 func init() {
@@ -43,11 +42,6 @@ type ZlogCfg struct {
 	Compress   bool   `mapstructure:"Compress"`   //default false
 }
 
-func (c *ZlogCfg) checkValid() error {
-
-	return nil
-}
-
 type Factory struct {
 }
 
@@ -55,29 +49,27 @@ func (f *Factory) Type() plugin.Type {
 	return plugin.Log
 }
 func (f *Factory) Name() string {
-	return _factoryname
+	return _name
 }
 
 func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
-	if _instance != nil {
-		return _instance, nil
+	if _zaplogger != nil {
+		return _zaplogger, nil
 	}
-	if err := mapstructure.Decode(c, &_cfg); err != nil {
+	var cfg ZlogCfg
+	if err := mapstructure.Decode(c, &cfg); err != nil {
 		return nil, errors.Wrap(err, "Zlog Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
-		return nil, err
-	}
-	loglv := log.ConvertLogLv(_cfg.LogLevel)
+	loglv := log.ConvertLogLv(cfg.LogLevel)
 
 	var zw zapcore.WriteSyncer
-	if _cfg.Filename != "" {
+	if cfg.Filename != "" {
 		zw = zapcore.AddSync(&lumberjack.Logger{
-			Filename:   _cfg.Filename,
-			MaxSize:    _cfg.MaxSize,
-			MaxAge:     _cfg.MaxAge,
-			MaxBackups: _cfg.MaxBackups,
-			LocalTime:  _cfg.LocalTime,
+			Filename:   cfg.Filename,
+			MaxSize:    cfg.MaxSize,
+			MaxAge:     cfg.MaxAge,
+			MaxBackups: cfg.MaxBackups,
+			LocalTime:  cfg.LocalTime,
 		})
 	} else {
 		zw = os.Stdout
@@ -96,17 +88,19 @@ func (f *Factory) Setup(c map[string]interface{}) (plugin.PluginIns, error) {
 		EncodeName:     zapcore.FullNameEncoder,
 	}
 	var newCore zapcore.Core
-	if _cfg.Encoding == "json" {
+	if cfg.Encoding == "json" {
 		newCore = zapcore.NewCore(zapcore.NewJSONEncoder(encoderConf), zw, zap.NewAtomicLevelAt(_loglvconvert[loglv]))
 	} else {
 		newCore = zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConf), zw, zap.NewAtomicLevelAt(_loglvconvert[loglv]))
 	}
-	_instance = &Zlog{
+	_zaplogger = &Zlog{
 		loglv:  loglv,
 		logger: zap.New(newCore),
 	}
-	log.Set(_instance)
-	return _instance, nil
+	if _, err := log.New(_zaplogger); err != nil {
+		return nil, err
+	}
+	return _zaplogger, nil
 }
 
 func (f *Factory) Destroy(plugin.PluginIns) error {
@@ -117,7 +111,7 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 	return nil
 }
 
-func (f *Factory) CanDelete(plugin.PluginIns) bool {
+func (f *Factory) CanUnload(plugin.PluginIns) bool {
 	return false
 }
 

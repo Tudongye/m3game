@@ -21,7 +21,7 @@ func newInstance(host string, port int, idstr string, meta map[string]string) *I
 }
 
 var (
-	_ router.Instance = (*Instance)(nil)
+	_ router.Ins = (*Instance)(nil)
 )
 
 func (i *Instance) GetHost() string {
