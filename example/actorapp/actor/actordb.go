@@ -24,7 +24,7 @@ func actorDBCreater() *pb.ActorDB {
 }
 
 func Register(playerid string, name string) (string, error) {
-	dbplugin := db.Get()
+	dbplugin := db.Instance()
 	if dbplugin == nil {
 		return "", _err_actor_dbplugin
 	}

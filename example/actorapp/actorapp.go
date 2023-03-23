@@ -23,9 +23,9 @@ import (
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
-	"m3game/util"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
@@ -45,21 +45,15 @@ type ActorApp struct {
 }
 
 type AppCfg struct {
-	PrePareTime int `mapstructure:"PrePareTime"`
+	PrePareTime int `mapstructure:"PrePareTime" validate:"gt=0"`
 }
 
-func (c *AppCfg) checkValid() error {
-	if err := util.InEqualInt(c.PrePareTime, 0, "PrePareTime"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (a *ActorApp) Init(cfg map[string]interface{}) error {
-	if err := mapstructure.Decode(cfg, &_cfg); err != nil {
+func (a *ActorApp) Init(c map[string]interface{}) error {
+	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return errors.Wrap(err, "App Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&_cfg); err != nil {
 		return err
 	}
 	return nil
@@ -68,11 +62,9 @@ func (a *ActorApp) Init(cfg map[string]interface{}) error {
 func (d *ActorApp) Prepare(ctx context.Context) error {
 	if err := asynccli.Init(config.GetAppID()); err != nil {
 		return err
-	}
-	if err := gatecli.Init(config.GetAppID()); err != nil {
+	} else if err := gatecli.Init(config.GetAppID()); err != nil {
 		return err
-	}
-	if err := actorregcli.Init(config.GetAppID()); err != nil {
+	} else if err := actorregcli.Init(config.GetAppID()); err != nil {
 		return err
 	}
 	lease.SetReciver(d)
@@ -90,11 +82,11 @@ func (d *ActorApp) Start(ctx context.Context) {
 			return
 		case <-t.C:
 			// 插件检查
-			if router.Get().Factory().CanDelete(router.Get()) {
+			if router.Instance().Factory().CanUnload(router.Instance()) {
 				t.Stop()
 				runtime.ShutDown("Router Delete")
 			}
-			if lease.Get().Factory().CanDelete(lease.Get()) {
+			if lease.Instance().Factory().CanUnload(lease.Instance()) {
 				t.Stop()
 				runtime.ShutDown("Lease Delete")
 			}

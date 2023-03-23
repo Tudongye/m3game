@@ -110,7 +110,7 @@ func (a *Actor) OnSave() error {
 	log.DebugP(a.logp, "Save")
 	if a.wraper.HasDirty() {
 		log.DebugP(a.logp, "Saving")
-		dbp := db.Get()
+		dbp := db.Instance()
 		if dbp == nil {
 			log.Error(_err_actor_dbplugin.Error())
 			return _err_actor_dbplugin
@@ -164,7 +164,7 @@ func (a *Actor) Name() string {
 }
 
 func (a *Actor) Login(ctx context.Context) error {
-	dbplugin := db.Get()
+	dbplugin := db.Instance()
 	if dbplugin == nil {
 		return _err_actor_dbplugin
 	}

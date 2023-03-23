@@ -23,10 +23,10 @@ import (
 	"m3game/runtime/app"
 	"m3game/runtime/rpc"
 	"m3game/runtime/server"
-	"m3game/util"
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -47,21 +47,15 @@ type GateApp struct {
 }
 
 type AppCfg struct {
-	PrePareTime int `mapstructure:"PrePareTime"`
+	PrePareTime int `mapstructure:"PrePareTime" validate:"gt=0"`
 }
 
-func (c *AppCfg) checkValid() error {
-	if err := util.InEqualInt(c.PrePareTime, 0, "PrePareTime"); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (a *GateApp) Init(cfg map[string]interface{}) error {
-	if err := mapstructure.Decode(cfg, &_cfg); err != nil {
+func (a *GateApp) Init(c map[string]interface{}) error {
+	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return errors.Wrap(err, "App Decode Cfg")
 	}
-	if err := _cfg.checkValid(); err != nil {
+	validate := validator.New()
+	if err := validate.Struct(&_cfg); err != nil {
 		return err
 	}
 	return nil
@@ -70,11 +64,9 @@ func (a *GateApp) Init(cfg map[string]interface{}) error {
 func (d *GateApp) Prepare(ctx context.Context) error {
 	if err := multicli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
 		return err
-	}
-	if err := actorcli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
+	} else if err := actorcli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
 		return err
-	}
-	if err := actorregcli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
+	} else if err := actorregcli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
 		return err
 	}
 	gate.SetReciver(d)
@@ -93,11 +85,11 @@ func (d *GateApp) Start(ctx context.Context) {
 			return
 		case <-t.C:
 			// 插件检查
-			if router.Get().Factory().CanDelete(router.Get()) {
+			if router.Instance().Factory().CanUnload(router.Instance()) {
 				runtime.ShutDown("Router Delete")
 				return
 			}
-			if gate.Get().Factory().CanDelete(gate.Get()) {
+			if gate.Instance().Factory().CanUnload(gate.Instance()) {
 				runtime.ShutDown("Gate Delete")
 				return
 			}

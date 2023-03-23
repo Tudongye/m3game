@@ -15,7 +15,7 @@ RuleConfigFile = "../../resource/rules.toml"
 ConsulHost = "127.0.0.1:8500"
 
 [[Plugin.Broker.broker_nats]]
-NatsURL = "127.0.0.1:4222"
+URL = "127.0.0.1:4222"
 
 [[Plugin.Shape.shape_sentinel]]
 ConfigFile = "../../resource/sentinel.yml"

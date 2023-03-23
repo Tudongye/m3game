@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
+	"time"
 
 	"m3game/example/proto/pb"
 
@@ -40,9 +41,12 @@ func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
 	}
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
-	opts = append(opts, grpc.WithInsecure())
-	opts = append(opts, grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`))
-	opts = append(opts, grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)))
+	opts = append(opts,
+		grpc.WithInsecure(),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)),
+		grpc.WithTimeout(time.Second*10),
+	)
 	if _client.conn, err = grpc.Dial(target, opts...); err != nil {
 		return errors.Wrapf(err, "Dial Target %s", target)
 	} else {
