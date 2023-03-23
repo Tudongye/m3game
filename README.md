@@ -56,6 +56,10 @@ Gate-Plugin：服务网关组件，当前有一个grpc-stream实现
 
 Lease-Plugin：租约管理组件，当前有一个etcd实现
 
+## 集群化部署架构
+
+![未命名文件 (12)](https://user-images.githubusercontent.com/16680818/227127493-b41dbfa7-3d65-4b1a-9331-0baf45b4b8fd.png)
+
 ## M3内部依赖
 
 ![graphviz](https://user-images.githubusercontent.com/16680818/226848482-d1facfba-8e86-4206-96f8-c786e385e862.png)
@@ -627,7 +631,7 @@ Demo是一个全服互通游戏，玩家(Role)可以自由组建社团(Club)，�
 
 在本demo中外围服务包括GateApp, UidApp, OnlineApp, RoleApp, ClubApp，ClubMgrApp组成的部分，管理玩家(Role) 和 社团(Club)数据。
 
-![未命名文件 (11)](https://user-images.githubusercontent.com/16680818/225325356-aa9fe15d-ef20-454b-a9d6-d9a48ec358d2.png)
+![未命名文件 (12)](https://user-images.githubusercontent.com/16680818/227127493-b41dbfa7-3d65-4b1a-9331-0baf45b4b8fd.png)
 
 GateApp: 网关服务，无状态服务，客户端任意链接
 
