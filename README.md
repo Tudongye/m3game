@@ -2,7 +2,7 @@
 
 一个基于Golang和Grpc的游戏后端框架。
 
-A GameServer framework using Golang and Grpc
+A GameServer framework built using Golang and GRPC
 
 M3Game是一个采用Golang构建游戏后端的尝试，期望能探索出一条Golang游戏后台的开发方案。
 
@@ -243,7 +243,7 @@ message HelloWorld {
         string Rsp = 1;
     }
 }
-```
+``
 
 业务层通过编写rpc_option将RPC接口注入框架层，解析相关逻辑参看runtime/rpc。rpc_option定义如下
 
@@ -279,19 +279,19 @@ func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (strin
 
 ### Mutil
 
-Mutil 多线程模型，主要用于无状态服务，M3采用原生Grpc服务实现。参考实现 example/mutilapp/mutilser
+Mutil 多线程模型，主要用于无状态服务，M3采用原生Grpc服务实现吗，一般用于推荐服务，SNS服务或者是适配代理类服务比如DB代理，第三方API代理。参考实现 example/mutilapp/mutilser
 
 ### Async
 
-Async 单线程异步，使用这类模型的服务不允许并发的执行RPC调用。参考实现 example/asyncapp/asyncser
+Async 单线程异步，使用这类模型的服务不允许并发的执行RPC调用，一般用于必须要串行处理的服务，比如地图服务，全服点赞服务等。参考实现 example/asyncapp/asyncser
 
-M3在Async服务的RPC驱动链中加入了资源锁。通过资源锁确保同一时间只有一个RPC调用再执行
+M3在Async服务的RPC驱动链中加入了资源锁。通过资源锁确保同一时间只有一个RPC调用在执行
 
 ![未命名文件 (12)](https://user-images.githubusercontent.com/16680818/222913602-eca183aa-c449-4d30-af10-c2579fdc4346.png)
 
 ### Actor
 
-Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实体内部串行，实体之间并发。参考实现 example/actorapp/actorser
+Actor模型。使用这类模型的服务将RPC调用和游戏实体绑定，实体内部串行，实体之间并发，一般用于常驻内存的游戏实体的服务，比如玩家服务，社团服务，小区服务等。参考实现 example/actorapp/actorser
 
 M3为每个Actor分配一个执行Goroutine，并引入ActorRuntime和ActorMgr对Actor进行管理，前者用于管理单个Actor的执行Goroutine，后者用于管理整个Actor池。
 
@@ -320,6 +320,10 @@ M3使用Grpc的Resolver & Picker方式将Mesh与RPC路由相关联，相关逻�
 | BroadCast  | 目标服务ID | 对目标服务所有实例广播 |
 | MutilCast  | 目标TopicID | 对订阅目标TopciID的所有实例广播 |
 | Single  | 目标服务ID | 对目标服务中ID最小的实例寻路 |
+
+实例：单个程序实体
+
+服务：一组有相同功能的实例集合
 
 ### 广播
 
