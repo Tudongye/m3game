@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package proto;
+
+import "msg.proto";
+
+option go_package = "gate/grpcgate";
+
+service GateSer {
+    rpc CSTransport(stream CSMsg) returns (stream CSMsg) ;
+}

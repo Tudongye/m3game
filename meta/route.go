@@ -120,6 +120,11 @@ func GenRouteSvc(env string, world string, fun string) RouteSvc {
 	return RouteSvc(fmt.Sprintf("%s.%s.%s", env, world, fun))
 }
 
+func GenDstRouteSvc(srcapp RouteApp, fun string) RouteSvc {
+	env, world, _, _, _ := srcapp.Parse()
+	return GenRouteSvc(env, world, fun)
+}
+
 type RouteWorld string
 
 func (r RouteWorld) String() string {

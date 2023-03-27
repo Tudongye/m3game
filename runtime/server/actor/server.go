@@ -21,8 +21,8 @@ type Config struct {
 	MaxReqChanSize       int    `mapstructure:"MaxReqChanSize" validate:"gt=0"`
 	MaxReqWaitTime       int    `mapstructure:"MaxReqWaitTime" validate:"gt=0"`
 	LeaseMode            int    `mapstructure:"LeaseMode" validate:"gte=0,lte=1"`
-	LeasePrefix          string `mapstructure:"LeasePrefix" validate:"gt=0"`
-	AllocLeaseTimeOut    int    `mapstructure:"AllocLeaseTimeOut" validate:"required"`
+	LeasePrefix          string `mapstructure:"LeasePrefix" validate:"required"`
+	AllocLeaseTimeOut    int    `mapstructure:"AllocLeaseTimeOut" validate:"gt=0"`
 	WaitFreeLeaseTimeOut int    `mapstructure:"WaitFreeLeaseTimeOut" validate:"gt=0"`
 }
 

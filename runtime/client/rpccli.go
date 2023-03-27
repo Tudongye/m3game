@@ -36,12 +36,9 @@ func RPCCallHash[T1, T2 proto.Message](c Client, f func(context.Context, T1, ...
 	if method == nil {
 		return t2, fmt.Errorf("Method not find %s", t1fullname)
 	}
-	if method.HashKeyd() == nil {
-		return t2, fmt.Errorf("Method nohash %s", t1fullname)
-	}
-	hashkey, ok := t1.ProtoReflect().Get(method.HashKeyd()).Interface().(string)
-	if !ok {
-		return t2, fmt.Errorf("Method %s hashkey %s invaild", t1fullname, method.HashKeyd().Name())
+	hashkey, err := method.HashKey(t1)
+	if err != nil {
+		return t2, errors.Wrapf(err, "Get HashKey")
 	}
 	ctx = FillRouteHeadHash(ctx, c.SrcApp(), c.DstSvc(), hashkey, meta.IsNtyFalse)
 	return rpcCall(method, f, ctx, t1, opts...)

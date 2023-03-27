@@ -19,7 +19,7 @@ var (
 
 type RPCMeta struct {
 	rpcname    string
-	grpcoption *metapb.M3GRPCOption // rpc_option
+	grpcoption *metapb.M3RpcOption // rpc_option
 
 	hashkeyd protoreflect.FieldDescriptor
 }
@@ -28,12 +28,27 @@ func (r *RPCMeta) RpcName() string {
 	return r.rpcname
 }
 
-func (r *RPCMeta) GrpcOption() *metapb.M3GRPCOption {
+func (r *RPCMeta) GrpcOption() *metapb.M3RpcOption {
 	return r.grpcoption
 }
 
-func (r *RPCMeta) HashKeyd() protoreflect.FieldDescriptor {
-	return r.hashkeyd
+func (r *RPCMeta) HashKey(msg proto.Message) (string, error) {
+	var hashkey string
+	switch r.hashkeyd.Kind() {
+	case protoreflect.StringKind:
+		hashkey = msg.ProtoReflect().Get(r.hashkeyd).Interface().(string)
+	case protoreflect.Int32Kind:
+		hashkey = fmt.Sprintf("%d", msg.ProtoReflect().Get(r.hashkeyd).Interface().(int32))
+	case protoreflect.Int64Kind:
+		hashkey = fmt.Sprintf("%d", msg.ProtoReflect().Get(r.hashkeyd).Interface().(int64))
+	case protoreflect.Uint32Kind:
+		hashkey = fmt.Sprintf("%d", msg.ProtoReflect().Get(r.hashkeyd).Interface().(uint32))
+	case protoreflect.Uint64Kind:
+		hashkey = fmt.Sprintf("%d", msg.ProtoReflect().Get(r.hashkeyd).Interface().(uint64))
+	default:
+		return "", fmt.Errorf("Unknow HashKey Kind %v", r.hashkeyd.Kind())
+	}
+	return hashkey, nil
 }
 
 func InjectionRPC(serviced protoreflect.ServiceDescriptor) error {
@@ -56,7 +71,7 @@ func InjectionRPC(serviced protoreflect.ServiceDescriptor) error {
 		// eache Rpc must have rpc_option
 		if v := proto.GetExtension(rpcde.Options(), metapb.E_RpcOption); v == nil {
 			return fmt.Errorf("RPC %s not have E_RpcOption", rpcname)
-		} else if m3grpcopt, ok := v.(*metapb.M3GRPCOption); !ok {
+		} else if m3grpcopt, ok := v.(*metapb.M3RpcOption); !ok {
 			return fmt.Errorf("RPC %s E_RpcOption type err", rpcname)
 		} else if m3grpcopt == nil {
 			return fmt.Errorf("RPC %s E_RpcOption is nil", rpcname)
@@ -67,7 +82,17 @@ func InjectionRPC(serviced protoreflect.ServiceDescriptor) error {
 			RPCClientMethods.Add(fmt.Sprintf("/%s/%s", servicefullname, methodname))
 		}
 		if fieldd := inputd.Fields().ByName(protoreflect.Name(meta.grpcoption.RouteKey)); fieldd != nil {
-			meta.hashkeyd = fieldd
+			switch fieldd.Kind() {
+			case protoreflect.StringKind:
+			case protoreflect.Int32Kind:
+			case protoreflect.Int64Kind:
+			case protoreflect.Uint32Kind:
+			case protoreflect.Uint64Kind:
+				meta.hashkeyd = fieldd
+			default:
+				return fmt.Errorf("Invaild HashKey Kind %v", fieldd.Kind())
+			}
+
 		}
 		if _, ok := RPCMetas.LoadOrStore(inputname, meta); ok {
 			continue

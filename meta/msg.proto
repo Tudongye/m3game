@@ -4,31 +4,19 @@ package proto;
 
 option go_package = "m3game/meta/metapb";
 
-
 message Meta {
-    string Key = 1;
-    string Value =2;
+    string Key   = 1;
+    string Value = 2;
 }
 
 message BrokerMsg {
-    string Method = 1;
-    repeated Meta Metas= 2;
-    bytes Content= 3;
+    string Method       = 1;
+    repeated Meta Metas = 2;
+    bytes Content       = 3;
 }
 
 message CSMsg {
-    string Method = 1;
-    repeated Meta Metas= 2;
-    bytes Content= 3;
-}
-
-message AuthReq {
-    int32 PlayerType = 1;
-    string Token = 2;
-    repeated Meta Metas= 3;
-}
-
-message AuthRsp {
-    string PlayerID = 1;
-    repeated Meta Metas= 2;
+    string Method       = 1;
+    repeated Meta Metas = 2;
+    bytes Content       = 3;
 }

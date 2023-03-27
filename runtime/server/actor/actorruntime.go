@@ -35,6 +35,7 @@ func newActorRuntime(actor Actor, cfg *Config) *actorRuntime {
 type actorRuntime struct {
 	actor       Actor
 	reqchan     chan *actorReq
+	ctx         context.Context
 	cancel      context.CancelFunc
 	activetime  int64 // 激活时间
 	savetime    int64 // 回写时间
@@ -42,13 +43,13 @@ type actorRuntime struct {
 	cfg         *Config
 }
 
-func (ar *actorRuntime) run(ctx context.Context) error {
+func (ar *actorRuntime) run() error {
 	ar.moveoutchch = make(chan chan []byte, 1)
 	if ar.cfg.LeaseMode == 1 {
 		// 获取租约
 		var movebytes []byte
 		var err error
-		if movebytes, err = ar.allocLease(ctx); err != nil {
+		if movebytes, err = ar.allocLease(ar.ctx); err != nil {
 			return errors.Wrapf(err, "actorRuntime run allocLease")
 		}
 		if err := ar.actor.OnMoveIn(movebytes); err != nil {
@@ -65,15 +66,15 @@ func (ar *actorRuntime) run(ctx context.Context) error {
 	t := time.NewTicker(time.Duration(ar.cfg.TickTimeInter) * time.Millisecond)
 	defer t.Stop()
 	for {
-		if !ar.loop(ctx, t) {
+		if !ar.loop(t) {
 			break
 		}
 	}
 	ar.exit()
 	if ar.cfg.LeaseMode == 1 {
 		// 释放租约
-		leaseid := fmt.Sprintf("%s/%s", ar.cfg.LeasePrefix, ar.actor.ID())
-		if err := lease.FreeLease(ctx, leaseid); err != nil {
+		leaseid := genLeaseId(ar.cfg.LeasePrefix, ar.actor.ID())
+		if err := lease.FreeLease(ar.ctx, leaseid); err != nil {
 			return errors.Wrapf(err, "FreeLease %s", leaseid)
 		}
 	}
@@ -112,6 +113,8 @@ func (ar *actorRuntime) ontick() {
 
 func (ar *actorRuntime) pushreq(req *actorReq) error {
 	select {
+	case <-ar.ctx.Done():
+		return fmt.Errorf("Actor %s have exit", ar.actor.ID())
 	case ar.reqchan <- req:
 		return nil
 	default:
@@ -119,9 +122,9 @@ func (ar *actorRuntime) pushreq(req *actorReq) error {
 	}
 }
 
-func (ar *actorRuntime) loop(ctx context.Context, t *time.Ticker) bool {
+func (ar *actorRuntime) loop(t *time.Ticker) bool {
 	select {
-	case <-ctx.Done():
+	case <-ar.ctx.Done():
 		return false
 	case <-ar.actor.ExitCh():
 		return false
@@ -133,7 +136,7 @@ func (ar *actorRuntime) loop(ctx context.Context, t *time.Ticker) bool {
 	case req := <-ar.reqchan:
 		now := time.Now().Unix()
 		ar.activetime = now
-		ctx = WithActor(req.ctx, ar.actor)
+		ctx := WithActor(req.ctx, ar.actor)
 		rsp, err := req.handler(ctx, req.req)
 		req.rspchan <- &actorRsp{
 			rsp: rsp,
@@ -166,7 +169,7 @@ func (ar *actorRuntime) allocLease(ctx context.Context) ([]byte, error) {
 	var movebytes []byte
 	ctx, cancel := context.WithTimeout(ctx, time.Duration(ar.cfg.AllocLeaseTimeOut)*time.Second)
 	defer cancel()
-	leaseid := fmt.Sprintf("%s/%s", ar.cfg.LeasePrefix, ar.actor.ID())
+	leaseid := genLeaseId(ar.cfg.LeasePrefix, ar.actor.ID())
 	if v, err := lease.GetLease(ctx, leaseid); err != nil {
 		return nil, errors.Wrapf(err, " GetLease %s ", leaseid)
 	} else if v != nil {

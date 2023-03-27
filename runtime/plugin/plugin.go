@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"context"
 	"fmt"
 	"m3game/plugins/log"
 
@@ -41,7 +42,7 @@ type PluginIns interface {
 type Factory interface {
 	Type() Type
 	Name() string
-	Setup(map[string]interface{}) (PluginIns, error)
+	Setup(context.Context, map[string]interface{}) (PluginIns, error)
 	Destroy(PluginIns) error
 	Reload(PluginIns, map[string]interface{}) error
 	CanUnload(PluginIns) bool
@@ -51,7 +52,7 @@ type config struct {
 	Plugin map[string]map[string]map[string]interface{} `toml:"Plugin"`
 }
 
-func InitPlugins(v viper.Viper) error {
+func InitPlugins(ctx context.Context, v viper.Viper) error {
 	var cfg config
 	if err := v.Unmarshal(&cfg); err != nil {
 		return errors.Wrap(err, "Unmarshal PluginCfg")
@@ -63,7 +64,7 @@ func InitPlugins(v viper.Viper) error {
 				return fmt.Errorf("Factory not find %s", name)
 			}
 			log.Info("Plugin Setup %s", name)
-			pluginIns, err := factory.Setup(nm)
+			pluginIns, err := factory.Setup(ctx, nm)
 			if err != nil {
 				return errors.Wrapf(err, "Factory %s", name)
 			}

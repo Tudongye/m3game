@@ -39,7 +39,8 @@ var (
 	_ grpc.ServiceRegistrar = (*brokerSer)(nil)
 )
 
-func (n *brokerSer) registerBroker(b broker.Broker) error {
+// 注册
+func (n *brokerSer) setBroker(b broker.Broker) error {
 	n.broker = b
 	if err := n.broker.Subscribe(util.BrokerSerTopic(string(config.GetAppID())), n.recvbytes); err != nil {
 		return errors.Wrapf(err, "Subscribe %s", util.BrokerSerTopic(string(config.GetAppID())))

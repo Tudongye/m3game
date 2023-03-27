@@ -20,14 +20,16 @@ import (
 )
 
 const (
-	_grpcHealthCheckMethod = "/grpc.health.v1.Health/Check"
-	_healthPathPattern     = "^Health/([^/]*)$"
+	_grpcHealthCheckMethod = "/grpc.health.v1.Health/Check" // Grpc健康检测默认health
+	_healthPathPattern     = "^Health/([^/]*)$"             // 健康检测参数
 )
 
 var (
 	_regexHealth *regexp.Regexp
+	_transport   *Transport
 )
 
+// Runtime接收器
 type RuntimeReciver interface {
 	ServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error)
 	HealthCheck(idstr string) bool
@@ -36,17 +38,19 @@ type RuntimeReciver interface {
 func init() {
 	var err error
 	if _regexHealth, err = regexp.Compile(_healthPathPattern); err != nil {
-		log.Error("Compile Health Fail %s", err.Error())
-		_regexHealth = nil
+		log.Fatal("Compile Health Fail %s", err.Error())
 	}
 }
 
 type TransportCfg struct {
-	Addr             string `mapstructure:"Addr" validate:"required,tcp4_addr"`
-	BroadcastTimeout int    `mapstructure:"BroadcastTimeout" validate:"gt=0"`
+	Addr             string `mapstructure:"Addr" validate:"required,tcp4_addr"` // 监听地址
+	BroadcastTimeout int    `mapstructure:"BroadcastTimeout" validate:"gt=0"`   // BrokerSer的Handler超时时间
 }
 
 func New(c map[string]interface{}, runtimeReciver RuntimeReciver) (*Transport, error) {
+	if _transport != nil {
+		return _transport, nil
+	}
 	if _regexHealth == nil {
 		return nil, errors.New("_regexHealth is nil")
 	}
@@ -58,12 +62,13 @@ func New(c map[string]interface{}, runtimeReciver RuntimeReciver) (*Transport, e
 	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
-	transport := &Transport{
+	_transport = &Transport{
 		cfg:            cfg,
 		runtimeReciver: runtimeReciver,
 	}
-	transport.RegisterServerInterceptor(transport.serverInterceptor)
-	return transport, nil
+	// 注册M3RPC的ServerInterceptor
+	_transport.RegisterServerInterceptor(_transport.serverInterceptor)
+	return _transport, nil
 }
 
 type Transport struct {
@@ -140,12 +145,13 @@ func (t *Transport) Prepare(ctx context.Context) error {
 	if brokerins == nil {
 		return errors.New("Broker-Plugin not find")
 	}
-	if err := t.brokerser.registerBroker(brokerins); err != nil {
+	if err := t.brokerser.setBroker(brokerins); err != nil {
 		return err
 	}
 	return nil
 }
 
+// 注册Grpc的Handler
 func (t *Transport) RegisterServer(f func(grpc.ServiceRegistrar) error) error {
 	if err := f(t.server); err != nil {
 		return errors.Wrap(err, "server.register")

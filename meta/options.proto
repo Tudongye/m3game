@@ -5,20 +5,24 @@ package proto;
 import "google/protobuf/descriptor.proto";
 option go_package = "m3game/meta/metapb";
 
-
-
 extend google.protobuf.MessageOptions {
-    string db_primary_key             = 50001;
+    string db_primary_key = 50001;
 
-    M3GRPCOption rpc_option             = 51001;
+    M3RpcOption rpc_option = 51001;
 }
 
-message M3GRPCOption {
+message M3RpcOption {
     string route_key = 1;
-    bool ntf = 2;
-    bool trace = 3;
-    bool cs = 4;
+    bool ntf         = 2;
+    bool trace       = 3;
+    bool cs          = 4;
 }
 
+extend google.protobuf.FieldOptions {
+    M3DBFieldOption dbfield_option = 60001;
+}
 
-
+message M3DBFieldOption {
+    string flag  = 1;   // 字段标记
+    bool primary = 2;   // 主键
+}
