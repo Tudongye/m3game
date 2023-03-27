@@ -16,6 +16,8 @@ M3Game是一个采用Golang构建游戏后端的尝试，期望能探索出一�
 
 3、更通用的技术和更低的门槛。M3基于golang主流的protobuf和grpc进行构建，没有繁琐的代码生成工具，上手门槛低。
 
+4、这里有一个很有意思的置脏管理模块，只需要在pb中定义好数据和脏标记，就可以轻松实现置脏&批量写回功能。
+
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
 Mutil，Async，Actor-Server: 游戏后台常见的业务模式，分别对应并发，单线程异步，Actor模式
@@ -40,7 +42,7 @@ PluginMgr：插件管理器
 
 Router-Plugin： 路由组件，提供服务注册和服务发现的能力。当前有一个Consul实现
 
-DB-Plugin: 存储组件，提供数据存储能力，当前有一个内存数据库和redis实现
+DB-Plugin: 存储组件，提供数据存储能力，当前有内存数据库，redis，mongo实现
 
 Broker-Plugin：消息队列组件，提供针对主题的发布和订阅功能，当前有一个Nats实现
 
@@ -346,70 +348,83 @@ message ActorInfo {
 
 ### DB结构注入
 
-M3使用DB插件来对实体数据进行落地，M3根据实体的PB结构生成对应的dbmeta，DB插件根据Meta来对实体数据进行CRUD操作。DBMeta的生成逻辑参看 db/dbmeta.go
+M3使用DB插件来对实体数据进行落地，M3根据实体的PB结构生成对应的dbmeta，DB插件不用感知业务数据的具体类型，直接根据Meta就可以对实体数据进行CRUD操作。
+
+DBMeta的生成逻辑参看 db/dbmeta.go
 
 ```
-type DBMeta[T proto.Message] struct {
-	objName   string
-	table     string                                  // DB表名
-	keyField  string                                  // 主键，强制为string
-	allFields []string                                // 所有数据键
-	allPBName map[string]string                       // 类型名到字段名映射
-	creater   func() T                                // 游戏实体工场
-	fieldds   map[string]protoreflect.FieldDescriptor // 游戏实体字段反射信息
+type DBMetaInter interface {
+	Setter(msg proto.Message, flag int32, data interface{}) // 赋值
+	Getter(msg proto.Message, flag int32) interface{}       // 读取
+	FlagKind(flag int32) protoreflect.Kind                  // 获取字段类型
+	FlagName(flag int32) string                             // 获取字段类型
+	KeyFlag() int32                                         // 主键字段
+	AllFlags() []int32                                      // 所有字段名
+	New() proto.Message
+	Table() string
 }
 type DB interface {
-	Read(meta DBMetaInter, key string, filters ...string) (proto.Message, error)
-	Update(meta DBMetaInter, key string, obj proto.Message, filters ...string) error
-	Create(meta DBMetaInter, key string, obj proto.Message, filters ...string) error
-	Delete(meta DBMetaInter, key string) error
+	plugin.PluginIns
+	Read(ctx context.Context, meta DBMetaInter, key interface{}, flags ...int32) (proto.Message, error)
+	Update(ctx context.Context, meta DBMetaInter, key interface{}, obj proto.Message, flags ...int32) error
+	Create(ctx context.Context, meta DBMetaInter, key interface{}, obj proto.Message) error
+	Delete(ctx context.Context, meta DBMetaInter, key interface{}) error
+
+	ReadMany(ctx context.Context, meta DBMetaInter, filters interface{}, flags ...int32) ([]proto.Message, error)
 }
 ```
 
 ### Wraper
 
-Wraper，对数据的ORM级封装，采用反射&泛型极大的简化了DB操作，同时封装了自动化的置脏管理。example/actorapp/actor是一个基于Wraper的实体样例
+Wraper，对数据的ORM级封装，采用反射&泛型极大的简化了DB操作，同时封装了一套置脏管理。example/actorapp/actor是一个基于Wraper的实体样例
 
 如下是Wraper定义
 
 ```
-type Wraper[T proto.Message] struct {
-	key    string          // 实体Key
-	obj    T               // 实体pb.Message
-	meta   *db.DBMeta[T]   // Meta
-	dirtys map[string]bool // 置脏标记
+type Wraper[TM proto.Message, TF Flag] struct {
+	meta   *WraperMeta[TM, TF] // Meta
+	key    interface{}         // 主键值
+	obj    TM                  // 原始数据
+	dirtys map[TF]bool         // 脏标记
 }
-func (w *Wraper[T]) Update(db db.DB) error	 // CRUD操作
-func (w *Wraper[T]) Create(db db.DB) error
-func (w *Wraper[T]) Delete(db db.DB) error
-func (w *Wraper[T]) Read(db db.DB) error
-func KeySetter[T proto.Message](wraper *Wraper[T], value string) error	 // key字段操作
-func KeyGetter[T proto.Message](wraper *Wraper[T]) (string, error)
-func Setter[P, T proto.Message](wraper *Wraper[T], value P) error	// 普通字段操作
-func Getter[P, T proto.Message](wraper *Wraper[T]) (P, error)		 
+func (w *Wraper[TM, TF]) Set(flag TF, value interface{}) 	
+func (w *Wraper[TM, TF]) Get(flag TF) interface{}
+func (w *Wraper[TM, TF]) Update(db db.DB) error	 // CRUD操作
+func (w *Wraper[TM, TF]) Create(db db.DB) error
+func (w *Wraper[TM, TF]) Delete(db db.DB) error
+func (w *Wraper[TM, TF]) Read(db db.DB) error
 ```
+
 使用方式如下，以前述ActorDB为例
 
+pb定义
 ```
-func actorDBCreater() *pb.ActorDB {
-	return &pb.RoleDB{		// 所有的一级结构体都要初始化
-		ActorID:       "",
-		ActorName:     &pb.ActorName{},
-		ActorInfo:     &pb.ActorInfo{},
-	}
+message ActorDB {
+    string ActorID = 1 [(dbfield_option) = { flag: "FActorID", primary: true }];	// 主键
+    string Name    = 2 [(dbfield_option) = { flag: "FActorName" }];
+    int32 Level    = 3 [(dbfield_option) = { flag: "FActorLevel" }];
 }
-actormeta := db.NewMeta("actor_table", actorDBCreater)
-wp := wraper.New(actormeta, "ActorID123")	// 构建Wraper
+
+enum AcFlag {
+    FActorMin   = 0;
+    FActorID    = 1;
+    FActorName  = 2;
+    FActorLevel = 3;
+}
+```
+
+```
+dbmeta := db.NewMeta[*pb.ActorDB]("actor_table")
+wrapermeata := db.NewWraperMeta[*pb.ActorDB, pb.AcFlag](db,eta)
+wp := wrapermeata.New("ActorID123")	// 构建Wraper
 // 读数据
 dbplugin := plugin.GetDBPlugin()
-wp.Read(dbplugin)
+wp.Read(ctx, dbplugin)
 // 修改用户名
-actorname, _ := wraper.Getter[*pb.ActorName](wp)	 // 参看前述 要求DB的一级pb字段类型不能重复
-actorname.Name = "王小明"
-wp.Setter(a.wraper, actorname)
+wp.Setter(pb.AcFlag_FActorName, "小明")
 // 脏字段写回
-if wp.HasDirty() {
-	wp.Update(dbplugin)
+if wp.IsDirty() {
+	wp.Update(ctx, dbplugin)
 }
 ```
 
