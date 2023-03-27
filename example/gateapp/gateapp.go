@@ -9,6 +9,7 @@ import (
 	"m3game/example/gateapp/gateser"
 	"m3game/example/multiapp/multicli"
 	"m3game/example/proto"
+	"m3game/example/proto/pb"
 	"m3game/meta/metapb"
 	_ "m3game/plugins/broker/nats"
 	"m3game/plugins/gate"
@@ -30,6 +31,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
+	goproto "google.golang.org/protobuf/proto"
 )
 
 var (
@@ -122,11 +124,17 @@ func (d *GateApp) LogicCall(s string, in *metapb.CSMsg) (*metapb.CSMsg, error) {
 	return nil, fmt.Errorf("Unknow Method %s", in.Method)
 }
 
-func (d *GateApp) AuthCall(req *metapb.AuthReq) (*metapb.AuthRsp, error) {
-	rsp := &metapb.AuthRsp{
-		PlayerID: fmt.Sprintf("PlayerID-%s", req.Token),
+func (d *GateApp) AuthCall(req []byte) (string, []byte, error) {
+	var authreq pb.AuthReq
+	if err := goproto.Unmarshal(req, &authreq); err != nil {
+		return "", nil, err
 	}
-	return rsp, nil
+	authrsp := &pb.AuthRsp{
+		PlayerId: fmt.Sprintf("PlayerID-%s", authreq.Token),
+	}
+	var rsp [1024]byte
+	goproto.Unmarshal(rsp[:], authrsp)
+	return authrsp.PlayerId, rsp[:], nil
 }
 
 func (d *GateApp) HealthCheck() bool {
@@ -134,6 +142,6 @@ func (d *GateApp) HealthCheck() bool {
 }
 
 func Run(ctx context.Context) error {
-	runtime.Run(ctx, newApp(), []server.Server{gateser.New()})
+	runtime.New().Run(ctx, newApp(), []server.Server{gateser.New()})
 	return nil
 }

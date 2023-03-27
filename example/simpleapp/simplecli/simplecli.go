@@ -33,14 +33,11 @@ func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
 	if _client != nil {
 		return nil
 	}
-	if env, world, _, _, err := srcapp.Parse(); err != nil {
-		return nil
-	} else {
-		dstsvc := meta.GenRouteSvc(env, world, proto.SimpleAppFuncID)
-		_client = &Client{
-			Client: client.New(srcapp, dstsvc),
-		}
+	dstsvc := meta.GenDstRouteSvc(srcapp, proto.SimpleAppFuncID)
+	_client = &Client{
+		Client: client.New(srcapp, dstsvc),
 	}
+
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
 	opts = append(opts,

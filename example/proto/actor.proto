@@ -22,29 +22,26 @@ service ActorRegSer {
 }
 
 message ActorDB {
-    option (db_primary_key) = "ActorID";
-    string ActorID = 1;
-    ActorName ActorName = 2;
-    ActorInfo ActorInfo = 3;
+    string ActorID = 1 [(dbfield_option) = { flag: "FActorID", primary: true }];
+    string Name    = 2 [(dbfield_option) = { flag: "FActorName" }];
+    int32 Level    = 3 [(dbfield_option) = { flag: "FActorLevel" }];
 }
 
-message ActorName {
-    string Name = 1;
-}
-
-message ActorInfo {
-    int32 Level = 1;
+enum AcFlag {
+    FActorMin   = 0;
+    FActorID    = 1;
+    FActorName  = 2;
+    FActorLevel = 3;
 }
 
 message Register {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
+    option (rpc_option).cs        = true;
     message Req {
-        string Name = 1;
+        string Name     = 1;
         string PlayerID = 2;
     }
-    message Rsp {
-    }
+    message Rsp {}
 }
 
 message Kick {
@@ -52,13 +49,12 @@ message Kick {
     message Req {
         string leaseid = 1;
     }
-    message Rsp {
-    }
+    message Rsp {}
 }
 
 message Login {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
+    option (rpc_option).cs        = true;
     message Req {
         string ActorID = 1;
     }
@@ -69,42 +65,42 @@ message Login {
 
 message ModifyName {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
+    option (rpc_option).cs        = true;
     message Req {
         string ActorID = 1;
         string NewName = 2;
     }
     message Rsp {
-        ActorName ActorName = 1;
+        string Name = 1;
     }
 }
 
 message LvUp {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
+    option (rpc_option).cs        = true;
     message Req {
         string ActorID = 1;
     }
     message Rsp {
-        ActorInfo ActorInfo = 1;
+        int32 Level = 1;
     }
 }
 
 message GetInfo {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
+    option (rpc_option).cs        = true;
     message Req {
         string ActorID = 1;
     }
     message Rsp {
-        string Name = 1;
+        string Name  = 1;
         string Title = 2;
     }
 }
 
 message PostChannel {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
+    option (rpc_option).cs        = true;
     message Req {
         string ActorID = 1;
         string Content = 2;
@@ -116,7 +112,7 @@ message PostChannel {
 
 message PullChannel {
     option (rpc_option).route_key = "";
-    option (rpc_option).cs = true;
+    option (rpc_option).cs        = true;
     message Req {
         string ActorID = 1;
     }

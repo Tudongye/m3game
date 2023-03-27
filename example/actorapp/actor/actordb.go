@@ -1,50 +1,31 @@
 package actor
 
 import (
+	"context"
 	"m3game/example/proto/pb"
 	"m3game/plugins/db"
-	"m3game/plugins/db/wraper"
 	"m3game/plugins/log"
 )
 
 var (
-	actormeta *db.DBMeta[*pb.ActorDB]
+	actordbmeta      *db.DBMeta[*pb.ActorDB]
+	actorwrapermeata *db.WraperMeta[*pb.ActorDB, pb.AcFlag]
 )
 
 func init() {
-	actormeta = db.NewMeta("actor_table", actorDBCreater)
+	actordbmeta = db.NewMeta[*pb.ActorDB]("actor_table")
+	actorwrapermeata = db.NewWraperMeta[*pb.ActorDB, pb.AcFlag](actordbmeta)
 }
 
-func actorDBCreater() *pb.ActorDB {
-	return &pb.ActorDB{
-		ActorID:   "",
-		ActorName: &pb.ActorName{},
-		ActorInfo: &pb.ActorInfo{},
-	}
-}
-
-func Register(playerid string, name string) (string, error) {
+func Register(ctx context.Context, playerid string, name string) (string, error) {
 	dbplugin := db.Instance()
 	if dbplugin == nil {
 		return "", _err_actor_dbplugin
 	}
 	log.Debug(playerid)
-	w := wraper.New(actormeta, playerid)
-	if err := wraper.KeySetter(w, playerid); err != nil {
-		log.Error(err.Error())
-		return "", _err_actor_dbplugin
-	}
-	if err := wraper.Setter(w, &pb.ActorName{
-		Name: name,
-	}); err != nil {
-		log.Error(err.Error())
-		return "", _err_actor_dbplugin
-	}
-	if err := wraper.Setter(w, &pb.ActorInfo{
-		Level: 0,
-	}); err != nil {
-		log.Error(err.Error())
-		return "", _err_actor_dbplugin
-	}
-	return playerid, w.Create(dbplugin)
+	w := actorwrapermeata.New(playerid)
+	w.Set(pb.AcFlag_FActorID, playerid)
+	w.Set(pb.AcFlag_FActorName, name)
+	w.Set(pb.AcFlag_FActorLevel, int32(0))
+	return playerid, w.Create(ctx, dbplugin)
 }

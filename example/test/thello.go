@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"m3game/example/proto/pb"
-	"m3game/meta/metapb"
 	"m3game/plugins/gate/grpcgate"
 
 	"google.golang.org/grpc"
@@ -27,14 +26,14 @@ func TTrace() {
 	}
 	{
 		log.Println("Call.Auth 建立连接...")
-		in := &metapb.AuthReq{
+		in := &pb.AuthReq{
 			Token: "PlayerTest",
 		}
-		out := &metapb.AuthRsp{}
+		out := &pb.AuthRsp{}
 		if err := CallGrpcGate(stream, "", m, in, out); err != nil {
 			log.Printf("CallGrpcGate Fail %s", err.Error())
 		}
-		log.Println("PlayerID:", out.PlayerID)
+		log.Println("PlayerID:", out.PlayerId)
 	}
 	{
 		log.Println("Call.TraceHello 链路追踪接口...")
@@ -67,14 +66,14 @@ func TBreak() {
 	}
 	{
 		log.Println("Call.Auth 建立连接...")
-		in := &metapb.AuthReq{
+		in := &pb.AuthReq{
 			Token: "PlayerTest",
 		}
-		out := &metapb.AuthRsp{}
+		out := &pb.AuthRsp{}
 		if err := CallGrpcGate(stream, "", m, in, out); err != nil {
 			log.Printf("CallGrpcGate Fail %s", err.Error())
 		}
-		log.Println("PlayerID:", out.PlayerID)
+		log.Println("PlayerID:", out.PlayerId)
 	}
 	for i := 0; i < 5; i++ {
 		log.Printf("Call.BreakHello 第%d次请求...", i)
@@ -107,14 +106,14 @@ func THello() {
 	}
 	{
 		log.Println("Call.Auth 建立连接...")
-		in := &metapb.AuthReq{
+		in := &pb.AuthReq{
 			Token: "PlayerTest",
 		}
-		out := &metapb.AuthRsp{}
+		out := &pb.AuthRsp{}
 		if err := CallGrpcGate(stream, "", m, in, out); err != nil {
 			log.Printf("CallGrpcGate Fail %s", err.Error())
 		}
-		log.Println("PlayerID:", out.PlayerID)
+		log.Println("PlayerID:", out.PlayerId)
 	}
 	{
 		log.Println("Call.Hello 测试接口...")

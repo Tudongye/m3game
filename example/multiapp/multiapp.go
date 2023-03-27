@@ -75,6 +75,6 @@ func (d *MultiApp) HealthCheck() bool {
 }
 
 func Run(ctx context.Context) error {
-	runtime.Run(ctx, newApp(), []server.Server{multiser.New()})
+	runtime.New().Run(ctx, newApp(), []server.Server{multiser.New()})
 	return nil
 }

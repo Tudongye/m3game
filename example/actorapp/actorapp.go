@@ -3,7 +3,6 @@ package actorapp
 import (
 	"context"
 	"m3game/config"
-	"m3game/example/actorapp/actor"
 	"m3game/example/actorapp/actorregcli"
 	"m3game/example/actorapp/actorregser"
 	"m3game/example/actorapp/actorser"
@@ -100,8 +99,7 @@ func (d *ActorApp) HealthCheck() bool {
 }
 
 func (d *ActorApp) PreExitLease(ctx context.Context, id string) ([]byte, error) {
-	actorid := actor.ParseActorIdFromLeaseId(id)
-	return nil, actorser.Ser().ActorMgr().KickOne(actorid)
+	return nil, actorser.Ser().ActorMgr().KickLease(id)
 }
 
 func (d *ActorApp) SendKickLease(ctx context.Context, id string, app string) ([]byte, error) {
@@ -110,6 +108,6 @@ func (d *ActorApp) SendKickLease(ctx context.Context, id string, app string) ([]
 
 func Run(ctx context.Context) error {
 	loader.RegisterTitleCfg()
-	runtime.Run(ctx, newApp(), []server.Server{actorser.New(), actorregser.New()})
+	runtime.New().Run(ctx, newApp(), []server.Server{actorser.New(), actorregser.New()})
 	return nil
 }

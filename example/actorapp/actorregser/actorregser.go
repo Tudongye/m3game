@@ -33,7 +33,7 @@ type ActorRegSer struct {
 func (d *ActorRegSer) Register(ctx context.Context, in *pb.Register_Req) (*pb.Register_Rsp, error) {
 	out := new(pb.Register_Rsp)
 	log.Info("Register")
-	if _, err := actor.Register(in.PlayerID, in.Name); err != nil {
+	if _, err := actor.Register(ctx, in.PlayerID, in.Name); err != nil {
 		return out, err
 	}
 	return out, nil

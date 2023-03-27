@@ -10,6 +10,14 @@ service GateSer {
     rpc SendToCli(SendToCli.Req) returns (SendToCli.Rsp);
 }
 
+message AuthReq {
+    string Token =1;
+}
+
+message AuthRsp {
+    string PlayerId = 1;
+}
+
 message SendToCli {
     option (rpc_option).route_key = "";
     message Req {

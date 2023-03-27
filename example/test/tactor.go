@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"m3game/example/proto/pb"
-	"m3game/meta/metapb"
 	"m3game/plugins/gate/grpcgate"
 
 	"google.golang.org/grpc"
@@ -28,15 +27,15 @@ func TActorCommon() {
 	var playerid string
 	{
 		log.Println("Call.Auth 建立连接...")
-		in := &metapb.AuthReq{
+		in := &pb.AuthReq{
 			Token: "PlayerTest",
 		}
-		out := &metapb.AuthRsp{}
+		out := &pb.AuthRsp{}
 		if err := CallGrpcGate(stream, "", m, in, out); err != nil {
 			log.Printf("CallGrpcGate Fail %s", err.Error())
 		}
-		playerid = out.PlayerID
-		log.Println("PlayerID:", out.PlayerID)
+		playerid = out.PlayerId
+		log.Println("PlayerID:", out.PlayerId)
 	}
 	{
 		log.Println("Call.Register 注册接口,调用ActorApp的ActorRegSer...")
@@ -143,15 +142,15 @@ func TActorBroadCast() {
 	var playerid string
 	{
 		log.Println("Call.Auth 建立连接...")
-		in := &metapb.AuthReq{
+		in := &pb.AuthReq{
 			Token: "PlayerTest",
 		}
-		out := &metapb.AuthRsp{}
+		out := &pb.AuthRsp{}
 		if err := CallGrpcGate(stream, "", m, in, out); err != nil {
 			log.Printf("CallGrpcGate Fail %s", err.Error())
 		}
-		playerid = out.PlayerID
-		log.Println("PlayerID:", out.PlayerID)
+		playerid = out.PlayerId
+		log.Println("PlayerID:", out.PlayerId)
 	}
 	{
 		log.Println("Call.Register 注册接口,调用ActorApp的ActorRegSer...")
@@ -224,15 +223,15 @@ func TActorMove() {
 	var playerid string
 	{
 		log.Println("Call.Auth 建立连接...")
-		in := &metapb.AuthReq{
+		in := &pb.AuthReq{
 			Token: "PlayerTest",
 		}
-		out := &metapb.AuthRsp{}
+		out := &pb.AuthRsp{}
 		if err := CallGrpcGate(stream, "", m, in, out); err != nil {
 			log.Printf("CallGrpcGate Fail %s", err.Error())
 		}
-		playerid = out.PlayerID
-		log.Println("PlayerID:", out.PlayerID)
+		playerid = out.PlayerId
+		log.Println("PlayerID:", out.PlayerId)
 	}
 	m["m3routedstapp"] = "example.world1.actor.2"
 	{

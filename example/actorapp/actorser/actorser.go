@@ -36,7 +36,7 @@ var (
 
 func init() {
 	if err := rpc.InjectionRPC(pb.File_actor_proto.Services().Get(0)); err != nil {
-		panic(fmt.Sprintf("InjectionRPC Actor %s", err.Error()))
+		log.Fatal("InjectionRPC Actor %s", err.Error())
 	}
 }
 
@@ -104,7 +104,7 @@ func (d *ActorSer) ModifyName(ctx context.Context, in *pb.ModifyName_Req) (*pb.M
 		return out, _err_actor_notready
 	}
 	actor.ModifyName(in.NewName)
-	out.ActorName = actor.DB().ActorName
+	out.Name = actor.DB().Name
 	return out, nil
 }
 
@@ -115,7 +115,7 @@ func (d *ActorSer) LvUp(ctx context.Context, in *pb.LvUp_Req) (*pb.LvUp_Rsp, err
 		return out, _err_actor_notready
 	}
 	actor.LvUp()
-	out.ActorInfo = actor.DB().ActorInfo
+	out.Level = actor.DB().Level
 	return out, nil
 }
 func (d *ActorSer) GetInfo(ctx context.Context, in *pb.GetInfo_Req) (*pb.GetInfo_Rsp, error) {
@@ -124,13 +124,13 @@ func (d *ActorSer) GetInfo(ctx context.Context, in *pb.GetInfo_Req) (*pb.GetInfo
 	if actor == nil || !actor.Ready() {
 		return out, _err_actor_notready
 	}
-	out.Name = actor.DB().ActorName.Name
+	out.Name = actor.DB().Name
 
 	titlecfgloader := resource.GetLoader[*loader.TitleCfgLoader](ctx)
 	if titlecfgloader == nil {
 		return out, fmt.Errorf("titlecfgloader Err")
 	}
-	out.Title = titlecfgloader.GetTitleByLv(actor.DB().ActorInfo.Level)
+	out.Title = titlecfgloader.GetTitleByLv(actor.DB().Level)
 	return out, nil
 }
 

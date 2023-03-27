@@ -74,6 +74,6 @@ func (d *AsyncApp) Start(ctx context.Context) {
 }
 
 func Run(ctx context.Context) error {
-	runtime.Run(ctx, newApp(), []server.Server{asyncser.New()})
+	runtime.New().Run(ctx, newApp(), []server.Server{asyncser.New()})
 	return nil
 }

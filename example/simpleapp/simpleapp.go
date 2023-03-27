@@ -29,6 +29,6 @@ func (d *SimpleApp) HealthCheck() bool {
 
 func Run(ctx context.Context) error {
 	// 启动一个 包含了simpleser的SimpleApp
-	runtime.Run(ctx, newApp(), []server.Server{simpleser.New()})
+	runtime.New().Run(ctx, newApp(), []server.Server{simpleser.New()})
 	return nil
 }
