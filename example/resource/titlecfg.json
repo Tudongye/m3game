@@ -1,0 +1,16 @@
+{
+    "TitleCfgs": [
+        {
+            "Level": 1,
+            "Title": "Junior"
+        },
+        {
+            "Level": 5,
+            "Title": "Middle"
+        },
+        {
+            "Level": 10,
+            "Title": "Senior"
+        }
+    ]
+}
