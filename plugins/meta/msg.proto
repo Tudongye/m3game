@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "m3game/meta/metapb";
+
+message Meta {
+    string Key   = 1;
+    string Value = 2;
+}
+
+message BrokerMsg {
+    string Method       = 1;
+    repeated Meta Metas = 2;
+    bytes Content       = 3;
+}
+
+message CSMsg {
+    string Method       = 1;
+    repeated Meta Metas = 2;
+    bytes Content       = 3;
+}
