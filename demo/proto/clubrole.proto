@@ -3,45 +3,21 @@ syntax = "proto3";
 package proto;
 
 import "options.proto";
-import "com.proto";
 
 option go_package = "proto/pb";
 
 service ClubRoleSer  {
     rpc ClubRoleRead(ClubRoleRead.Req) returns (ClubRoleRead.Rsp);   // 查询Role归属Club
-    rpc ClubRoleCreate(ClubRoleCreate.Req) returns (ClubRoleCreate.Rsp);   // 创建Role-Club关系
-    rpc ClubRoleDelete(ClubRoleDelete.Req) returns (ClubRoleDelete.Rsp);   // 删除Role-Club关系
 }
 
 message ClubRoleRead {
     option (rpc_option).route_key = "";
     option (rpc_option).ntf = true;
     message Req {
-        string RoleId = 1;
+        int64 RoleId = 1;
     }
     message Rsp {
-        ClubRoleRelationDB ClubRoleRelationDB = 1;
+        int64 ClubId = 1;
     }
 }
 
-message ClubRoleCreate {
-    option (rpc_option).route_key = "";
-    option (rpc_option).ntf = true;
-    message Req {
-        string ClubId = 1;
-        string RoleId = 2;
-    }
-    message Rsp {
-    }
-}
-
-message ClubRoleDelete {
-    option (rpc_option).route_key = "";
-    option (rpc_option).ntf = true;
-    message Req {
-        string ClubId = 1;
-        string RoleId = 2;
-    }
-    message Rsp {
-    }
-}

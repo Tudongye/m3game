@@ -8,36 +8,32 @@ import "com.proto";
 option go_package = "proto/pb";
 
 service ClubSer {
-    rpc ClubCreate(ClubCreate.Req) returns (ClubCreate.Rsp);   // 创建社团
-    rpc ClubRead(ClubRead.Req) returns (ClubRead.Rsp);   // 获取社团信息
-    rpc ClubDelete(ClubDelete.Req) returns (ClubDelete.Rsp);   // 解散社团
+    rpc ClubCreate(ClubCreate.Req) returns (ClubCreate.Rsp);  // 创建社团
+    rpc ClubRead(ClubRead.Req) returns (ClubRead.Rsp);  // 获取社团信息
+    rpc ClubDelete(ClubDelete.Req) returns (ClubDelete.Rsp);  // 解散社团
 
-    rpc ClubJoin(ClubJoin.Req) returns (ClubJoin.Rsp);   // 加入社团
-    rpc ClubExit(ClubExit.Req) returns (ClubExit.Rsp);   // 退出社团
+    rpc ClubJoin(ClubJoin.Req) returns (ClubJoin.Rsp);  // 加入社团
+    rpc ClubExit(ClubExit.Req) returns (ClubExit.Rsp);  // 退出社团
 }
 
 service ClubDaemonSer {
-    rpc ClubKick(ClubKick.Req) returns (ClubKick.Rsp);    // 服务迁移
-    rpc ClubList(ClubList.Req) returns (ClubList.Rsp);   // 获取社团列表
+    rpc ClubKick(ClubKick.Req) returns (ClubKick.Rsp);  // 服务迁移
+    rpc ClubList(ClubList.Req) returns (ClubList.Rsp);  // 获取社团列表
 }
 
-
 message ClubCreate {
-    option (rpc_option).route_key = "HashKey";
+    option (rpc_option).route_key = "ClubId";
     message Req {
-        string ClubId = 1;
-        string HashKey = 2;
-        string RoleId = 3;
+        int64 ClubId  = 1;
+        int64 RoleId  = 2;
     }
-    message Rsp {
-    }
+    message Rsp {}
 }
 
 message ClubRead {
-    option (rpc_option).route_key = "HashKey";
+    option (rpc_option).route_key = "ClubId";
     message Req {
-        string ClubId = 1;
-        string HashKey = 2;
+        int64 ClubId  = 1;
     }
     message Rsp {
         ClubDB ClubDB = 1;
@@ -45,51 +41,43 @@ message ClubRead {
 }
 
 message ClubJoin {
-    option (rpc_option).route_key = "HashKey";
+    option (rpc_option).route_key = "ClubId";
     message Req {
-        string ClubId = 1;
-        string HashKey = 2;
-        string RoleId = 3;
+        int64 ClubId  = 1;
+        int64 RoleId  = 3;
     }
-    message Rsp {
-    }
+    message Rsp {}
 }
 
 message ClubExit {
-    option (rpc_option).route_key = "HashKey";
+    option (rpc_option).route_key = "ClubId";
     message Req {
-        string ClubId = 1;
-        string HashKey = 2;
-        string RoleId = 3;
+        int64 ClubId  = 1;
+        int64 RoleId  = 2;
     }
-    message Rsp {
-    }
+    message Rsp {}
 }
 
 message ClubDelete {
-    option (rpc_option).route_key = "HashKey";
+    option (rpc_option).route_key = "ClubId";
     message Req {
-        string ClubId = 1;
-        string HashKey = 2;
-        string RoleId = 3;
+        int64 ClubId  = 1;
+        int64 RoleId  = 2;
     }
-    message Rsp {
-    }
+    message Rsp {}
 }
 
 message ClubKick {
     option (rpc_option).route_key = "";
     message Req {
-        string leaseid = 1;
+        string LeaseId = 1;
     }
-    message Rsp {
-    }
+    message Rsp {}
 }
 
 message ClubList {
     option (rpc_option).route_key = "";
-    message Req {
-    }
+    message Req {}
     message Rsp {
         ClubDB ClubDBs = 1;
     }

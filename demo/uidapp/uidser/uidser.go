@@ -65,7 +65,7 @@ func (s *UidSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 
 func (d *UidSer) AllocRoleId(ctx context.Context, in *pb.AllocRoleId_Req) (*pb.AllocRoleId_Rsp, error) {
 	out := new(pb.AllocRoleId_Rsp)
-	if roleid, err := _uidpool.AllocRoleId(in.OpenId); err != nil {
+	if roleid, err := _uidpool.AllocRoleId(ctx, in.OpenId); err != nil {
 		return out, err
 	} else {
 		out.RoleId = roleid
@@ -75,7 +75,7 @@ func (d *UidSer) AllocRoleId(ctx context.Context, in *pb.AllocRoleId_Req) (*pb.A
 
 func (d *UidSer) AllocClubId(ctx context.Context, in *pb.AllocClubId_Req) (*pb.AllocClubId_Rsp, error) {
 	out := new(pb.AllocClubId_Rsp)
-	if clubid, err := _uidpool.AllocClubId(in.RoleId); err != nil {
+	if clubid, err := _uidpool.AllocClubId(ctx, in.RoleId); err != nil {
 		return out, err
 	} else {
 		out.ClubId = clubid

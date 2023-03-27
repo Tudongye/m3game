@@ -5,9 +5,8 @@ import (
 	"m3game/config"
 	"m3game/demo/onlineapp/onlineser"
 	"m3game/demo/proto"
-	"m3game/demo/uidapp/uidser"
 	_ "m3game/plugins/broker/nats"
-	_ "m3game/plugins/db/redis"
+	_ "m3game/plugins/db/mongo"
 	"m3game/plugins/lease"
 	_ "m3game/plugins/lease/etcd"
 	"m3game/plugins/log"
@@ -141,8 +140,8 @@ func (a *OnlineApp) VoteMain(ctx context.Context) (bool, error) {
 		return false, nil
 	} else if logicAppId == appid {
 		log.Info("Local is LogicAppId %s, Alloc Lease %s...", leaseAppId, a.cfg.VoteLease)
-		if uidser.Pool().IsOpen() {
-			uidser.Pool().Close()
+		if onlineser.Pool().IsOpen() {
+			onlineser.Pool().Close()
 		}
 		if err := lease.AllocLease(ctx, a.cfg.VoteLease, lease.DefaultLeaseMoveOutFunc); err != nil {
 			log.Error("Local %s Alloc Lease %s Fail %s", appid, a.cfg.VoteLease, err.Error())
@@ -158,5 +157,5 @@ func (d *OnlineApp) HealthCheck() bool {
 }
 
 func Run(ctx context.Context) error {
-	return runtime.Run(ctx, newApp(), []server.Server{onlineser.New()})
+	return runtime.New().Run(ctx, newApp(), []server.Server{onlineser.New()})
 }

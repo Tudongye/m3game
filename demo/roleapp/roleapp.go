@@ -8,7 +8,7 @@ import (
 	"m3game/demo/roleapp/rolecli"
 	"m3game/demo/roleapp/roleser"
 	_ "m3game/plugins/broker/nats"
-	_ "m3game/plugins/db/redis"
+	_ "m3game/plugins/db/mongo"
 	"m3game/plugins/log"
 	_ "m3game/plugins/log/zap"
 	"m3game/plugins/router"
@@ -85,5 +85,5 @@ func (a *RoleApp) HealthCheck() bool {
 }
 
 func Run(ctx context.Context) error {
-	return runtime.Run(ctx, newApp(), []server.Server{roleser.New()})
+	return runtime.New().Run(ctx, newApp(), []server.Server{roleser.New()})
 }

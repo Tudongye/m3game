@@ -33,14 +33,11 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	if env, world, _, _, err := srcapp.Parse(); err != nil {
-		return nil, nil
-	} else {
-		dstsvc := meta.GenRouteSvc(env, world, proto.RoleFuncID)
-		_client = &Client{
-			Client: client.New(srcapp, dstsvc),
-		}
+	dstsvc := meta.GenDstRouteSvc(srcapp, proto.RoleFuncID)
+	_client = &Client{
+		Client: client.New(srcapp, dstsvc),
 	}
+
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
 	opts = append(opts,
@@ -67,7 +64,7 @@ type Client struct {
 	conn *grpc.ClientConn
 }
 
-func RoleKick(ctx context.Context, roleid string, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
+func RoleKick(ctx context.Context, roleid int64, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
 	var in pb.RoleKick_Req
 	in.RoleId = roleid
 	_, err := client.RPCCallP2P(_client, _client.RoleKick, ctx, &in, dstapp, opts...)

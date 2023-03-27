@@ -33,13 +33,9 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	if env, world, _, _, err := srcapp.Parse(); err != nil {
-		return nil, nil
-	} else {
-		dstsvc := meta.GenRouteSvc(env, world, proto.OnlineFuncID)
-		_client = &Client{
-			Client: client.New(srcapp, dstsvc),
-		}
+	dstsvc := meta.GenDstRouteSvc(srcapp, proto.OnlineFuncID)
+	_client = &Client{
+		Client: client.New(srcapp, dstsvc),
 	}
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
@@ -67,7 +63,7 @@ type Client struct {
 	conn *grpc.ClientConn
 }
 
-func OnlineCreate(ctx context.Context, roleid string, appid string, opts ...grpc.CallOption) error {
+func OnlineCreate(ctx context.Context, roleid int64, appid string, opts ...grpc.CallOption) error {
 	var in pb.OnlineCreate_Req
 	in.RoleId = roleid
 	in.AppId = appid
@@ -79,7 +75,7 @@ func OnlineCreate(ctx context.Context, roleid string, appid string, opts ...grpc
 	}
 }
 
-func OnlineDelete(ctx context.Context, roleid string, appid string, opts ...grpc.CallOption) error {
+func OnlineDelete(ctx context.Context, roleid int64, appid string, opts ...grpc.CallOption) error {
 	var in pb.OnlineDelete_Req
 	in.RoleId = roleid
 	in.AppId = appid
@@ -91,7 +87,7 @@ func OnlineDelete(ctx context.Context, roleid string, appid string, opts ...grpc
 	}
 }
 
-func OnlineRead(ctx context.Context, roleid string, opts ...grpc.CallOption) (string, error) {
+func OnlineRead(ctx context.Context, roleid int64, opts ...grpc.CallOption) (string, error) {
 	var in pb.OnlineRead_Req
 	in.RoleId = roleid
 	out, err := client.RPCCallSingle(_client, _client.OnlineRead, ctx, &in, opts...)

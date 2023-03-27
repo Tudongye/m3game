@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:32102"
+Addr = "127.0.0.1:32501"
 BroadcastTimeout = 5
 
 [Options]
@@ -21,17 +21,5 @@ URL = "127.0.0.1:4222"
 LogLevel = "DEBUG"
 Encoding = "console"
 
-[[Plugin.DB.db_mongo]]
-URI = "mongodb://admin:123456@127.0.0.1:27017"
-DataBase = "uiddb"
-
-[[Plugin.Lease.lease_etcd]]
-Endpoints = "127.0.0.1:2379"
-DialTimeout = 5
-LeaseKeepLiveTime = 10
-PreExitTime = 5
-
 [App]
 PrePareTime = 10 # 启动前准备时长
-CachePoolSize = 10000 # 缓存池
-VoteLease = "/single/uidapp"

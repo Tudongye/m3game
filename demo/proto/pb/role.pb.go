@@ -21,6 +21,121 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type RFlag int32
+
+const (
+	RFlag_RRoleMin RFlag = 0
+	RFlag_RRoleId  RFlag = 1
+	RFlag_RName    RFlag = 2
+	RFlag_RPower   RFlag = 3
+)
+
+// Enum value maps for RFlag.
+var (
+	RFlag_name = map[int32]string{
+		0: "RRoleMin",
+		1: "RRoleId",
+		2: "RName",
+		3: "RPower",
+	}
+	RFlag_value = map[string]int32{
+		"RRoleMin": 0,
+		"RRoleId":  1,
+		"RName":    2,
+		"RPower":   3,
+	}
+)
+
+func (x RFlag) Enum() *RFlag {
+	p := new(RFlag)
+	*p = x
+	return p
+}
+
+func (x RFlag) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (RFlag) Descriptor() protoreflect.EnumDescriptor {
+	return file_role_proto_enumTypes[0].Descriptor()
+}
+
+func (RFlag) Type() protoreflect.EnumType {
+	return &file_role_proto_enumTypes[0]
+}
+
+func (x RFlag) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use RFlag.Descriptor instead.
+func (RFlag) EnumDescriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{0}
+}
+
+type RoleDB struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RoleId int64  `protobuf:"varint,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
+	Name   string `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
+	Power  int32  `protobuf:"varint,3,opt,name=Power,proto3" json:"Power,omitempty"`
+}
+
+func (x *RoleDB) Reset() {
+	*x = RoleDB{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RoleDB) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoleDB) ProtoMessage() {}
+
+func (x *RoleDB) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoleDB.ProtoReflect.Descriptor instead.
+func (*RoleDB) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *RoleDB) GetRoleId() int64 {
+	if x != nil {
+		return x.RoleId
+	}
+	return 0
+}
+
+func (x *RoleDB) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RoleDB) GetPower() int32 {
+	if x != nil {
+		return x.Power
+	}
+	return 0
+}
+
 type RoleLogin struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -30,7 +145,7 @@ type RoleLogin struct {
 func (x *RoleLogin) Reset() {
 	*x = RoleLogin{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[0]
+		mi := &file_role_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -43,7 +158,7 @@ func (x *RoleLogin) String() string {
 func (*RoleLogin) ProtoMessage() {}
 
 func (x *RoleLogin) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[0]
+	mi := &file_role_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +171,7 @@ func (x *RoleLogin) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleLogin.ProtoReflect.Descriptor instead.
 func (*RoleLogin) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{0}
+	return file_role_proto_rawDescGZIP(), []int{1}
 }
 
 type RoleGetInfo struct {
@@ -68,7 +183,7 @@ type RoleGetInfo struct {
 func (x *RoleGetInfo) Reset() {
 	*x = RoleGetInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[1]
+		mi := &file_role_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -81,7 +196,7 @@ func (x *RoleGetInfo) String() string {
 func (*RoleGetInfo) ProtoMessage() {}
 
 func (x *RoleGetInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[1]
+	mi := &file_role_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -94,7 +209,7 @@ func (x *RoleGetInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetInfo.ProtoReflect.Descriptor instead.
 func (*RoleGetInfo) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{1}
+	return file_role_proto_rawDescGZIP(), []int{2}
 }
 
 type RoleModifyName struct {
@@ -106,7 +221,7 @@ type RoleModifyName struct {
 func (x *RoleModifyName) Reset() {
 	*x = RoleModifyName{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[2]
+		mi := &file_role_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -119,7 +234,7 @@ func (x *RoleModifyName) String() string {
 func (*RoleModifyName) ProtoMessage() {}
 
 func (x *RoleModifyName) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[2]
+	mi := &file_role_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -132,7 +247,7 @@ func (x *RoleModifyName) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleModifyName.ProtoReflect.Descriptor instead.
 func (*RoleModifyName) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{2}
+	return file_role_proto_rawDescGZIP(), []int{3}
 }
 
 type RolePowerUp struct {
@@ -144,7 +259,7 @@ type RolePowerUp struct {
 func (x *RolePowerUp) Reset() {
 	*x = RolePowerUp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[3]
+		mi := &file_role_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -157,7 +272,7 @@ func (x *RolePowerUp) String() string {
 func (*RolePowerUp) ProtoMessage() {}
 
 func (x *RolePowerUp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[3]
+	mi := &file_role_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -170,7 +285,7 @@ func (x *RolePowerUp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RolePowerUp.ProtoReflect.Descriptor instead.
 func (*RolePowerUp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{3}
+	return file_role_proto_rawDescGZIP(), []int{4}
 }
 
 type RoleGetClubRoleInfo struct {
@@ -182,7 +297,7 @@ type RoleGetClubRoleInfo struct {
 func (x *RoleGetClubRoleInfo) Reset() {
 	*x = RoleGetClubRoleInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[4]
+		mi := &file_role_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -195,7 +310,7 @@ func (x *RoleGetClubRoleInfo) String() string {
 func (*RoleGetClubRoleInfo) ProtoMessage() {}
 
 func (x *RoleGetClubRoleInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[4]
+	mi := &file_role_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -208,7 +323,7 @@ func (x *RoleGetClubRoleInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubRoleInfo.ProtoReflect.Descriptor instead.
 func (*RoleGetClubRoleInfo) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{4}
+	return file_role_proto_rawDescGZIP(), []int{5}
 }
 
 type RoleGetClubList struct {
@@ -220,7 +335,7 @@ type RoleGetClubList struct {
 func (x *RoleGetClubList) Reset() {
 	*x = RoleGetClubList{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[5]
+		mi := &file_role_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -233,7 +348,7 @@ func (x *RoleGetClubList) String() string {
 func (*RoleGetClubList) ProtoMessage() {}
 
 func (x *RoleGetClubList) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[5]
+	mi := &file_role_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -246,7 +361,7 @@ func (x *RoleGetClubList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubList.ProtoReflect.Descriptor instead.
 func (*RoleGetClubList) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{5}
+	return file_role_proto_rawDescGZIP(), []int{6}
 }
 
 type RoleGetClubInfo struct {
@@ -258,7 +373,7 @@ type RoleGetClubInfo struct {
 func (x *RoleGetClubInfo) Reset() {
 	*x = RoleGetClubInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[6]
+		mi := &file_role_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -271,7 +386,7 @@ func (x *RoleGetClubInfo) String() string {
 func (*RoleGetClubInfo) ProtoMessage() {}
 
 func (x *RoleGetClubInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[6]
+	mi := &file_role_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -284,7 +399,7 @@ func (x *RoleGetClubInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubInfo.ProtoReflect.Descriptor instead.
 func (*RoleGetClubInfo) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{6}
+	return file_role_proto_rawDescGZIP(), []int{7}
 }
 
 type RoleCreateClub struct {
@@ -296,7 +411,7 @@ type RoleCreateClub struct {
 func (x *RoleCreateClub) Reset() {
 	*x = RoleCreateClub{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[7]
+		mi := &file_role_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -309,7 +424,7 @@ func (x *RoleCreateClub) String() string {
 func (*RoleCreateClub) ProtoMessage() {}
 
 func (x *RoleCreateClub) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[7]
+	mi := &file_role_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -322,7 +437,7 @@ func (x *RoleCreateClub) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleCreateClub.ProtoReflect.Descriptor instead.
 func (*RoleCreateClub) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{7}
+	return file_role_proto_rawDescGZIP(), []int{8}
 }
 
 type RoleJoinClub struct {
@@ -334,7 +449,7 @@ type RoleJoinClub struct {
 func (x *RoleJoinClub) Reset() {
 	*x = RoleJoinClub{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[8]
+		mi := &file_role_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -347,7 +462,7 @@ func (x *RoleJoinClub) String() string {
 func (*RoleJoinClub) ProtoMessage() {}
 
 func (x *RoleJoinClub) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[8]
+	mi := &file_role_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -360,7 +475,7 @@ func (x *RoleJoinClub) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleJoinClub.ProtoReflect.Descriptor instead.
 func (*RoleJoinClub) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{8}
+	return file_role_proto_rawDescGZIP(), []int{9}
 }
 
 type RoleExitClub struct {
@@ -372,7 +487,7 @@ type RoleExitClub struct {
 func (x *RoleExitClub) Reset() {
 	*x = RoleExitClub{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[9]
+		mi := &file_role_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -385,7 +500,7 @@ func (x *RoleExitClub) String() string {
 func (*RoleExitClub) ProtoMessage() {}
 
 func (x *RoleExitClub) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[9]
+	mi := &file_role_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -398,7 +513,7 @@ func (x *RoleExitClub) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleExitClub.ProtoReflect.Descriptor instead.
 func (*RoleExitClub) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{9}
+	return file_role_proto_rawDescGZIP(), []int{10}
 }
 
 type RoleCancelClub struct {
@@ -410,7 +525,7 @@ type RoleCancelClub struct {
 func (x *RoleCancelClub) Reset() {
 	*x = RoleCancelClub{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[10]
+		mi := &file_role_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -423,7 +538,7 @@ func (x *RoleCancelClub) String() string {
 func (*RoleCancelClub) ProtoMessage() {}
 
 func (x *RoleCancelClub) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[10]
+	mi := &file_role_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -436,7 +551,7 @@ func (x *RoleCancelClub) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleCancelClub.ProtoReflect.Descriptor instead.
 func (*RoleCancelClub) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{10}
+	return file_role_proto_rawDescGZIP(), []int{11}
 }
 
 type RoleKick struct {
@@ -448,7 +563,7 @@ type RoleKick struct {
 func (x *RoleKick) Reset() {
 	*x = RoleKick{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[11]
+		mi := &file_role_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -461,7 +576,7 @@ func (x *RoleKick) String() string {
 func (*RoleKick) ProtoMessage() {}
 
 func (x *RoleKick) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[11]
+	mi := &file_role_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -474,21 +589,19 @@ func (x *RoleKick) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleKick.ProtoReflect.Descriptor instead.
 func (*RoleKick) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{11}
+	return file_role_proto_rawDescGZIP(), []int{12}
 }
 
 type RoleLogin_Req struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
-
-	OpenId string `protobuf:"bytes,2,opt,name=OpenId,proto3" json:"OpenId,omitempty"`
 }
 
 func (x *RoleLogin_Req) Reset() {
 	*x = RoleLogin_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[12]
+		mi := &file_role_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -501,7 +614,7 @@ func (x *RoleLogin_Req) String() string {
 func (*RoleLogin_Req) ProtoMessage() {}
 
 func (x *RoleLogin_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[12]
+	mi := &file_role_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -514,14 +627,7 @@ func (x *RoleLogin_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleLogin_Req.ProtoReflect.Descriptor instead.
 func (*RoleLogin_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{0, 0}
-}
-
-func (x *RoleLogin_Req) GetOpenId() string {
-	if x != nil {
-		return x.OpenId
-	}
-	return ""
+	return file_role_proto_rawDescGZIP(), []int{1, 0}
 }
 
 type RoleLogin_Rsp struct {
@@ -536,7 +642,7 @@ type RoleLogin_Rsp struct {
 func (x *RoleLogin_Rsp) Reset() {
 	*x = RoleLogin_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[13]
+		mi := &file_role_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -549,7 +655,7 @@ func (x *RoleLogin_Rsp) String() string {
 func (*RoleLogin_Rsp) ProtoMessage() {}
 
 func (x *RoleLogin_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[13]
+	mi := &file_role_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -562,7 +668,7 @@ func (x *RoleLogin_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleLogin_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleLogin_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{0, 1}
+	return file_role_proto_rawDescGZIP(), []int{1, 1}
 }
 
 func (x *RoleLogin_Rsp) GetRoleDB() *RoleDB {
@@ -588,7 +694,7 @@ type RoleGetInfo_Req struct {
 func (x *RoleGetInfo_Req) Reset() {
 	*x = RoleGetInfo_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[14]
+		mi := &file_role_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -601,7 +707,7 @@ func (x *RoleGetInfo_Req) String() string {
 func (*RoleGetInfo_Req) ProtoMessage() {}
 
 func (x *RoleGetInfo_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[14]
+	mi := &file_role_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -614,7 +720,7 @@ func (x *RoleGetInfo_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetInfo_Req.ProtoReflect.Descriptor instead.
 func (*RoleGetInfo_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{1, 0}
+	return file_role_proto_rawDescGZIP(), []int{2, 0}
 }
 
 type RoleGetInfo_Rsp struct {
@@ -629,7 +735,7 @@ type RoleGetInfo_Rsp struct {
 func (x *RoleGetInfo_Rsp) Reset() {
 	*x = RoleGetInfo_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[15]
+		mi := &file_role_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -642,7 +748,7 @@ func (x *RoleGetInfo_Rsp) String() string {
 func (*RoleGetInfo_Rsp) ProtoMessage() {}
 
 func (x *RoleGetInfo_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[15]
+	mi := &file_role_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -655,7 +761,7 @@ func (x *RoleGetInfo_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetInfo_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleGetInfo_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{1, 1}
+	return file_role_proto_rawDescGZIP(), []int{2, 1}
 }
 
 func (x *RoleGetInfo_Rsp) GetRoleDB() *RoleDB {
@@ -683,7 +789,7 @@ type RoleModifyName_Req struct {
 func (x *RoleModifyName_Req) Reset() {
 	*x = RoleModifyName_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[16]
+		mi := &file_role_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -696,7 +802,7 @@ func (x *RoleModifyName_Req) String() string {
 func (*RoleModifyName_Req) ProtoMessage() {}
 
 func (x *RoleModifyName_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[16]
+	mi := &file_role_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -709,7 +815,7 @@ func (x *RoleModifyName_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleModifyName_Req.ProtoReflect.Descriptor instead.
 func (*RoleModifyName_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{2, 0}
+	return file_role_proto_rawDescGZIP(), []int{3, 0}
 }
 
 func (x *RoleModifyName_Req) GetNewName() string {
@@ -724,13 +830,13 @@ type RoleModifyName_Rsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleName *RoleName `protobuf:"bytes,1,opt,name=RoleName,proto3" json:"RoleName,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
 }
 
 func (x *RoleModifyName_Rsp) Reset() {
 	*x = RoleModifyName_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[17]
+		mi := &file_role_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -743,7 +849,7 @@ func (x *RoleModifyName_Rsp) String() string {
 func (*RoleModifyName_Rsp) ProtoMessage() {}
 
 func (x *RoleModifyName_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[17]
+	mi := &file_role_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -756,14 +862,14 @@ func (x *RoleModifyName_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleModifyName_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleModifyName_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{2, 1}
+	return file_role_proto_rawDescGZIP(), []int{3, 1}
 }
 
-func (x *RoleModifyName_Rsp) GetRoleName() *RoleName {
+func (x *RoleModifyName_Rsp) GetName() string {
 	if x != nil {
-		return x.RoleName
+		return x.Name
 	}
-	return nil
+	return ""
 }
 
 type RolePowerUp_Req struct {
@@ -777,7 +883,7 @@ type RolePowerUp_Req struct {
 func (x *RolePowerUp_Req) Reset() {
 	*x = RolePowerUp_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[18]
+		mi := &file_role_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -790,7 +896,7 @@ func (x *RolePowerUp_Req) String() string {
 func (*RolePowerUp_Req) ProtoMessage() {}
 
 func (x *RolePowerUp_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[18]
+	mi := &file_role_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -803,7 +909,7 @@ func (x *RolePowerUp_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RolePowerUp_Req.ProtoReflect.Descriptor instead.
 func (*RolePowerUp_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{3, 0}
+	return file_role_proto_rawDescGZIP(), []int{4, 0}
 }
 
 func (x *RolePowerUp_Req) GetPowerUp() int32 {
@@ -818,13 +924,13 @@ type RolePowerUp_Rsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RolePower *RolePower `protobuf:"bytes,1,opt,name=RolePower,proto3" json:"RolePower,omitempty"`
+	Power int32 `protobuf:"varint,1,opt,name=Power,proto3" json:"Power,omitempty"`
 }
 
 func (x *RolePowerUp_Rsp) Reset() {
 	*x = RolePowerUp_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[19]
+		mi := &file_role_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -837,7 +943,7 @@ func (x *RolePowerUp_Rsp) String() string {
 func (*RolePowerUp_Rsp) ProtoMessage() {}
 
 func (x *RolePowerUp_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[19]
+	mi := &file_role_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -850,14 +956,14 @@ func (x *RolePowerUp_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RolePowerUp_Rsp.ProtoReflect.Descriptor instead.
 func (*RolePowerUp_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{3, 1}
+	return file_role_proto_rawDescGZIP(), []int{4, 1}
 }
 
-func (x *RolePowerUp_Rsp) GetRolePower() *RolePower {
+func (x *RolePowerUp_Rsp) GetPower() int32 {
 	if x != nil {
-		return x.RolePower
+		return x.Power
 	}
-	return nil
+	return 0
 }
 
 type RoleGetClubRoleInfo_Req struct {
@@ -869,7 +975,7 @@ type RoleGetClubRoleInfo_Req struct {
 func (x *RoleGetClubRoleInfo_Req) Reset() {
 	*x = RoleGetClubRoleInfo_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[20]
+		mi := &file_role_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -882,7 +988,7 @@ func (x *RoleGetClubRoleInfo_Req) String() string {
 func (*RoleGetClubRoleInfo_Req) ProtoMessage() {}
 
 func (x *RoleGetClubRoleInfo_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[20]
+	mi := &file_role_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -895,7 +1001,7 @@ func (x *RoleGetClubRoleInfo_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubRoleInfo_Req.ProtoReflect.Descriptor instead.
 func (*RoleGetClubRoleInfo_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{4, 0}
+	return file_role_proto_rawDescGZIP(), []int{5, 0}
 }
 
 type RoleGetClubRoleInfo_Rsp struct {
@@ -909,7 +1015,7 @@ type RoleGetClubRoleInfo_Rsp struct {
 func (x *RoleGetClubRoleInfo_Rsp) Reset() {
 	*x = RoleGetClubRoleInfo_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[21]
+		mi := &file_role_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -922,7 +1028,7 @@ func (x *RoleGetClubRoleInfo_Rsp) String() string {
 func (*RoleGetClubRoleInfo_Rsp) ProtoMessage() {}
 
 func (x *RoleGetClubRoleInfo_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[21]
+	mi := &file_role_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -935,7 +1041,7 @@ func (x *RoleGetClubRoleInfo_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubRoleInfo_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleGetClubRoleInfo_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{4, 1}
+	return file_role_proto_rawDescGZIP(), []int{5, 1}
 }
 
 func (x *RoleGetClubRoleInfo_Rsp) GetClubRoleDB() *ClubRoleDB {
@@ -954,7 +1060,7 @@ type RoleGetClubList_Req struct {
 func (x *RoleGetClubList_Req) Reset() {
 	*x = RoleGetClubList_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[22]
+		mi := &file_role_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -967,7 +1073,7 @@ func (x *RoleGetClubList_Req) String() string {
 func (*RoleGetClubList_Req) ProtoMessage() {}
 
 func (x *RoleGetClubList_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[22]
+	mi := &file_role_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -980,7 +1086,7 @@ func (x *RoleGetClubList_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubList_Req.ProtoReflect.Descriptor instead.
 func (*RoleGetClubList_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{5, 0}
+	return file_role_proto_rawDescGZIP(), []int{6, 0}
 }
 
 type RoleGetClubList_Rsp struct {
@@ -994,7 +1100,7 @@ type RoleGetClubList_Rsp struct {
 func (x *RoleGetClubList_Rsp) Reset() {
 	*x = RoleGetClubList_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[23]
+		mi := &file_role_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1007,7 +1113,7 @@ func (x *RoleGetClubList_Rsp) String() string {
 func (*RoleGetClubList_Rsp) ProtoMessage() {}
 
 func (x *RoleGetClubList_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[23]
+	mi := &file_role_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1020,7 +1126,7 @@ func (x *RoleGetClubList_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubList_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleGetClubList_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{5, 1}
+	return file_role_proto_rawDescGZIP(), []int{6, 1}
 }
 
 func (x *RoleGetClubList_Rsp) GetClubDBs() []*ClubDB {
@@ -1035,13 +1141,13 @@ type RoleGetClubInfo_Req struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClubId string `protobuf:"bytes,2,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
+	ClubId int64 `protobuf:"varint,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
 }
 
 func (x *RoleGetClubInfo_Req) Reset() {
 	*x = RoleGetClubInfo_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[24]
+		mi := &file_role_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1054,7 +1160,7 @@ func (x *RoleGetClubInfo_Req) String() string {
 func (*RoleGetClubInfo_Req) ProtoMessage() {}
 
 func (x *RoleGetClubInfo_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[24]
+	mi := &file_role_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1067,14 +1173,14 @@ func (x *RoleGetClubInfo_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubInfo_Req.ProtoReflect.Descriptor instead.
 func (*RoleGetClubInfo_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{6, 0}
+	return file_role_proto_rawDescGZIP(), []int{7, 0}
 }
 
-func (x *RoleGetClubInfo_Req) GetClubId() string {
+func (x *RoleGetClubInfo_Req) GetClubId() int64 {
 	if x != nil {
 		return x.ClubId
 	}
-	return ""
+	return 0
 }
 
 type RoleGetClubInfo_Rsp struct {
@@ -1088,7 +1194,7 @@ type RoleGetClubInfo_Rsp struct {
 func (x *RoleGetClubInfo_Rsp) Reset() {
 	*x = RoleGetClubInfo_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[25]
+		mi := &file_role_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1101,7 +1207,7 @@ func (x *RoleGetClubInfo_Rsp) String() string {
 func (*RoleGetClubInfo_Rsp) ProtoMessage() {}
 
 func (x *RoleGetClubInfo_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[25]
+	mi := &file_role_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1114,7 +1220,7 @@ func (x *RoleGetClubInfo_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleGetClubInfo_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleGetClubInfo_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{6, 1}
+	return file_role_proto_rawDescGZIP(), []int{7, 1}
 }
 
 func (x *RoleGetClubInfo_Rsp) GetClubDB() *ClubDB {
@@ -1133,7 +1239,7 @@ type RoleCreateClub_Req struct {
 func (x *RoleCreateClub_Req) Reset() {
 	*x = RoleCreateClub_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[26]
+		mi := &file_role_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1146,7 +1252,7 @@ func (x *RoleCreateClub_Req) String() string {
 func (*RoleCreateClub_Req) ProtoMessage() {}
 
 func (x *RoleCreateClub_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[26]
+	mi := &file_role_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1159,7 +1265,7 @@ func (x *RoleCreateClub_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleCreateClub_Req.ProtoReflect.Descriptor instead.
 func (*RoleCreateClub_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{7, 0}
+	return file_role_proto_rawDescGZIP(), []int{8, 0}
 }
 
 type RoleCreateClub_Rsp struct {
@@ -1167,13 +1273,13 @@ type RoleCreateClub_Rsp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClubId string `protobuf:"bytes,2,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
+	ClubId int64 `protobuf:"varint,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
 }
 
 func (x *RoleCreateClub_Rsp) Reset() {
 	*x = RoleCreateClub_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[27]
+		mi := &file_role_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1186,7 +1292,7 @@ func (x *RoleCreateClub_Rsp) String() string {
 func (*RoleCreateClub_Rsp) ProtoMessage() {}
 
 func (x *RoleCreateClub_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[27]
+	mi := &file_role_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1199,14 +1305,14 @@ func (x *RoleCreateClub_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleCreateClub_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleCreateClub_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{7, 1}
+	return file_role_proto_rawDescGZIP(), []int{8, 1}
 }
 
-func (x *RoleCreateClub_Rsp) GetClubId() string {
+func (x *RoleCreateClub_Rsp) GetClubId() int64 {
 	if x != nil {
 		return x.ClubId
 	}
-	return ""
+	return 0
 }
 
 type RoleJoinClub_Req struct {
@@ -1214,13 +1320,13 @@ type RoleJoinClub_Req struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClubId string `protobuf:"bytes,2,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
+	ClubId int64 `protobuf:"varint,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
 }
 
 func (x *RoleJoinClub_Req) Reset() {
 	*x = RoleJoinClub_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[28]
+		mi := &file_role_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1233,7 +1339,7 @@ func (x *RoleJoinClub_Req) String() string {
 func (*RoleJoinClub_Req) ProtoMessage() {}
 
 func (x *RoleJoinClub_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[28]
+	mi := &file_role_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1246,14 +1352,14 @@ func (x *RoleJoinClub_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleJoinClub_Req.ProtoReflect.Descriptor instead.
 func (*RoleJoinClub_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{8, 0}
+	return file_role_proto_rawDescGZIP(), []int{9, 0}
 }
 
-func (x *RoleJoinClub_Req) GetClubId() string {
+func (x *RoleJoinClub_Req) GetClubId() int64 {
 	if x != nil {
 		return x.ClubId
 	}
-	return ""
+	return 0
 }
 
 type RoleJoinClub_Rsp struct {
@@ -1265,7 +1371,7 @@ type RoleJoinClub_Rsp struct {
 func (x *RoleJoinClub_Rsp) Reset() {
 	*x = RoleJoinClub_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[29]
+		mi := &file_role_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1278,7 +1384,7 @@ func (x *RoleJoinClub_Rsp) String() string {
 func (*RoleJoinClub_Rsp) ProtoMessage() {}
 
 func (x *RoleJoinClub_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[29]
+	mi := &file_role_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1291,7 +1397,7 @@ func (x *RoleJoinClub_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleJoinClub_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleJoinClub_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{8, 1}
+	return file_role_proto_rawDescGZIP(), []int{9, 1}
 }
 
 type RoleExitClub_Req struct {
@@ -1299,13 +1405,13 @@ type RoleExitClub_Req struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClubId string `protobuf:"bytes,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
+	ClubId int64 `protobuf:"varint,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
 }
 
 func (x *RoleExitClub_Req) Reset() {
 	*x = RoleExitClub_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[30]
+		mi := &file_role_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1318,7 +1424,7 @@ func (x *RoleExitClub_Req) String() string {
 func (*RoleExitClub_Req) ProtoMessage() {}
 
 func (x *RoleExitClub_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[30]
+	mi := &file_role_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1331,14 +1437,14 @@ func (x *RoleExitClub_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleExitClub_Req.ProtoReflect.Descriptor instead.
 func (*RoleExitClub_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{9, 0}
+	return file_role_proto_rawDescGZIP(), []int{10, 0}
 }
 
-func (x *RoleExitClub_Req) GetClubId() string {
+func (x *RoleExitClub_Req) GetClubId() int64 {
 	if x != nil {
 		return x.ClubId
 	}
-	return ""
+	return 0
 }
 
 type RoleExitClub_Rsp struct {
@@ -1350,7 +1456,7 @@ type RoleExitClub_Rsp struct {
 func (x *RoleExitClub_Rsp) Reset() {
 	*x = RoleExitClub_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[31]
+		mi := &file_role_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1363,7 +1469,7 @@ func (x *RoleExitClub_Rsp) String() string {
 func (*RoleExitClub_Rsp) ProtoMessage() {}
 
 func (x *RoleExitClub_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[31]
+	mi := &file_role_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1376,7 +1482,7 @@ func (x *RoleExitClub_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleExitClub_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleExitClub_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{9, 1}
+	return file_role_proto_rawDescGZIP(), []int{10, 1}
 }
 
 type RoleCancelClub_Req struct {
@@ -1384,13 +1490,13 @@ type RoleCancelClub_Req struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClubId string `protobuf:"bytes,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
+	ClubId int64 `protobuf:"varint,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
 }
 
 func (x *RoleCancelClub_Req) Reset() {
 	*x = RoleCancelClub_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[32]
+		mi := &file_role_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1403,7 +1509,7 @@ func (x *RoleCancelClub_Req) String() string {
 func (*RoleCancelClub_Req) ProtoMessage() {}
 
 func (x *RoleCancelClub_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[32]
+	mi := &file_role_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1416,14 +1522,14 @@ func (x *RoleCancelClub_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleCancelClub_Req.ProtoReflect.Descriptor instead.
 func (*RoleCancelClub_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{10, 0}
+	return file_role_proto_rawDescGZIP(), []int{11, 0}
 }
 
-func (x *RoleCancelClub_Req) GetClubId() string {
+func (x *RoleCancelClub_Req) GetClubId() int64 {
 	if x != nil {
 		return x.ClubId
 	}
-	return ""
+	return 0
 }
 
 type RoleCancelClub_Rsp struct {
@@ -1435,7 +1541,7 @@ type RoleCancelClub_Rsp struct {
 func (x *RoleCancelClub_Rsp) Reset() {
 	*x = RoleCancelClub_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[33]
+		mi := &file_role_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1448,7 +1554,7 @@ func (x *RoleCancelClub_Rsp) String() string {
 func (*RoleCancelClub_Rsp) ProtoMessage() {}
 
 func (x *RoleCancelClub_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[33]
+	mi := &file_role_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1461,7 +1567,7 @@ func (x *RoleCancelClub_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleCancelClub_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleCancelClub_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{10, 1}
+	return file_role_proto_rawDescGZIP(), []int{11, 1}
 }
 
 type RoleKick_Req struct {
@@ -1469,13 +1575,13 @@ type RoleKick_Req struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId string `protobuf:"bytes,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
+	RoleId int64 `protobuf:"varint,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
 }
 
 func (x *RoleKick_Req) Reset() {
 	*x = RoleKick_Req{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[34]
+		mi := &file_role_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1488,7 +1594,7 @@ func (x *RoleKick_Req) String() string {
 func (*RoleKick_Req) ProtoMessage() {}
 
 func (x *RoleKick_Req) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[34]
+	mi := &file_role_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1501,14 +1607,14 @@ func (x *RoleKick_Req) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleKick_Req.ProtoReflect.Descriptor instead.
 func (*RoleKick_Req) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{11, 0}
+	return file_role_proto_rawDescGZIP(), []int{12, 0}
 }
 
-func (x *RoleKick_Req) GetRoleId() string {
+func (x *RoleKick_Req) GetRoleId() int64 {
 	if x != nil {
 		return x.RoleId
 	}
-	return ""
+	return 0
 }
 
 type RoleKick_Rsp struct {
@@ -1520,7 +1626,7 @@ type RoleKick_Rsp struct {
 func (x *RoleKick_Rsp) Reset() {
 	*x = RoleKick_Rsp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[35]
+		mi := &file_role_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1533,7 +1639,7 @@ func (x *RoleKick_Rsp) String() string {
 func (*RoleKick_Rsp) ProtoMessage() {}
 
 func (x *RoleKick_Rsp) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[35]
+	mi := &file_role_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1546,7 +1652,7 @@ func (x *RoleKick_Rsp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleKick_Rsp.ProtoReflect.Descriptor instead.
 func (*RoleKick_Rsp) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{11, 1}
+	return file_role_proto_rawDescGZIP(), []int{12, 1}
 }
 
 var File_role_proto protoreflect.FileDescriptor
@@ -1554,129 +1660,135 @@ var File_role_proto protoreflect.FileDescriptor
 var file_role_proto_rawDesc = []byte{
 	0x0a, 0x0a, 0x72, 0x6f, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x1a, 0x0d, 0x6f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x1a, 0x09, 0x63, 0x6f, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x93, 0x01,
-	0x0a, 0x09, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x1a, 0x1d, 0x0a, 0x03, 0x52,
-	0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x06, 0x4f, 0x70, 0x65, 0x6e, 0x49, 0x64, 0x1a, 0x5f, 0x0a, 0x03, 0x52, 0x73,
-	0x70, 0x12, 0x25, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42,
-	0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x12, 0x31, 0x0a, 0x0a, 0x43, 0x6c, 0x75, 0x62,
-	0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x52,
-	0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x3a, 0x06, 0xca, 0xf3, 0x18,
-	0x02, 0x20, 0x01, 0x22, 0x7d, 0x0a, 0x0b, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x49, 0x6e,
-	0x66, 0x6f, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a, 0x5f, 0x0a, 0x03, 0x52, 0x73, 0x70,
+	0x74, 0x6f, 0x1a, 0x09, 0x63, 0x6f, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x76, 0x0a,
+	0x06, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x12, 0x27, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49,
+	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x0f, 0x8a, 0xa6, 0x1d, 0x0b, 0x0a, 0x07, 0x52,
+	0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x10, 0x01, 0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64,
+	0x12, 0x1f, 0x0a, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x42, 0x0b,
+	0x8a, 0xa6, 0x1d, 0x07, 0x0a, 0x05, 0x52, 0x4e, 0x61, 0x6d, 0x65, 0x52, 0x04, 0x4e, 0x61, 0x6d,
+	0x65, 0x12, 0x22, 0x0a, 0x05, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05,
+	0x42, 0x0c, 0x8a, 0xa6, 0x1d, 0x08, 0x0a, 0x06, 0x52, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x52, 0x05,
+	0x50, 0x6f, 0x77, 0x65, 0x72, 0x22, 0x7b, 0x0a, 0x09, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67,
+	0x69, 0x6e, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a, 0x5f, 0x0a, 0x03, 0x52, 0x73, 0x70,
 	0x12, 0x25, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
 	0x32, 0x0d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x52,
 	0x06, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x12, 0x31, 0x0a, 0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52,
 	0x6f, 0x6c, 0x65, 0x44, 0x42, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x52, 0x0a,
 	0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02,
-	0x20, 0x01, 0x22, 0x6d, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79,
-	0x4e, 0x61, 0x6d, 0x65, 0x1a, 0x1f, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x4e,
-	0x65, 0x77, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x4e, 0x65,
-	0x77, 0x4e, 0x61, 0x6d, 0x65, 0x1a, 0x32, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x2b, 0x0a, 0x08,
-	0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0f,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x52,
-	0x08, 0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20,
-	0x01, 0x22, 0x6d, 0x0a, 0x0b, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x55, 0x70,
-	0x1a, 0x1f, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x50, 0x6f, 0x77, 0x65, 0x72,
-	0x55, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x55,
-	0x70, 0x1a, 0x35, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x2e, 0x0a, 0x09, 0x52, 0x6f, 0x6c, 0x65,
-	0x50, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x52, 0x09, 0x52,
-	0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01,
-	0x22, 0x5e, 0x0a, 0x13, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x52,
-	0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a, 0x38,
-	0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x31, 0x0a, 0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c,
-	0x65, 0x44, 0x42, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x52, 0x0a, 0x43, 0x6c,
-	0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01,
-	0x22, 0x50, 0x0a, 0x0f, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x4c,
-	0x69, 0x73, 0x74, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a, 0x2e, 0x0a, 0x03, 0x52, 0x73,
-	0x70, 0x12, 0x27, 0x0a, 0x07, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x73, 0x18, 0x01, 0x20, 0x03,
-	0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x44,
-	0x42, 0x52, 0x07, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x73, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02,
-	0x20, 0x01, 0x22, 0x66, 0x0a, 0x0f, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75,
-	0x62, 0x49, 0x6e, 0x66, 0x6f, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06,
-	0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x43, 0x6c,
-	0x75, 0x62, 0x49, 0x64, 0x1a, 0x2c, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x25, 0x0a, 0x06, 0x43,
-	0x6c, 0x75, 0x62, 0x44, 0x42, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62,
-	0x44, 0x42, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x3e, 0x0a, 0x0e, 0x52, 0x6f,
-	0x6c, 0x65, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x62, 0x1a, 0x05, 0x0a, 0x03,
-	0x52, 0x65, 0x71, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x16, 0x0a, 0x06, 0x43, 0x6c,
-	0x75, 0x62, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62,
-	0x49, 0x64, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x3c, 0x0a, 0x0c, 0x52, 0x6f,
-	0x6c, 0x65, 0x4a, 0x6f, 0x69, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65,
-	0x71, 0x12, 0x16, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70,
-	0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x3c, 0x0a, 0x0c, 0x52, 0x6f, 0x6c, 0x65,
-	0x45, 0x78, 0x69, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12,
-	0x16, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x3a, 0x06,
-	0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x3e, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x61,
-	0x6e, 0x63, 0x65, 0x6c, 0x43, 0x6c, 0x75, 0x62, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12,
-	0x16, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
-	0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x3a, 0x06,
-	0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x38, 0x0a, 0x08, 0x52, 0x6f, 0x6c, 0x65, 0x4b, 0x69,
-	0x63, 0x6b, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x6f, 0x6c,
-	0x65, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49,
-	0x64, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x00,
-	0x32, 0xbf, 0x06, 0x0a, 0x07, 0x52, 0x6f, 0x6c, 0x65, 0x53, 0x65, 0x72, 0x12, 0x37, 0x0a, 0x09,
-	0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x12, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x2e, 0x52, 0x65, 0x71, 0x1a,
-	0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67, 0x69,
-	0x6e, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x3d, 0x0a, 0x0b, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74,
-	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c,
-	0x65, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x16, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x6f,
-	0x2e, 0x52, 0x73, 0x70, 0x12, 0x46, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x6f, 0x64, 0x69,
-	0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
-	0x6f, 0x6c, 0x65, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x65,
-	0x71, 0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x6f,
-	0x64, 0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x3d, 0x0a, 0x0b,
-	0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x12, 0x16, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x2e,
+	0x20, 0x01, 0x22, 0x7d, 0x0a, 0x0b, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66,
+	0x6f, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a, 0x5f, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12,
+	0x25, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x0d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x52, 0x06,
+	0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x12, 0x31, 0x0a, 0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f,
+	0x6c, 0x65, 0x44, 0x42, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x52, 0x0a, 0x43,
+	0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20,
+	0x01, 0x22, 0x54, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x4e,
+	0x61, 0x6d, 0x65, 0x1a, 0x1f, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x4e, 0x65,
+	0x77, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x4e, 0x65, 0x77,
+	0x4e, 0x61, 0x6d, 0x65, 0x1a, 0x19, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x12, 0x0a, 0x04, 0x4e,
+	0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x3a,
+	0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x53, 0x0a, 0x0b, 0x52, 0x6f, 0x6c, 0x65, 0x50,
+	0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x1a, 0x1f, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a,
+	0x07, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07,
+	0x50, 0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x1a, 0x1b, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x14,
+	0x0a, 0x05, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x50,
+	0x6f, 0x77, 0x65, 0x72, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x5e, 0x0a, 0x13,
+	0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x49,
+	0x6e, 0x66, 0x6f, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a, 0x38, 0x0a, 0x03, 0x52, 0x73,
+	0x70, 0x12, 0x31, 0x0a, 0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x11, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c,
+	0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x52, 0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f,
+	0x6c, 0x65, 0x44, 0x42, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x50, 0x0a, 0x0f,
+	0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x1a,
+	0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a, 0x2e, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x27, 0x0a,
+	0x07, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0d,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x52, 0x07, 0x43,
+	0x6c, 0x75, 0x62, 0x44, 0x42, 0x73, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x66,
+	0x0a, 0x0f, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x6e, 0x66,
+	0x6f, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62,
+	0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64,
+	0x1a, 0x2c, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x25, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x44,
+	0x42, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x3a, 0x06,
+	0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x3e, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x62, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x1a,
+	0x1d, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x12, 0x16, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x3a, 0x06,
+	0xca, 0xf3, 0x18, 0x02, 0x20, 0x01, 0x22, 0x3c, 0x0a, 0x0c, 0x52, 0x6f, 0x6c, 0x65, 0x4a, 0x6f,
+	0x69, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a,
+	0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x43,
+	0x6c, 0x75, 0x62, 0x49, 0x64, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x3a, 0x06, 0xca, 0xf3,
+	0x18, 0x02, 0x20, 0x01, 0x22, 0x3c, 0x0a, 0x0c, 0x52, 0x6f, 0x6c, 0x65, 0x45, 0x78, 0x69, 0x74,
+	0x43, 0x6c, 0x75, 0x62, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x43,
+	0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x43, 0x6c, 0x75,
+	0x62, 0x49, 0x64, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02,
+	0x20, 0x01, 0x22, 0x3e, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c,
+	0x43, 0x6c, 0x75, 0x62, 0x1a, 0x1d, 0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x43,
+	0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x43, 0x6c, 0x75,
+	0x62, 0x49, 0x64, 0x1a, 0x05, 0x0a, 0x03, 0x52, 0x73, 0x70, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02,
+	0x20, 0x01, 0x22, 0x38, 0x0a, 0x08, 0x52, 0x6f, 0x6c, 0x65, 0x4b, 0x69, 0x63, 0x6b, 0x1a, 0x1d,
+	0x0a, 0x03, 0x52, 0x65, 0x71, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x1a, 0x05, 0x0a,
+	0x03, 0x52, 0x73, 0x70, 0x3a, 0x06, 0xca, 0xf3, 0x18, 0x02, 0x20, 0x00, 0x2a, 0x39, 0x0a, 0x05,
+	0x52, 0x46, 0x6c, 0x61, 0x67, 0x12, 0x0c, 0x0a, 0x08, 0x52, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x69,
+	0x6e, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07, 0x52, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x10, 0x01,
+	0x12, 0x09, 0x0a, 0x05, 0x52, 0x4e, 0x61, 0x6d, 0x65, 0x10, 0x02, 0x12, 0x0a, 0x0a, 0x06, 0x52,
+	0x50, 0x6f, 0x77, 0x65, 0x72, 0x10, 0x03, 0x32, 0xbf, 0x06, 0x0a, 0x07, 0x52, 0x6f, 0x6c, 0x65,
+	0x53, 0x65, 0x72, 0x12, 0x37, 0x0a, 0x09, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67, 0x69, 0x6e,
+	0x12, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67,
+	0x69, 0x6e, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
+	0x6f, 0x6c, 0x65, 0x4c, 0x6f, 0x67, 0x69, 0x6e, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x3d, 0x0a, 0x0b,
+	0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x2e,
 	0x52, 0x65, 0x71, 0x1a, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65,
-	0x50, 0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x34, 0x0a, 0x08, 0x52,
-	0x6f, 0x6c, 0x65, 0x4b, 0x69, 0x63, 0x6b, 0x12, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
-	0x52, 0x6f, 0x6c, 0x65, 0x4b, 0x69, 0x63, 0x6b, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x13, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4b, 0x69, 0x63, 0x6b, 0x2e, 0x52, 0x73,
-	0x70, 0x12, 0x49, 0x0a, 0x0f, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62,
-	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1a, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c,
-	0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x52, 0x65, 0x71,
-	0x1a, 0x1a, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74,
-	0x43, 0x6c, 0x75, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x49, 0x0a, 0x0f,
-	0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x12,
-	0x1a, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43,
-	0x6c, 0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x1a, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x4c,
-	0x69, 0x73, 0x74, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x55, 0x0a, 0x13, 0x52, 0x6f, 0x6c, 0x65, 0x47,
-	0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1e,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c,
-	0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x1e,
-	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c,
-	0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x46,
-	0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x62,
-	0x12, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x72, 0x65,
-	0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x19, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c,
-	0x75, 0x62, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x40, 0x0a, 0x0c, 0x52, 0x6f, 0x6c, 0x65, 0x4a, 0x6f,
-	0x69, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x12, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
-	0x6f, 0x6c, 0x65, 0x4a, 0x6f, 0x69, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x1a,
-	0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4a, 0x6f, 0x69, 0x6e,
-	0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x40, 0x0a, 0x0c, 0x52, 0x6f, 0x6c, 0x65,
-	0x45, 0x78, 0x69, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x12, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x45, 0x78, 0x69, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x65,
-	0x71, 0x1a, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x45, 0x78,
-	0x69, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x46, 0x0a, 0x0e, 0x52, 0x6f,
-	0x6c, 0x65, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x43, 0x6c, 0x75, 0x62, 0x12, 0x19, 0x2e, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x43,
-	0x6c, 0x75, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
-	0x52, 0x6f, 0x6c, 0x65, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52,
-	0x73, 0x70, 0x42, 0x0a, 0x5a, 0x08, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x70, 0x62, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x47, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x46, 0x0a, 0x0e, 0x52,
+	0x6f, 0x6c, 0x65, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x19, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79,
+	0x4e, 0x61, 0x6d, 0x65, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x4e, 0x61, 0x6d, 0x65, 0x2e,
+	0x52, 0x73, 0x70, 0x12, 0x3d, 0x0a, 0x0b, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72,
+	0x55, 0x70, 0x12, 0x16, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x50,
+	0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x16, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x55, 0x70, 0x2e, 0x52,
+	0x73, 0x70, 0x12, 0x34, 0x0a, 0x08, 0x52, 0x6f, 0x6c, 0x65, 0x4b, 0x69, 0x63, 0x6b, 0x12, 0x13,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4b, 0x69, 0x63, 0x6b, 0x2e,
+	0x52, 0x65, 0x71, 0x1a, 0x13, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65,
+	0x4b, 0x69, 0x63, 0x6b, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x49, 0x0a, 0x0f, 0x52, 0x6f, 0x6c, 0x65,
+	0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1a, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x49,
+	0x6e, 0x66, 0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x1a, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x6e, 0x66, 0x6f, 0x2e,
+	0x52, 0x73, 0x70, 0x12, 0x49, 0x0a, 0x0f, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c,
+	0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1a, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
+	0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x2e, 0x52,
+	0x65, 0x71, 0x1a, 0x1a, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x47,
+	0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x4c, 0x69, 0x73, 0x74, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x55,
+	0x0a, 0x13, 0x52, 0x6f, 0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c,
+	0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f,
+	0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66,
+	0x6f, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x1e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f,
+	0x6c, 0x65, 0x47, 0x65, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x6e, 0x66,
+	0x6f, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x46, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x62, 0x12, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
+	0x52, 0x6f, 0x6c, 0x65, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52,
+	0x65, 0x71, 0x1a, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x43,
+	0x72, 0x65, 0x61, 0x74, 0x65, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x73, 0x70, 0x12, 0x40, 0x0a,
+	0x0c, 0x52, 0x6f, 0x6c, 0x65, 0x4a, 0x6f, 0x69, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x12, 0x17, 0x2e,
+	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4a, 0x6f, 0x69, 0x6e, 0x43, 0x6c,
+	0x75, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52,
+	0x6f, 0x6c, 0x65, 0x4a, 0x6f, 0x69, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x73, 0x70, 0x12,
+	0x40, 0x0a, 0x0c, 0x52, 0x6f, 0x6c, 0x65, 0x45, 0x78, 0x69, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x12,
+	0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x45, 0x78, 0x69, 0x74,
+	0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x17, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x45, 0x78, 0x69, 0x74, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x73,
+	0x70, 0x12, 0x46, 0x0a, 0x0e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x43,
+	0x6c, 0x75, 0x62, 0x12, 0x19, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65,
+	0x43, 0x61, 0x6e, 0x63, 0x65, 0x6c, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x65, 0x71, 0x1a, 0x19,
+	0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x61, 0x6e, 0x63, 0x65,
+	0x6c, 0x43, 0x6c, 0x75, 0x62, 0x2e, 0x52, 0x73, 0x70, 0x42, 0x0a, 0x5a, 0x08, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1691,89 +1803,87 @@ func file_role_proto_rawDescGZIP() []byte {
 	return file_role_proto_rawDescData
 }
 
-var file_role_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_role_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_role_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_role_proto_goTypes = []interface{}{
-	(*RoleLogin)(nil),               // 0: proto.RoleLogin
-	(*RoleGetInfo)(nil),             // 1: proto.RoleGetInfo
-	(*RoleModifyName)(nil),          // 2: proto.RoleModifyName
-	(*RolePowerUp)(nil),             // 3: proto.RolePowerUp
-	(*RoleGetClubRoleInfo)(nil),     // 4: proto.RoleGetClubRoleInfo
-	(*RoleGetClubList)(nil),         // 5: proto.RoleGetClubList
-	(*RoleGetClubInfo)(nil),         // 6: proto.RoleGetClubInfo
-	(*RoleCreateClub)(nil),          // 7: proto.RoleCreateClub
-	(*RoleJoinClub)(nil),            // 8: proto.RoleJoinClub
-	(*RoleExitClub)(nil),            // 9: proto.RoleExitClub
-	(*RoleCancelClub)(nil),          // 10: proto.RoleCancelClub
-	(*RoleKick)(nil),                // 11: proto.RoleKick
-	(*RoleLogin_Req)(nil),           // 12: proto.RoleLogin.Req
-	(*RoleLogin_Rsp)(nil),           // 13: proto.RoleLogin.Rsp
-	(*RoleGetInfo_Req)(nil),         // 14: proto.RoleGetInfo.Req
-	(*RoleGetInfo_Rsp)(nil),         // 15: proto.RoleGetInfo.Rsp
-	(*RoleModifyName_Req)(nil),      // 16: proto.RoleModifyName.Req
-	(*RoleModifyName_Rsp)(nil),      // 17: proto.RoleModifyName.Rsp
-	(*RolePowerUp_Req)(nil),         // 18: proto.RolePowerUp.Req
-	(*RolePowerUp_Rsp)(nil),         // 19: proto.RolePowerUp.Rsp
-	(*RoleGetClubRoleInfo_Req)(nil), // 20: proto.RoleGetClubRoleInfo.Req
-	(*RoleGetClubRoleInfo_Rsp)(nil), // 21: proto.RoleGetClubRoleInfo.Rsp
-	(*RoleGetClubList_Req)(nil),     // 22: proto.RoleGetClubList.Req
-	(*RoleGetClubList_Rsp)(nil),     // 23: proto.RoleGetClubList.Rsp
-	(*RoleGetClubInfo_Req)(nil),     // 24: proto.RoleGetClubInfo.Req
-	(*RoleGetClubInfo_Rsp)(nil),     // 25: proto.RoleGetClubInfo.Rsp
-	(*RoleCreateClub_Req)(nil),      // 26: proto.RoleCreateClub.Req
-	(*RoleCreateClub_Rsp)(nil),      // 27: proto.RoleCreateClub.Rsp
-	(*RoleJoinClub_Req)(nil),        // 28: proto.RoleJoinClub.Req
-	(*RoleJoinClub_Rsp)(nil),        // 29: proto.RoleJoinClub.Rsp
-	(*RoleExitClub_Req)(nil),        // 30: proto.RoleExitClub.Req
-	(*RoleExitClub_Rsp)(nil),        // 31: proto.RoleExitClub.Rsp
-	(*RoleCancelClub_Req)(nil),      // 32: proto.RoleCancelClub.Req
-	(*RoleCancelClub_Rsp)(nil),      // 33: proto.RoleCancelClub.Rsp
-	(*RoleKick_Req)(nil),            // 34: proto.RoleKick.Req
-	(*RoleKick_Rsp)(nil),            // 35: proto.RoleKick.Rsp
-	(*RoleDB)(nil),                  // 36: proto.RoleDB
-	(*ClubRoleDB)(nil),              // 37: proto.ClubRoleDB
-	(*RoleName)(nil),                // 38: proto.RoleName
-	(*RolePower)(nil),               // 39: proto.RolePower
-	(*ClubDB)(nil),                  // 40: proto.ClubDB
+	(RFlag)(0),                      // 0: proto.RFlag
+	(*RoleDB)(nil),                  // 1: proto.RoleDB
+	(*RoleLogin)(nil),               // 2: proto.RoleLogin
+	(*RoleGetInfo)(nil),             // 3: proto.RoleGetInfo
+	(*RoleModifyName)(nil),          // 4: proto.RoleModifyName
+	(*RolePowerUp)(nil),             // 5: proto.RolePowerUp
+	(*RoleGetClubRoleInfo)(nil),     // 6: proto.RoleGetClubRoleInfo
+	(*RoleGetClubList)(nil),         // 7: proto.RoleGetClubList
+	(*RoleGetClubInfo)(nil),         // 8: proto.RoleGetClubInfo
+	(*RoleCreateClub)(nil),          // 9: proto.RoleCreateClub
+	(*RoleJoinClub)(nil),            // 10: proto.RoleJoinClub
+	(*RoleExitClub)(nil),            // 11: proto.RoleExitClub
+	(*RoleCancelClub)(nil),          // 12: proto.RoleCancelClub
+	(*RoleKick)(nil),                // 13: proto.RoleKick
+	(*RoleLogin_Req)(nil),           // 14: proto.RoleLogin.Req
+	(*RoleLogin_Rsp)(nil),           // 15: proto.RoleLogin.Rsp
+	(*RoleGetInfo_Req)(nil),         // 16: proto.RoleGetInfo.Req
+	(*RoleGetInfo_Rsp)(nil),         // 17: proto.RoleGetInfo.Rsp
+	(*RoleModifyName_Req)(nil),      // 18: proto.RoleModifyName.Req
+	(*RoleModifyName_Rsp)(nil),      // 19: proto.RoleModifyName.Rsp
+	(*RolePowerUp_Req)(nil),         // 20: proto.RolePowerUp.Req
+	(*RolePowerUp_Rsp)(nil),         // 21: proto.RolePowerUp.Rsp
+	(*RoleGetClubRoleInfo_Req)(nil), // 22: proto.RoleGetClubRoleInfo.Req
+	(*RoleGetClubRoleInfo_Rsp)(nil), // 23: proto.RoleGetClubRoleInfo.Rsp
+	(*RoleGetClubList_Req)(nil),     // 24: proto.RoleGetClubList.Req
+	(*RoleGetClubList_Rsp)(nil),     // 25: proto.RoleGetClubList.Rsp
+	(*RoleGetClubInfo_Req)(nil),     // 26: proto.RoleGetClubInfo.Req
+	(*RoleGetClubInfo_Rsp)(nil),     // 27: proto.RoleGetClubInfo.Rsp
+	(*RoleCreateClub_Req)(nil),      // 28: proto.RoleCreateClub.Req
+	(*RoleCreateClub_Rsp)(nil),      // 29: proto.RoleCreateClub.Rsp
+	(*RoleJoinClub_Req)(nil),        // 30: proto.RoleJoinClub.Req
+	(*RoleJoinClub_Rsp)(nil),        // 31: proto.RoleJoinClub.Rsp
+	(*RoleExitClub_Req)(nil),        // 32: proto.RoleExitClub.Req
+	(*RoleExitClub_Rsp)(nil),        // 33: proto.RoleExitClub.Rsp
+	(*RoleCancelClub_Req)(nil),      // 34: proto.RoleCancelClub.Req
+	(*RoleCancelClub_Rsp)(nil),      // 35: proto.RoleCancelClub.Rsp
+	(*RoleKick_Req)(nil),            // 36: proto.RoleKick.Req
+	(*RoleKick_Rsp)(nil),            // 37: proto.RoleKick.Rsp
+	(*ClubRoleDB)(nil),              // 38: proto.ClubRoleDB
+	(*ClubDB)(nil),                  // 39: proto.ClubDB
 }
 var file_role_proto_depIdxs = []int32{
-	36, // 0: proto.RoleLogin.Rsp.RoleDB:type_name -> proto.RoleDB
-	37, // 1: proto.RoleLogin.Rsp.ClubRoleDB:type_name -> proto.ClubRoleDB
-	36, // 2: proto.RoleGetInfo.Rsp.RoleDB:type_name -> proto.RoleDB
-	37, // 3: proto.RoleGetInfo.Rsp.ClubRoleDB:type_name -> proto.ClubRoleDB
-	38, // 4: proto.RoleModifyName.Rsp.RoleName:type_name -> proto.RoleName
-	39, // 5: proto.RolePowerUp.Rsp.RolePower:type_name -> proto.RolePower
-	37, // 6: proto.RoleGetClubRoleInfo.Rsp.ClubRoleDB:type_name -> proto.ClubRoleDB
-	40, // 7: proto.RoleGetClubList.Rsp.ClubDBs:type_name -> proto.ClubDB
-	40, // 8: proto.RoleGetClubInfo.Rsp.ClubDB:type_name -> proto.ClubDB
-	12, // 9: proto.RoleSer.RoleLogin:input_type -> proto.RoleLogin.Req
-	14, // 10: proto.RoleSer.RoleGetInfo:input_type -> proto.RoleGetInfo.Req
-	16, // 11: proto.RoleSer.RoleModifyName:input_type -> proto.RoleModifyName.Req
-	18, // 12: proto.RoleSer.RolePowerUp:input_type -> proto.RolePowerUp.Req
-	34, // 13: proto.RoleSer.RoleKick:input_type -> proto.RoleKick.Req
-	24, // 14: proto.RoleSer.RoleGetClubInfo:input_type -> proto.RoleGetClubInfo.Req
-	22, // 15: proto.RoleSer.RoleGetClubList:input_type -> proto.RoleGetClubList.Req
-	20, // 16: proto.RoleSer.RoleGetClubRoleInfo:input_type -> proto.RoleGetClubRoleInfo.Req
-	26, // 17: proto.RoleSer.RoleCreateClub:input_type -> proto.RoleCreateClub.Req
-	28, // 18: proto.RoleSer.RoleJoinClub:input_type -> proto.RoleJoinClub.Req
-	30, // 19: proto.RoleSer.RoleExitClub:input_type -> proto.RoleExitClub.Req
-	32, // 20: proto.RoleSer.RoleCancelClub:input_type -> proto.RoleCancelClub.Req
-	13, // 21: proto.RoleSer.RoleLogin:output_type -> proto.RoleLogin.Rsp
-	15, // 22: proto.RoleSer.RoleGetInfo:output_type -> proto.RoleGetInfo.Rsp
-	17, // 23: proto.RoleSer.RoleModifyName:output_type -> proto.RoleModifyName.Rsp
-	19, // 24: proto.RoleSer.RolePowerUp:output_type -> proto.RolePowerUp.Rsp
-	35, // 25: proto.RoleSer.RoleKick:output_type -> proto.RoleKick.Rsp
-	25, // 26: proto.RoleSer.RoleGetClubInfo:output_type -> proto.RoleGetClubInfo.Rsp
-	23, // 27: proto.RoleSer.RoleGetClubList:output_type -> proto.RoleGetClubList.Rsp
-	21, // 28: proto.RoleSer.RoleGetClubRoleInfo:output_type -> proto.RoleGetClubRoleInfo.Rsp
-	27, // 29: proto.RoleSer.RoleCreateClub:output_type -> proto.RoleCreateClub.Rsp
-	29, // 30: proto.RoleSer.RoleJoinClub:output_type -> proto.RoleJoinClub.Rsp
-	31, // 31: proto.RoleSer.RoleExitClub:output_type -> proto.RoleExitClub.Rsp
-	33, // 32: proto.RoleSer.RoleCancelClub:output_type -> proto.RoleCancelClub.Rsp
-	21, // [21:33] is the sub-list for method output_type
-	9,  // [9:21] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	1,  // 0: proto.RoleLogin.Rsp.RoleDB:type_name -> proto.RoleDB
+	38, // 1: proto.RoleLogin.Rsp.ClubRoleDB:type_name -> proto.ClubRoleDB
+	1,  // 2: proto.RoleGetInfo.Rsp.RoleDB:type_name -> proto.RoleDB
+	38, // 3: proto.RoleGetInfo.Rsp.ClubRoleDB:type_name -> proto.ClubRoleDB
+	38, // 4: proto.RoleGetClubRoleInfo.Rsp.ClubRoleDB:type_name -> proto.ClubRoleDB
+	39, // 5: proto.RoleGetClubList.Rsp.ClubDBs:type_name -> proto.ClubDB
+	39, // 6: proto.RoleGetClubInfo.Rsp.ClubDB:type_name -> proto.ClubDB
+	14, // 7: proto.RoleSer.RoleLogin:input_type -> proto.RoleLogin.Req
+	16, // 8: proto.RoleSer.RoleGetInfo:input_type -> proto.RoleGetInfo.Req
+	18, // 9: proto.RoleSer.RoleModifyName:input_type -> proto.RoleModifyName.Req
+	20, // 10: proto.RoleSer.RolePowerUp:input_type -> proto.RolePowerUp.Req
+	36, // 11: proto.RoleSer.RoleKick:input_type -> proto.RoleKick.Req
+	26, // 12: proto.RoleSer.RoleGetClubInfo:input_type -> proto.RoleGetClubInfo.Req
+	24, // 13: proto.RoleSer.RoleGetClubList:input_type -> proto.RoleGetClubList.Req
+	22, // 14: proto.RoleSer.RoleGetClubRoleInfo:input_type -> proto.RoleGetClubRoleInfo.Req
+	28, // 15: proto.RoleSer.RoleCreateClub:input_type -> proto.RoleCreateClub.Req
+	30, // 16: proto.RoleSer.RoleJoinClub:input_type -> proto.RoleJoinClub.Req
+	32, // 17: proto.RoleSer.RoleExitClub:input_type -> proto.RoleExitClub.Req
+	34, // 18: proto.RoleSer.RoleCancelClub:input_type -> proto.RoleCancelClub.Req
+	15, // 19: proto.RoleSer.RoleLogin:output_type -> proto.RoleLogin.Rsp
+	17, // 20: proto.RoleSer.RoleGetInfo:output_type -> proto.RoleGetInfo.Rsp
+	19, // 21: proto.RoleSer.RoleModifyName:output_type -> proto.RoleModifyName.Rsp
+	21, // 22: proto.RoleSer.RolePowerUp:output_type -> proto.RolePowerUp.Rsp
+	37, // 23: proto.RoleSer.RoleKick:output_type -> proto.RoleKick.Rsp
+	27, // 24: proto.RoleSer.RoleGetClubInfo:output_type -> proto.RoleGetClubInfo.Rsp
+	25, // 25: proto.RoleSer.RoleGetClubList:output_type -> proto.RoleGetClubList.Rsp
+	23, // 26: proto.RoleSer.RoleGetClubRoleInfo:output_type -> proto.RoleGetClubRoleInfo.Rsp
+	29, // 27: proto.RoleSer.RoleCreateClub:output_type -> proto.RoleCreateClub.Rsp
+	31, // 28: proto.RoleSer.RoleJoinClub:output_type -> proto.RoleJoinClub.Rsp
+	33, // 29: proto.RoleSer.RoleExitClub:output_type -> proto.RoleExitClub.Rsp
+	35, // 30: proto.RoleSer.RoleCancelClub:output_type -> proto.RoleCancelClub.Rsp
+	19, // [19:31] is the sub-list for method output_type
+	7,  // [7:19] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_role_proto_init() }
@@ -1784,7 +1894,7 @@ func file_role_proto_init() {
 	file_com_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_role_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleLogin); i {
+			switch v := v.(*RoleDB); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1796,7 +1906,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetInfo); i {
+			switch v := v.(*RoleLogin); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1808,7 +1918,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleModifyName); i {
+			switch v := v.(*RoleGetInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1820,7 +1930,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RolePowerUp); i {
+			switch v := v.(*RoleModifyName); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1832,7 +1942,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubRoleInfo); i {
+			switch v := v.(*RolePowerUp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1844,7 +1954,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubList); i {
+			switch v := v.(*RoleGetClubRoleInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1856,7 +1966,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubInfo); i {
+			switch v := v.(*RoleGetClubList); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1868,7 +1978,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleCreateClub); i {
+			switch v := v.(*RoleGetClubInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1880,7 +1990,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleJoinClub); i {
+			switch v := v.(*RoleCreateClub); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1892,7 +2002,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleExitClub); i {
+			switch v := v.(*RoleJoinClub); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1904,7 +2014,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleCancelClub); i {
+			switch v := v.(*RoleExitClub); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1916,7 +2026,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleKick); i {
+			switch v := v.(*RoleCancelClub); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1928,7 +2038,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleLogin_Req); i {
+			switch v := v.(*RoleKick); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1940,7 +2050,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleLogin_Rsp); i {
+			switch v := v.(*RoleLogin_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1952,7 +2062,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetInfo_Req); i {
+			switch v := v.(*RoleLogin_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1964,7 +2074,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetInfo_Rsp); i {
+			switch v := v.(*RoleGetInfo_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1976,7 +2086,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleModifyName_Req); i {
+			switch v := v.(*RoleGetInfo_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1988,7 +2098,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleModifyName_Rsp); i {
+			switch v := v.(*RoleModifyName_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2000,7 +2110,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RolePowerUp_Req); i {
+			switch v := v.(*RoleModifyName_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2012,7 +2122,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RolePowerUp_Rsp); i {
+			switch v := v.(*RolePowerUp_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2024,7 +2134,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubRoleInfo_Req); i {
+			switch v := v.(*RolePowerUp_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2036,7 +2146,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubRoleInfo_Rsp); i {
+			switch v := v.(*RoleGetClubRoleInfo_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2048,7 +2158,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubList_Req); i {
+			switch v := v.(*RoleGetClubRoleInfo_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2060,7 +2170,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubList_Rsp); i {
+			switch v := v.(*RoleGetClubList_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2072,7 +2182,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubInfo_Req); i {
+			switch v := v.(*RoleGetClubList_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2084,7 +2194,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleGetClubInfo_Rsp); i {
+			switch v := v.(*RoleGetClubInfo_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2096,7 +2206,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleCreateClub_Req); i {
+			switch v := v.(*RoleGetClubInfo_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2108,7 +2218,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleCreateClub_Rsp); i {
+			switch v := v.(*RoleCreateClub_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2120,7 +2230,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleJoinClub_Req); i {
+			switch v := v.(*RoleCreateClub_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2132,7 +2242,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleJoinClub_Rsp); i {
+			switch v := v.(*RoleJoinClub_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2144,7 +2254,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleExitClub_Req); i {
+			switch v := v.(*RoleJoinClub_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2156,7 +2266,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleExitClub_Rsp); i {
+			switch v := v.(*RoleExitClub_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2168,7 +2278,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleCancelClub_Req); i {
+			switch v := v.(*RoleExitClub_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2180,7 +2290,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleCancelClub_Rsp); i {
+			switch v := v.(*RoleCancelClub_Req); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2192,7 +2302,7 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleKick_Req); i {
+			switch v := v.(*RoleCancelClub_Rsp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2204,6 +2314,18 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoleKick_Req); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*RoleKick_Rsp); i {
 			case 0:
 				return &v.state
@@ -2221,13 +2343,14 @@ func file_role_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_role_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   36,
+			NumEnums:      1,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_role_proto_goTypes,
 		DependencyIndexes: file_role_proto_depIdxs,
+		EnumInfos:         file_role_proto_enumTypes,
 		MessageInfos:      file_role_proto_msgTypes,
 	}.Build()
 	File_role_proto = out.File

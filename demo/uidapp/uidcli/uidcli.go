@@ -33,14 +33,11 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	if env, world, _, _, err := srcapp.Parse(); err != nil {
-		return nil, nil
-	} else {
-		dstsvc := meta.GenRouteSvc(env, world, proto.UidFuncID)
-		_client = &Client{
-			Client: client.New(srcapp, dstsvc),
-		}
+	dstsvc := meta.GenDstRouteSvc(srcapp, proto.UidFuncID)
+	_client = &Client{
+		Client: client.New(srcapp, dstsvc),
 	}
+
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
 	opts = append(opts,
@@ -67,23 +64,23 @@ type Client struct {
 	conn *grpc.ClientConn
 }
 
-func AllocRoleId(ctx context.Context, openid string, opts ...grpc.CallOption) (string, error) {
+func AllocRoleId(ctx context.Context, openid string, opts ...grpc.CallOption) (int64, error) {
 	var in pb.AllocRoleId_Req
 	in.OpenId = openid
 	out, err := client.RPCCallSingle(_client, _client.AllocRoleId, ctx, &in, opts...)
 	if err != nil {
-		return "", err
+		return 0, err
 	} else {
 		return out.RoleId, nil
 	}
 }
 
-func AllocClubId(ctx context.Context, roleid string, opts ...grpc.CallOption) (string, error) {
+func AllocClubId(ctx context.Context, roleid int64, opts ...grpc.CallOption) (int64, error) {
 	var in pb.AllocClubId_Req
 	in.RoleId = roleid
 	out, err := client.RPCCallSingle(_client, _client.AllocClubId, ctx, &in, opts...)
 	if err != nil {
-		return "", err
+		return 0, err
 	} else {
 		return out.ClubId, nil
 	}

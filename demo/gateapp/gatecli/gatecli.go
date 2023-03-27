@@ -32,13 +32,9 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	if env, world, _, _, err := srcapp.Parse(); err != nil {
-		return nil, nil
-	} else {
-		dstsvc := meta.GenRouteSvc(env, world, proto.GateFuncID)
-		_client = &Client{
-			Client: client.New(srcapp, dstsvc),
-		}
+	dstsvc := meta.GenDstRouteSvc(srcapp, proto.GateFuncID)
+	_client = &Client{
+		Client: client.New(srcapp, dstsvc),
 	}
 	var err error
 	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
@@ -66,7 +62,7 @@ type Client struct {
 	conn *grpc.ClientConn
 }
 
-func SendToCli(ctx context.Context, roleid string, ntymsg *pb.NtyMsg, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
+func SendToCli(ctx context.Context, roleid int64, ntymsg *pb.NtyMsg, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
 	var in pb.SendToCli_Req
 	in.RoleId = roleid
 	in.NtyMsg = ntymsg

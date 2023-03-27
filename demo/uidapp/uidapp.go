@@ -6,7 +6,7 @@ import (
 	"m3game/demo/proto"
 	"m3game/demo/uidapp/uidser"
 	_ "m3game/plugins/broker/nats"
-	_ "m3game/plugins/db/redis"
+	_ "m3game/plugins/db/mongo"
 	"m3game/plugins/lease"
 	_ "m3game/plugins/lease/etcd"
 	"m3game/plugins/log"
@@ -154,5 +154,6 @@ func (d *UidApp) HealthCheck() bool {
 }
 
 func Run(ctx context.Context) error {
-	return runtime.Run(ctx, newApp(), []server.Server{uidser.New()})
+	uidser.New()
+	return runtime.New().Run(ctx, newApp(), []server.Server{uidser.New()})
 }

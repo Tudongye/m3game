@@ -66,7 +66,7 @@ func (s *OnlineSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 
 func (d *OnlineSer) OnlineCreate(ctx context.Context, in *pb.OnlineCreate_Req) (*pb.OnlineCreate_Rsp, error) {
 	out := new(pb.OnlineCreate_Rsp)
-	if err := _onlinepool.OnlineCreate(in.RoleId, in.AppId); err != nil {
+	if err := _onlinepool.OnlineCreate(ctx, in.RoleId, in.AppId); err != nil {
 		return out, err
 	} else {
 		return out, nil
@@ -75,7 +75,7 @@ func (d *OnlineSer) OnlineCreate(ctx context.Context, in *pb.OnlineCreate_Req) (
 
 func (d *OnlineSer) OnlineDelete(ctx context.Context, in *pb.OnlineDelete_Req) (*pb.OnlineDelete_Rsp, error) {
 	out := new(pb.OnlineDelete_Rsp)
-	if err := _onlinepool.OnlineDelete(in.RoleId, in.AppId); err != nil {
+	if err := _onlinepool.OnlineDelete(ctx, in.RoleId, in.AppId); err != nil {
 		return out, err
 	} else {
 		return out, nil

@@ -23,8 +23,6 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ClubRoleSerClient interface {
 	ClubRoleRead(ctx context.Context, in *ClubRoleRead_Req, opts ...grpc.CallOption) (*ClubRoleRead_Rsp, error)
-	ClubRoleCreate(ctx context.Context, in *ClubRoleCreate_Req, opts ...grpc.CallOption) (*ClubRoleCreate_Rsp, error)
-	ClubRoleDelete(ctx context.Context, in *ClubRoleDelete_Req, opts ...grpc.CallOption) (*ClubRoleDelete_Rsp, error)
 }
 
 type clubRoleSerClient struct {
@@ -44,31 +42,11 @@ func (c *clubRoleSerClient) ClubRoleRead(ctx context.Context, in *ClubRoleRead_R
 	return out, nil
 }
 
-func (c *clubRoleSerClient) ClubRoleCreate(ctx context.Context, in *ClubRoleCreate_Req, opts ...grpc.CallOption) (*ClubRoleCreate_Rsp, error) {
-	out := new(ClubRoleCreate_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.ClubRoleSer/ClubRoleCreate", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *clubRoleSerClient) ClubRoleDelete(ctx context.Context, in *ClubRoleDelete_Req, opts ...grpc.CallOption) (*ClubRoleDelete_Rsp, error) {
-	out := new(ClubRoleDelete_Rsp)
-	err := c.cc.Invoke(ctx, "/proto.ClubRoleSer/ClubRoleDelete", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // ClubRoleSerServer is the server API for ClubRoleSer service.
 // All implementations must embed UnimplementedClubRoleSerServer
 // for forward compatibility
 type ClubRoleSerServer interface {
 	ClubRoleRead(context.Context, *ClubRoleRead_Req) (*ClubRoleRead_Rsp, error)
-	ClubRoleCreate(context.Context, *ClubRoleCreate_Req) (*ClubRoleCreate_Rsp, error)
-	ClubRoleDelete(context.Context, *ClubRoleDelete_Req) (*ClubRoleDelete_Rsp, error)
 	mustEmbedUnimplementedClubRoleSerServer()
 }
 
@@ -78,12 +56,6 @@ type UnimplementedClubRoleSerServer struct {
 
 func (UnimplementedClubRoleSerServer) ClubRoleRead(context.Context, *ClubRoleRead_Req) (*ClubRoleRead_Rsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClubRoleRead not implemented")
-}
-func (UnimplementedClubRoleSerServer) ClubRoleCreate(context.Context, *ClubRoleCreate_Req) (*ClubRoleCreate_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ClubRoleCreate not implemented")
-}
-func (UnimplementedClubRoleSerServer) ClubRoleDelete(context.Context, *ClubRoleDelete_Req) (*ClubRoleDelete_Rsp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ClubRoleDelete not implemented")
 }
 func (UnimplementedClubRoleSerServer) mustEmbedUnimplementedClubRoleSerServer() {}
 
@@ -116,42 +88,6 @@ func _ClubRoleSer_ClubRoleRead_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ClubRoleSer_ClubRoleCreate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClubRoleCreate_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ClubRoleSerServer).ClubRoleCreate(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.ClubRoleSer/ClubRoleCreate",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClubRoleSerServer).ClubRoleCreate(ctx, req.(*ClubRoleCreate_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ClubRoleSer_ClubRoleDelete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ClubRoleDelete_Req)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ClubRoleSerServer).ClubRoleDelete(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/proto.ClubRoleSer/ClubRoleDelete",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ClubRoleSerServer).ClubRoleDelete(ctx, req.(*ClubRoleDelete_Req))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // ClubRoleSer_ServiceDesc is the grpc.ServiceDesc for ClubRoleSer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -162,14 +98,6 @@ var ClubRoleSer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ClubRoleRead",
 			Handler:    _ClubRoleSer_ClubRoleRead_Handler,
-		},
-		{
-			MethodName: "ClubRoleCreate",
-			Handler:    _ClubRoleSer_ClubRoleCreate_Handler,
-		},
-		{
-			MethodName: "ClubRoleDelete",
-			Handler:    _ClubRoleSer_ClubRoleDelete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,6 +1,7 @@
 package onlineser
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"m3game/config"
@@ -8,7 +9,7 @@ import (
 	"m3game/demo/proto/pb"
 	"m3game/meta"
 	"m3game/plugins/db"
-	"m3game/plugins/db/wraper"
+	"m3game/plugins/log"
 	"m3game/plugins/router"
 	"sync"
 	"time"
@@ -17,12 +18,14 @@ import (
 )
 
 var (
-	_onlineroledbmeta *db.DBMeta[*pb.OnlineRoleDB]
-	_onlinepool       *OnlinePool
+	_onlineroledbmeta     *db.DBMeta[*pb.OnlineRoleDB]
+	_onlinerolewrapermeta *db.WraperMeta[*pb.OnlineRoleDB, pb.ORFlag]
+	_onlinepool           *OnlinePool
 )
 
 func init() {
-	_onlineroledbmeta = db.NewMeta("onlinerole_table", onlineroleCreater)
+	_onlineroledbmeta = db.NewMeta[*pb.OnlineRoleDB]("onlinerole_table")
+	_onlinerolewrapermeta = db.NewWraperMeta[*pb.OnlineRoleDB, pb.ORFlag](_onlineroledbmeta)
 }
 
 func newPool() *OnlinePool {
@@ -39,10 +42,10 @@ func newCache() gcache.Cache {
 	return gcache.New(_cfg.CachePoolSize).LRU().
 		LoaderFunc(func(key interface{}) (interface{}, error) {
 			dbp := db.Instance()
-			openid := key.(string)
-			w := wraper.New(_onlineroledbmeta, openid)
-			if err := w.Read(dbp); err == nil {
-				if app := w.TObj().GetApp(); app != nil {
+			roleid := key.(int64)
+			w := _onlinerolewrapermeta.New(roleid)
+			if err := w.Read(context.TODO(), dbp); err == nil {
+				if app := w.Obj().GetOnlineApp(); app != nil {
 					return app, nil
 				} else {
 					// 异常
@@ -52,13 +55,6 @@ func newCache() gcache.Cache {
 				return nil, err
 			}
 		}).Build()
-}
-
-func onlineroleCreater() *pb.OnlineRoleDB {
-	return &pb.OnlineRoleDB{
-		RoleId: "",
-		App:    &pb.OnlineRoleApp{},
-	}
 }
 
 func Pool() *OnlinePool {
@@ -92,24 +88,26 @@ func (u *OnlinePool) Open() {
 }
 
 func (u *OnlinePool) IsOpen() bool {
+	u.mu.Lock()
+	defer u.mu.Unlock()
 	return u.isopen
 }
 
-func (u *OnlinePool) OnlineCreate(roleid string, appid string) error {
+func (u *OnlinePool) OnlineCreate(ctx context.Context, roleid int64, appid string) error {
 	u.mu.Lock()
 	defer u.mu.Unlock()
-	if !u.IsOpen() {
+	if !u.isopen {
 		return errors.New("OnlinePool is Close")
 	}
 	// 查缓存
 	created := false
 	if v, err := u.rolecache.Get(roleid); err == nil {
-		roleapp := v.(*pb.OnlineRoleApp)
+		roleapp := v.(*pb.OnlineApp)
 		if roleapp.AppId != appid {
 			if v, ok := u.appcache.Load(roleapp.AppId); ok {
 				appcache := v.(*AppCache)
 				if appcache.Ver == roleapp.Ver && appcache.LastUpdateTime+int64(_cfg.AppAliveTimeOut) > time.Now().Unix() {
-					return fmt.Errorf("RoleId %s have online in %s:%s", roleid, roleapp.AppId, roleapp.Ver)
+					return fmt.Errorf("RoleId %d have online in %s:%s", roleid, roleapp.AppId, roleapp.Ver)
 				}
 			}
 		}
@@ -130,34 +128,34 @@ func (u *OnlinePool) OnlineCreate(roleid string, appid string) error {
 	}
 	// 写入DB
 	dbp := db.Instance()
-	w := wraper.New(_onlineroledbmeta, roleid)
-	roleapp := &pb.OnlineRoleApp{AppId: appid, Ver: appcache.Ver}
-	if err := wraper.Setter(w, roleapp); err != nil {
-		return err
-	}
+	w := _onlinerolewrapermeta.New(roleid)
+	onlineapp := &pb.OnlineApp{AppId: appid, Ver: appcache.Ver}
+	w.Set(pb.ORFlag_OROnlineApp, onlineapp)
 	if created {
-		if err := w.Update(dbp); err != nil {
+		if err := w.Update(ctx, dbp); err != nil {
+			log.Error("%s", err.Error())
 			return err
 		}
 	} else {
-		if err := w.Create(dbp); err != nil {
+		if err := w.Create(ctx, dbp); err != nil {
+			log.Error("%s", err.Error())
 			return err
 		}
 	}
 	// 返回
-	u.rolecache.Set(roleid, roleapp)
+	u.rolecache.Set(roleid, onlineapp)
 	return nil
 }
 
-func (u *OnlinePool) OnlineRead(roleid string) (string, error) {
+func (u *OnlinePool) OnlineRead(roleid int64) (string, error) {
 	u.mu.Lock()
 	defer u.mu.Unlock()
-	if !u.IsOpen() {
+	if !u.isopen {
 		return "", errors.New("OnlinePool is Close")
 	}
 	// 查缓存
 	if v, err := u.rolecache.Get(roleid); err == nil {
-		roleapp := v.(*pb.OnlineRoleApp)
+		roleapp := v.(*pb.OnlineApp)
 		if v, ok := u.appcache.Load(roleapp.AppId); ok {
 			appcache := v.(*AppCache)
 			if appcache.Ver == roleapp.Ver && appcache.LastUpdateTime+int64(_cfg.AppAliveTimeOut) > time.Now().Unix() {
@@ -172,20 +170,20 @@ func (u *OnlinePool) OnlineRead(roleid string) (string, error) {
 	}
 }
 
-func (u *OnlinePool) OnlineDelete(roleid string, appid string) error {
+func (u *OnlinePool) OnlineDelete(ctx context.Context, roleid int64, appid string) error {
 	u.mu.Lock()
 	defer u.mu.Unlock()
-	if !u.IsOpen() {
+	if !u.isopen {
 		return errors.New("OnlinePool is Close")
 	}
 	// 查缓存
 	created := false
 	if v, err := u.rolecache.Get(roleid); err == nil {
-		roleapp := v.(*pb.OnlineRoleApp)
+		roleapp := v.(*pb.OnlineApp)
 		if v, ok := u.appcache.Load(roleapp.AppId); ok {
 			appcache := v.(*AppCache)
 			if appcache.Ver == roleapp.Ver && appcache.LastUpdateTime+int64(_cfg.AppAliveTimeOut) > time.Now().Unix() {
-				return fmt.Errorf("RoleId %s have online in %s:%s", roleid, roleapp.AppId, roleapp.Ver)
+				return fmt.Errorf("RoleId %d have online in %s:%s", roleid, roleapp.AppId, roleapp.Ver)
 			}
 		}
 		created = true
@@ -195,8 +193,8 @@ func (u *OnlinePool) OnlineDelete(roleid string, appid string) error {
 	u.rolecache.Remove(roleid)
 	if created {
 		dbp := db.Instance()
-		w := wraper.New(_onlineroledbmeta, roleid)
-		if err := w.Delete(dbp); err != nil {
+		w := _onlinerolewrapermeta.New(roleid)
+		if err := w.Delete(ctx, dbp); err != nil {
 			return err
 		}
 	}

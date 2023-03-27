@@ -6,58 +6,24 @@ import "options.proto";
 
 option go_package = "proto/pb";
 
-// RoleSer管理Role数据
-message RoleDB {
-    option (db_primary_key) = "RoleId";
-    string RoleId = 1;  // 唯一
-    RoleName Name = 2;  // 玩家名
-    RolePower Power = 3; // 玩家战力
-} 
-
-
-message RoleName {
-    string Value = 1;    // 玩家名
-}
-
-message RolePower {
-    int32 Value = 1;   // 战力
-}
-
-// ClubSer管理Club数据
 message ClubDB {
-    option (db_primary_key) = "ClubId";
-    string ClubId = 1;  
-    ClubOwnRoleId OwnRoleId = 2;
-    ClubRoleList RoleList = 3;
+    int64 ClubId  = 1 [(dbfield_option) = { flag: "CClubId", primary: true }];
+    int64 OwnerId = 2 [(dbfield_option) = { flag: "COwnerId" }];
 }
 
-message ClubOwnRoleId {
-    string Value = 1;
+enum CFlag {
+    CClubMin = 0;
+    CClubId  = 1;
+    COwnerId = 2;
 }
 
-message ClubRoleList {
-    repeated string Values = 1;
-}
-
-// ClubSer管理的Role数据
 message ClubRoleDB {
-    option (db_primary_key) = "RoleId";
-    string RoleId = 1;
-    ClubRoleClubId ClubId = 2;
+    int64 RoleId = 1 [(dbfield_option) = { flag: "CRRoleId", primary: true }];
+    int64 ClubId = 2 [(dbfield_option) = { flag: "CRClubId" }];
 }
 
-message ClubRoleClubId {
-    string Value = 1;
+enum CRFlag {
+    CRClubRoleMin = 0;
+    CRRoleId      = 1;
+    CRClubId      = 2;
 }
-
-// ClubRole记录Club Role映射关系
-message ClubRoleRelationDB {
-    option (db_primary_key) = "RoleId";
-    string RoleId = 1;
-    ClubRoleRelationClubId ClubId = 2;
-}
-
-message ClubRoleRelationClubId {
-    string Value = 1;
-}
-// OnlineSer管理Role在线信息

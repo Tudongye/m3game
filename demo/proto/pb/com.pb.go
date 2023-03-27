@@ -21,179 +21,117 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// RoleSer管理Role数据
-type RoleDB struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
+type CFlag int32
 
-	RoleId string     `protobuf:"bytes,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"` // 唯一
-	Name   *RoleName  `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`     // 玩家名
-	Power  *RolePower `protobuf:"bytes,3,opt,name=Power,proto3" json:"Power,omitempty"`   // 玩家战力
-}
+const (
+	CFlag_CClubMin CFlag = 0
+	CFlag_CClubId  CFlag = 1
+	CFlag_COwnerId CFlag = 2
+)
 
-func (x *RoleDB) Reset() {
-	*x = RoleDB{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
+// Enum value maps for CFlag.
+var (
+	CFlag_name = map[int32]string{
+		0: "CClubMin",
+		1: "CClubId",
+		2: "COwnerId",
 	}
-}
-
-func (x *RoleDB) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RoleDB) ProtoMessage() {}
-
-func (x *RoleDB) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+	CFlag_value = map[string]int32{
+		"CClubMin": 0,
+		"CClubId":  1,
+		"COwnerId": 2,
 	}
-	return mi.MessageOf(x)
+)
+
+func (x CFlag) Enum() *CFlag {
+	p := new(CFlag)
+	*p = x
+	return p
 }
 
-// Deprecated: Use RoleDB.ProtoReflect.Descriptor instead.
-func (*RoleDB) Descriptor() ([]byte, []int) {
+func (x CFlag) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (CFlag) Descriptor() protoreflect.EnumDescriptor {
+	return file_com_proto_enumTypes[0].Descriptor()
+}
+
+func (CFlag) Type() protoreflect.EnumType {
+	return &file_com_proto_enumTypes[0]
+}
+
+func (x CFlag) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use CFlag.Descriptor instead.
+func (CFlag) EnumDescriptor() ([]byte, []int) {
 	return file_com_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *RoleDB) GetRoleId() string {
-	if x != nil {
-		return x.RoleId
+type CRFlag int32
+
+const (
+	CRFlag_CRClubRoleMin CRFlag = 0
+	CRFlag_CRRoleId      CRFlag = 1
+	CRFlag_CRClubId      CRFlag = 2
+)
+
+// Enum value maps for CRFlag.
+var (
+	CRFlag_name = map[int32]string{
+		0: "CRClubRoleMin",
+		1: "CRRoleId",
+		2: "CRClubId",
 	}
-	return ""
-}
-
-func (x *RoleDB) GetName() *RoleName {
-	if x != nil {
-		return x.Name
+	CRFlag_value = map[string]int32{
+		"CRClubRoleMin": 0,
+		"CRRoleId":      1,
+		"CRClubId":      2,
 	}
-	return nil
+)
+
+func (x CRFlag) Enum() *CRFlag {
+	p := new(CRFlag)
+	*p = x
+	return p
 }
 
-func (x *RoleDB) GetPower() *RolePower {
-	if x != nil {
-		return x.Power
-	}
-	return nil
+func (x CRFlag) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-type RoleName struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Value string `protobuf:"bytes,1,opt,name=Value,proto3" json:"Value,omitempty"` // 玩家名
+func (CRFlag) Descriptor() protoreflect.EnumDescriptor {
+	return file_com_proto_enumTypes[1].Descriptor()
 }
 
-func (x *RoleName) Reset() {
-	*x = RoleName{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
+func (CRFlag) Type() protoreflect.EnumType {
+	return &file_com_proto_enumTypes[1]
 }
 
-func (x *RoleName) String() string {
-	return protoimpl.X.MessageStringOf(x)
+func (x CRFlag) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
 }
 
-func (*RoleName) ProtoMessage() {}
-
-func (x *RoleName) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RoleName.ProtoReflect.Descriptor instead.
-func (*RoleName) Descriptor() ([]byte, []int) {
+// Deprecated: Use CRFlag.Descriptor instead.
+func (CRFlag) EnumDescriptor() ([]byte, []int) {
 	return file_com_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *RoleName) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
-}
-
-type RolePower struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Value int32 `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"` // 战力
-}
-
-func (x *RolePower) Reset() {
-	*x = RolePower{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *RolePower) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RolePower) ProtoMessage() {}
-
-func (x *RolePower) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RolePower.ProtoReflect.Descriptor instead.
-func (*RolePower) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *RolePower) GetValue() int32 {
-	if x != nil {
-		return x.Value
-	}
-	return 0
-}
-
-// ClubSer管理Club数据
 type ClubDB struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClubId    string         `protobuf:"bytes,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
-	OwnRoleId *ClubOwnRoleId `protobuf:"bytes,2,opt,name=OwnRoleId,proto3" json:"OwnRoleId,omitempty"`
-	RoleList  *ClubRoleList  `protobuf:"bytes,3,opt,name=RoleList,proto3" json:"RoleList,omitempty"`
+	ClubId  int64 `protobuf:"varint,1,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
+	OwnerId int64 `protobuf:"varint,2,opt,name=OwnerId,proto3" json:"OwnerId,omitempty"`
 }
 
 func (x *ClubDB) Reset() {
 	*x = ClubDB{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[3]
+		mi := &file_com_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -206,7 +144,7 @@ func (x *ClubDB) String() string {
 func (*ClubDB) ProtoMessage() {}
 
 func (x *ClubDB) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[3]
+	mi := &file_com_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -219,138 +157,36 @@ func (x *ClubDB) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClubDB.ProtoReflect.Descriptor instead.
 func (*ClubDB) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{3}
+	return file_com_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ClubDB) GetClubId() string {
+func (x *ClubDB) GetClubId() int64 {
 	if x != nil {
 		return x.ClubId
 	}
-	return ""
+	return 0
 }
 
-func (x *ClubDB) GetOwnRoleId() *ClubOwnRoleId {
+func (x *ClubDB) GetOwnerId() int64 {
 	if x != nil {
-		return x.OwnRoleId
+		return x.OwnerId
 	}
-	return nil
+	return 0
 }
 
-func (x *ClubDB) GetRoleList() *ClubRoleList {
-	if x != nil {
-		return x.RoleList
-	}
-	return nil
-}
-
-type ClubOwnRoleId struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Value string `protobuf:"bytes,1,opt,name=Value,proto3" json:"Value,omitempty"`
-}
-
-func (x *ClubOwnRoleId) Reset() {
-	*x = ClubOwnRoleId{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[4]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ClubOwnRoleId) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ClubOwnRoleId) ProtoMessage() {}
-
-func (x *ClubOwnRoleId) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[4]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ClubOwnRoleId.ProtoReflect.Descriptor instead.
-func (*ClubOwnRoleId) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *ClubOwnRoleId) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
-}
-
-type ClubRoleList struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Values []string `protobuf:"bytes,1,rep,name=Values,proto3" json:"Values,omitempty"`
-}
-
-func (x *ClubRoleList) Reset() {
-	*x = ClubRoleList{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ClubRoleList) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ClubRoleList) ProtoMessage() {}
-
-func (x *ClubRoleList) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ClubRoleList.ProtoReflect.Descriptor instead.
-func (*ClubRoleList) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *ClubRoleList) GetValues() []string {
-	if x != nil {
-		return x.Values
-	}
-	return nil
-}
-
-// ClubSer管理的Role数据
 type ClubRoleDB struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoleId string          `protobuf:"bytes,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
-	ClubId *ClubRoleClubId `protobuf:"bytes,2,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
+	RoleId int64 `protobuf:"varint,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
+	ClubId int64 `protobuf:"varint,2,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
 }
 
 func (x *ClubRoleDB) Reset() {
 	*x = ClubRoleDB{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[6]
+		mi := &file_com_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -363,7 +199,7 @@ func (x *ClubRoleDB) String() string {
 func (*ClubRoleDB) ProtoMessage() {}
 
 func (x *ClubRoleDB) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[6]
+	mi := &file_com_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -376,171 +212,21 @@ func (x *ClubRoleDB) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClubRoleDB.ProtoReflect.Descriptor instead.
 func (*ClubRoleDB) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{6}
+	return file_com_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ClubRoleDB) GetRoleId() string {
+func (x *ClubRoleDB) GetRoleId() int64 {
 	if x != nil {
 		return x.RoleId
 	}
-	return ""
+	return 0
 }
 
-func (x *ClubRoleDB) GetClubId() *ClubRoleClubId {
+func (x *ClubRoleDB) GetClubId() int64 {
 	if x != nil {
 		return x.ClubId
 	}
-	return nil
-}
-
-type ClubRoleClubId struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Value string `protobuf:"bytes,1,opt,name=Value,proto3" json:"Value,omitempty"`
-}
-
-func (x *ClubRoleClubId) Reset() {
-	*x = ClubRoleClubId{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[7]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ClubRoleClubId) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ClubRoleClubId) ProtoMessage() {}
-
-func (x *ClubRoleClubId) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[7]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ClubRoleClubId.ProtoReflect.Descriptor instead.
-func (*ClubRoleClubId) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *ClubRoleClubId) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
-}
-
-// ClubRole记录Club Role映射关系
-type ClubRoleRelationDB struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	RoleId string                  `protobuf:"bytes,1,opt,name=RoleId,proto3" json:"RoleId,omitempty"`
-	ClubId *ClubRoleRelationClubId `protobuf:"bytes,2,opt,name=ClubId,proto3" json:"ClubId,omitempty"`
-}
-
-func (x *ClubRoleRelationDB) Reset() {
-	*x = ClubRoleRelationDB{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ClubRoleRelationDB) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ClubRoleRelationDB) ProtoMessage() {}
-
-func (x *ClubRoleRelationDB) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ClubRoleRelationDB.ProtoReflect.Descriptor instead.
-func (*ClubRoleRelationDB) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *ClubRoleRelationDB) GetRoleId() string {
-	if x != nil {
-		return x.RoleId
-	}
-	return ""
-}
-
-func (x *ClubRoleRelationDB) GetClubId() *ClubRoleRelationClubId {
-	if x != nil {
-		return x.ClubId
-	}
-	return nil
-}
-
-type ClubRoleRelationClubId struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Value string `protobuf:"bytes,1,opt,name=Value,proto3" json:"Value,omitempty"`
-}
-
-func (x *ClubRoleRelationClubId) Reset() {
-	*x = ClubRoleRelationClubId{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_com_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *ClubRoleRelationClubId) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ClubRoleRelationClubId) ProtoMessage() {}
-
-func (x *ClubRoleRelationClubId) ProtoReflect() protoreflect.Message {
-	mi := &file_com_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ClubRoleRelationClubId.ProtoReflect.Descriptor instead.
-func (*ClubRoleRelationClubId) Descriptor() ([]byte, []int) {
-	return file_com_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *ClubRoleRelationClubId) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
+	return 0
 }
 
 var File_com_proto protoreflect.FileDescriptor
@@ -548,53 +234,26 @@ var File_com_proto protoreflect.FileDescriptor
 var file_com_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x05, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x1a, 0x0d, 0x6f, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0x79, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x12, 0x16, 0x0a, 0x06, 0x52,
-	0x6f, 0x6c, 0x65, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x52, 0x6f, 0x6c,
-	0x65, 0x49, 0x64, 0x12, 0x23, 0x0a, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61,
-	0x6d, 0x65, 0x52, 0x04, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x26, 0x0a, 0x05, 0x50, 0x6f, 0x77, 0x65,
-	0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
-	0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x52, 0x05, 0x50, 0x6f, 0x77, 0x65, 0x72,
-	0x3a, 0x0a, 0x8a, 0xb5, 0x18, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x22, 0x20, 0x0a, 0x08,
-	0x52, 0x6f, 0x6c, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x56, 0x61, 0x6c, 0x75,
-	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x21,
-	0x0a, 0x09, 0x52, 0x6f, 0x6c, 0x65, 0x50, 0x6f, 0x77, 0x65, 0x72, 0x12, 0x14, 0x0a, 0x05, 0x56,
-	0x61, 0x6c, 0x75, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x56, 0x61, 0x6c, 0x75,
-	0x65, 0x22, 0x91, 0x01, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x12, 0x16, 0x0a, 0x06,
-	0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x43, 0x6c,
-	0x75, 0x62, 0x49, 0x64, 0x12, 0x32, 0x0a, 0x09, 0x4f, 0x77, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x49,
-	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
-	0x43, 0x6c, 0x75, 0x62, 0x4f, 0x77, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x52, 0x09, 0x4f,
-	0x77, 0x6e, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x2f, 0x0a, 0x08, 0x52, 0x6f, 0x6c, 0x65,
-	0x4c, 0x69, 0x73, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x13, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x52,
-	0x08, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x3a, 0x0a, 0x8a, 0xb5, 0x18, 0x06, 0x43,
-	0x6c, 0x75, 0x62, 0x49, 0x64, 0x22, 0x25, 0x0a, 0x0d, 0x43, 0x6c, 0x75, 0x62, 0x4f, 0x77, 0x6e,
-	0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x26, 0x0a, 0x0c,
-	0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x16, 0x0a, 0x06,
-	0x56, 0x61, 0x6c, 0x75, 0x65, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x56, 0x61,
-	0x6c, 0x75, 0x65, 0x73, 0x22, 0x5f, 0x0a, 0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65,
-	0x44, 0x42, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x2d, 0x0a, 0x06, 0x43, 0x6c,
-	0x75, 0x62, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x43, 0x6c, 0x75, 0x62, 0x49,
-	0x64, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x3a, 0x0a, 0x8a, 0xb5, 0x18, 0x06, 0x52,
-	0x6f, 0x6c, 0x65, 0x49, 0x64, 0x22, 0x26, 0x0a, 0x0e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c,
-	0x65, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x56, 0x61, 0x6c, 0x75, 0x65,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x22, 0x6f, 0x0a,
-	0x12, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x6c, 0x61, 0x74, 0x69, 0x6f,
-	0x6e, 0x44, 0x42, 0x12, 0x16, 0x0a, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x35, 0x0a, 0x06, 0x43,
-	0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x2e, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x6c, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62,
-	0x49, 0x64, 0x3a, 0x0a, 0x8a, 0xb5, 0x18, 0x06, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x22, 0x2e,
-	0x0a, 0x16, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x6c, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x56, 0x61, 0x6c, 0x75,
-	0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x42, 0x0a,
-	0x5a, 0x08, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x6f, 0x22, 0x5b, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x44, 0x42, 0x12, 0x27, 0x0a, 0x06, 0x43,
+	0x6c, 0x75, 0x62, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x0f, 0x8a, 0xa6, 0x1d,
+	0x0b, 0x0a, 0x07, 0x43, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x10, 0x01, 0x52, 0x06, 0x43, 0x6c,
+	0x75, 0x62, 0x49, 0x64, 0x12, 0x28, 0x0a, 0x07, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x49, 0x64, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x03, 0x42, 0x0e, 0x8a, 0xa6, 0x1d, 0x0a, 0x0a, 0x08, 0x43, 0x4f, 0x77,
+	0x6e, 0x65, 0x72, 0x49, 0x64, 0x52, 0x07, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x49, 0x64, 0x22, 0x5e,
+	0x0a, 0x0a, 0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x44, 0x42, 0x12, 0x28, 0x0a, 0x06,
+	0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x42, 0x10, 0x8a, 0xa6,
+	0x1d, 0x0c, 0x0a, 0x08, 0x43, 0x52, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x10, 0x01, 0x52, 0x06,
+	0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x42, 0x0e, 0x8a, 0xa6, 0x1d, 0x0a, 0x0a, 0x08, 0x43, 0x52,
+	0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x52, 0x06, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x2a, 0x30,
+	0x0a, 0x05, 0x43, 0x46, 0x6c, 0x61, 0x67, 0x12, 0x0c, 0x0a, 0x08, 0x43, 0x43, 0x6c, 0x75, 0x62,
+	0x4d, 0x69, 0x6e, 0x10, 0x00, 0x12, 0x0b, 0x0a, 0x07, 0x43, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64,
+	0x10, 0x01, 0x12, 0x0c, 0x0a, 0x08, 0x43, 0x4f, 0x77, 0x6e, 0x65, 0x72, 0x49, 0x64, 0x10, 0x02,
+	0x2a, 0x37, 0x0a, 0x06, 0x43, 0x52, 0x46, 0x6c, 0x61, 0x67, 0x12, 0x11, 0x0a, 0x0d, 0x43, 0x52,
+	0x43, 0x6c, 0x75, 0x62, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x69, 0x6e, 0x10, 0x00, 0x12, 0x0c, 0x0a,
+	0x08, 0x43, 0x52, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x10, 0x01, 0x12, 0x0c, 0x0a, 0x08, 0x43,
+	0x52, 0x43, 0x6c, 0x75, 0x62, 0x49, 0x64, 0x10, 0x02, 0x42, 0x0a, 0x5a, 0x08, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -609,31 +268,20 @@ func file_com_proto_rawDescGZIP() []byte {
 	return file_com_proto_rawDescData
 }
 
-var file_com_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_com_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_com_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_com_proto_goTypes = []interface{}{
-	(*RoleDB)(nil),                 // 0: proto.RoleDB
-	(*RoleName)(nil),               // 1: proto.RoleName
-	(*RolePower)(nil),              // 2: proto.RolePower
-	(*ClubDB)(nil),                 // 3: proto.ClubDB
-	(*ClubOwnRoleId)(nil),          // 4: proto.ClubOwnRoleId
-	(*ClubRoleList)(nil),           // 5: proto.ClubRoleList
-	(*ClubRoleDB)(nil),             // 6: proto.ClubRoleDB
-	(*ClubRoleClubId)(nil),         // 7: proto.ClubRoleClubId
-	(*ClubRoleRelationDB)(nil),     // 8: proto.ClubRoleRelationDB
-	(*ClubRoleRelationClubId)(nil), // 9: proto.ClubRoleRelationClubId
+	(CFlag)(0),         // 0: proto.CFlag
+	(CRFlag)(0),        // 1: proto.CRFlag
+	(*ClubDB)(nil),     // 2: proto.ClubDB
+	(*ClubRoleDB)(nil), // 3: proto.ClubRoleDB
 }
 var file_com_proto_depIdxs = []int32{
-	1, // 0: proto.RoleDB.Name:type_name -> proto.RoleName
-	2, // 1: proto.RoleDB.Power:type_name -> proto.RolePower
-	4, // 2: proto.ClubDB.OwnRoleId:type_name -> proto.ClubOwnRoleId
-	5, // 3: proto.ClubDB.RoleList:type_name -> proto.ClubRoleList
-	7, // 4: proto.ClubRoleDB.ClubId:type_name -> proto.ClubRoleClubId
-	9, // 5: proto.ClubRoleRelationDB.ClubId:type_name -> proto.ClubRoleRelationClubId
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_com_proto_init() }
@@ -643,42 +291,6 @@ func file_com_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_com_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleDB); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleName); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RolePower); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ClubDB); i {
 			case 0:
 				return &v.state
@@ -690,68 +302,8 @@ func file_com_proto_init() {
 				return nil
 			}
 		}
-		file_com_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClubOwnRoleId); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClubRoleList); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_com_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ClubRoleDB); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClubRoleClubId); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClubRoleRelationDB); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_com_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ClubRoleRelationClubId); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -768,13 +320,14 @@ func file_com_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_com_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   10,
+			NumEnums:      2,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_com_proto_goTypes,
 		DependencyIndexes: file_com_proto_depIdxs,
+		EnumInfos:         file_com_proto_enumTypes,
 		MessageInfos:      file_com_proto_msgTypes,
 	}.Build()
 	File_com_proto = out.File

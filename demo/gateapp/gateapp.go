@@ -6,6 +6,7 @@ import (
 	"m3game/config"
 	"m3game/demo/gateapp/gateser"
 	"m3game/demo/proto"
+	"m3game/demo/proto/pb"
 	"m3game/demo/roleapp/rolecli"
 	"m3game/demo/uidapp/uidcli"
 	"m3game/meta"
@@ -30,6 +31,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
+	goproto "google.golang.org/protobuf/proto"
 )
 
 var (
@@ -120,16 +122,23 @@ func (d *GateApp) LogicCall(roleid string, in *metapb.CSMsg) (*metapb.CSMsg, err
 	return nil, fmt.Errorf("Unknow Method %s", in.Method)
 }
 
-func (d *GateApp) AuthCall(req *metapb.AuthReq) (*metapb.AuthRsp, error) {
+func (d *GateApp) AuthCall(req []byte) (string, []byte, error) {
 	log.Debug("AuthCall...")
-	openid := fmt.Sprintf("OpenId-%s", req.Token)
-	if roleid, err := uidcli.AllocRoleId(context.Background(), openid); err != nil {
-		return nil, err
-	} else {
-		return &metapb.AuthRsp{
-			PlayerID: roleid,
-		}, nil
+	var authreq pb.AuthReq
+	if err := goproto.Unmarshal(req, &authreq); err != nil {
+		return "", nil, err
 	}
+	openid := fmt.Sprintf("OpenId-%s", authreq.Token)
+	roleid, err := uidcli.AllocRoleId(context.Background(), openid)
+	if err != nil {
+		return "", nil, err
+	}
+	authrsp := &pb.AuthRsp{
+		RoleId: roleid,
+	}
+	var rsp []byte
+	goproto.Unmarshal(rsp, authrsp)
+	return fmt.Sprintf("%d", authrsp.RoleId), rsp, nil
 }
 
 func (d *GateApp) HealthCheck() bool {
@@ -137,5 +146,5 @@ func (d *GateApp) HealthCheck() bool {
 }
 
 func Run(ctx context.Context) error {
-	return runtime.Run(ctx, newApp(), []server.Server{gateser.New()})
+	return runtime.New().Run(ctx, newApp(), []server.Server{gateser.New()})
 }

@@ -42,6 +42,14 @@ func New() *RoleSer {
 	return _ser
 }
 
+func RoleLogic(ctx context.Context, f func(role *role.Role) error) error {
+	role := role.ConvertRole(ctx)
+	if role == nil || !role.Ready() {
+		return _err_actor_notready
+	}
+	return f(role)
+}
+
 type RoleSer struct {
 	*mactor.Server
 	pb.UnimplementedRoleSerServer
@@ -82,42 +90,33 @@ func (d *RoleSer) RoleLogin(ctx context.Context, in *pb.RoleLogin_Req) (*pb.Role
 
 func (d *RoleSer) RoleGetInfo(ctx context.Context, in *pb.RoleGetInfo_Req) (*pb.RoleGetInfo_Rsp, error) {
 	out := new(pb.RoleGetInfo_Rsp)
-	role := role.ConvertRole(ctx)
-	if role == nil || !role.Ready() {
-		return out, _err_actor_notready
-	}
-	out.RoleDB = role.DB()
-	return out, nil
+	return out, RoleLogic(ctx, func(role *role.Role) error {
+		out.RoleDB = role.DB()
+		return nil
+	})
 }
 
 func (d *RoleSer) RoleModifyName(ctx context.Context, in *pb.RoleModifyName_Req) (*pb.RoleModifyName_Rsp, error) {
 	out := new(pb.RoleModifyName_Rsp)
-	role := role.ConvertRole(ctx)
-	if role == nil || !role.Ready() {
-		return out, _err_actor_notready
-	}
-	role.ModifyName(in.NewName)
-	out.RoleName = role.DB().GetName()
-	return out, nil
+	return out, RoleLogic(ctx, func(role *role.Role) error {
+		role.ModifyName(in.NewName)
+		out.Name = role.DB().GetName()
+		return nil
+	})
 }
 
 func (d *RoleSer) RolePowerUp(ctx context.Context, in *pb.RolePowerUp_Req) (*pb.RolePowerUp_Rsp, error) {
 	out := new(pb.RolePowerUp_Rsp)
-	role := role.ConvertRole(ctx)
-	if role == nil || !role.Ready() {
-		return out, _err_actor_notready
-	}
-	role.PowerUp(in.PowerUp)
-	out.RolePower = role.DB().GetPower()
-	return out, nil
+	return out, RoleLogic(ctx, func(role *role.Role) error {
+		role.PowerUp(in.PowerUp)
+		out.Power = role.DB().GetPower()
+		return nil
+	})
 }
 
 func (d *RoleSer) RoleKick(ctx context.Context, in *pb.RoleKick_Req) (*pb.RoleKick_Rsp, error) {
 	out := new(pb.RoleKick_Rsp)
-	role := role.ConvertRole(ctx)
-	if role == nil || !role.Ready() {
-		return out, _err_actor_notready
-	}
-	err := role.Kick(ctx)
-	return out, err
+	return out, RoleLogic(ctx, func(role *role.Role) error {
+		return role.Kick(ctx)
+	})
 }

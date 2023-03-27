@@ -9,9 +9,9 @@ import (
 	"m3game/demo/roleapp/rolecli"
 	"m3game/meta"
 	"m3game/plugins/db"
-	"m3game/plugins/db/wraper"
 	"m3game/plugins/log"
 	"m3game/runtime/server/actor"
+	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
@@ -39,7 +39,7 @@ func ConvertRole(ctx context.Context) *Role {
 
 type Role struct {
 	*actor.ActorBase
-	wraper *wraper.Wraper[*pb.RoleDB]
+	wraper *db.Wraper[*pb.RoleDB, pb.RFlag]
 	ready  bool
 	logp   log.LogPlus
 
@@ -64,7 +64,11 @@ func (a *Role) ActorID() string {
 
 func (a *Role) OnInit() error {
 	log.InfoP(a.logp, "OnInit")
-	a.wraper = wraper.New(rolemeta, a.ID())
+	if roleid, err := strconv.ParseInt(a.ID(), 10, 64); err != nil {
+		return err
+	} else {
+		a.wraper = _rolewrapermeta.New(roleid)
+	}
 	return nil
 }
 
@@ -79,7 +83,7 @@ func (a *Role) OnExit() error {
 	log.InfoP(a.logp, "OnExit")
 	// 向Online反注册
 	if a.ready {
-		if err := onlinecli.OnlineCreate(context.Background(), a.ActorID(), config.GetAppID().String()); err != nil {
+		if err := onlinecli.OnlineCreate(context.Background(), a.wraper.Obj().RoleId, config.GetAppID().String()); err != nil {
 			return err
 		}
 	}
@@ -88,14 +92,14 @@ func (a *Role) OnExit() error {
 
 func (a *Role) OnSave() error {
 	log.DebugP(a.logp, "Save")
-	if a.wraper.HasDirty() {
+	if a.wraper.IsDirty() {
 		log.DebugP(a.logp, "Saving")
 		dbp := db.Instance()
 		if dbp == nil {
 			log.Error(_err_actor_dbplugin.Error())
 			return _err_actor_dbplugin
 		}
-		if err := a.wraper.Update(dbp); err != nil {
+		if err := a.wraper.Update(context.TODO(), dbp); err != nil {
 			log.Error(err.Error())
 			return err
 		}
@@ -104,7 +108,7 @@ func (a *Role) OnSave() error {
 }
 
 func (a *Role) DB() *pb.RoleDB {
-	return a.wraper.TObj()
+	return a.wraper.Obj()
 }
 
 func (a *Role) ModifyName(name string) error {
@@ -112,13 +116,8 @@ func (a *Role) ModifyName(name string) error {
 	if !a.ready {
 		return fmt.Errorf("Role not Ready")
 	}
-	if rolename, err := wraper.Getter[*pb.RoleName](a.wraper); err != nil {
-		log.Error(err.Error())
-		return err
-	} else {
-		rolename.Value = name
-		return wraper.Setter(a.wraper, rolename)
-	}
+	a.wraper.Set(pb.RFlag_RName, name)
+	return nil
 }
 
 func (a *Role) PowerUp(up int32) error {
@@ -126,13 +125,9 @@ func (a *Role) PowerUp(up int32) error {
 	if !a.ready {
 		return fmt.Errorf("Role not Ready")
 	}
-	if rolepower, err := wraper.Getter[*pb.RolePower](a.wraper); err != nil {
-		log.Error(err.Error())
-		return err
-	} else {
-		rolepower.Value += up
-		return wraper.Setter(a.wraper, rolepower)
-	}
+	power := a.wraper.Get(pb.RFlag_RPower).(int32)
+	a.wraper.Set(pb.RFlag_RPower, power+up)
+	return nil
 }
 
 func (a *Role) GetInfo() (*pb.RoleDB, *pb.ClubRoleDB, error) {
@@ -140,35 +135,40 @@ func (a *Role) GetInfo() (*pb.RoleDB, *pb.ClubRoleDB, error) {
 	if !a.ready {
 		return nil, nil, fmt.Errorf("Role not Ready")
 	}
-	return a.wraper.TObj(), nil, nil
+	return a.wraper.Obj(), nil, nil
 }
 
 func (a *Role) Login(ctx context.Context) error {
 	// 查询Online
-	if appid, err := onlinecli.OnlineRead(ctx, a.ActorID()); err != nil {
+	if appid, err := onlinecli.OnlineRead(ctx, a.DB().RoleId); err != nil {
+		log.Error("%s", err.Error())
 		return err
 	} else if appid != "" && appid != config.GetAppID().String() {
 		// 踢下线
-		if err := rolecli.RoleKick(ctx, a.ActorID(), meta.RouteApp(appid)); err != nil {
+		if err := rolecli.RoleKick(ctx, a.DB().RoleId, meta.RouteApp(appid)); err != nil {
+			log.Error("%s", err.Error())
 			return err
 		}
 		time.Sleep(3 * time.Second)
 	}
 	// 向Online注册
-	if err := onlinecli.OnlineCreate(ctx, a.ActorID(), config.GetAppID().String()); err != nil {
+	if err := onlinecli.OnlineCreate(ctx, a.DB().RoleId, config.GetAppID().String()); err != nil {
+		log.Error("%s", err.Error())
 		return err
 	}
 	dbp := db.Instance()
-	if err := a.wraper.Read(dbp); err != nil {
+	if err := a.wraper.Read(ctx, dbp); err != nil {
 		if db.IsErrKeyNotFound(err) {
 			// 未注册，
-			wraper.Setter(a.wraper, &pb.RoleName{Value: fmt.Sprintf("Role%s", a.ActorID())})
-			wraper.Setter(a.wraper, &pb.RolePower{Value: 0})
+			a.wraper.Set(pb.RFlag_RName, fmt.Sprintf("Role%d", a.DB().RoleId))
+			a.wraper.Set(pb.RFlag_RPower, int32(0))
 			// DB写入失败
-			if err := a.wraper.Create(dbp); err != nil {
+			if err := a.wraper.Create(ctx, dbp); err != nil {
+				log.Error("%s", err.Error())
 				return err
 			}
 		} else {
+			log.Error("%s", err.Error())
 			return err
 		}
 	}

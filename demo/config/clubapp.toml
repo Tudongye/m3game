@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:32301"
+Addr = "127.0.0.1:32601"
 BroadcastTimeout = 5
 
 [Options]
@@ -10,6 +10,10 @@ CfgPath = "../../resource"
 [[Options.Shape]]
 RuleConfigFile = "../../resource/rules.toml"
 
+[[Plugin.Log.log_zap]]
+LogLevel = "DEBUG"
+Encoding = "console"
+
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
@@ -17,13 +21,15 @@ ConsulHost = "127.0.0.1:8500"
 [[Plugin.Broker.broker_nats]]
 URL = "127.0.0.1:4222"
 
-[[Plugin.Log.log_zap]]
-LogLevel = "DEBUG"
-Encoding = "console"
-
 [[Plugin.DB.db_mongo]]
-URI = "mongodb://admin:123456@127.0.0.1:27017"
-DataBase = "roledb"
+URI = "127.0.0.1:27017"
+DataBase = "clubdb"
+
+[[Plugin.Lease.lease_etcd]]
+Endpoints = "127.0.0.1:2379"
+DialTimeout = 5
+LeaseKeepLiveTime = 10
+PreExitTime = 5
 
 [Server]
 [[Server.Actor]]
@@ -32,10 +38,11 @@ SaveTimeInter = 10  # role自动存储时间
 TickTimeInter = 10  # 定时器轮转时间
 MaxReqChanSize = 10 # 最大接受信道
 MaxReqWaitTime = 30 # 最大等待时间
-LeaseMode = 0   # 启用租约管理
-LeasePrefix = "1"   # 租约前缀
-AllocLeaseTimeOut = 1    # 申请租约超时时间
-WaitFreeLeaseTimeOut = 1  # 预估数据迁出时长
+LeaseMode = 1   # 启用租约管理
+LeasePrefix = "clubslot"   # 租约前缀
+AllocLeaseTimeOut = 10    # 申请租约超时时间
+WaitFreeLeaseTimeOut = 3  # 预估数据迁出时长
 
 [App]
 PrePareTime = 10 # 启动前准备时长
+SlotNum = 1024 # Slot数

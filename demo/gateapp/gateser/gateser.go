@@ -2,6 +2,7 @@ package gateser
 
 import (
 	"context"
+	"fmt"
 	"m3game/demo/proto/pb"
 	"m3game/meta/metapb"
 	"m3game/plugins/gate"
@@ -41,7 +42,7 @@ type GateSer struct {
 func (d *GateSer) SendToCli(ctx context.Context, in *pb.SendToCli_Req) (*pb.SendToCli_Rsp, error) {
 	out := new(pb.SendToCli_Rsp)
 	roleid := in.RoleId
-	if csconn := gate.GetConn(roleid); csconn != nil {
+	if csconn := gate.GetConn(fmt.Sprintf("%d", roleid)); csconn != nil {
 		csmsg := &metapb.CSMsg{}
 		csmsg.Content, _ = gpb.Marshal(in)
 		csconn.Send(ctx, csmsg)

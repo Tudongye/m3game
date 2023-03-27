@@ -13,12 +13,20 @@ service GateSer {
 message SendToCli {
     option (rpc_option).ntf = true;
     message Req {
-        string RoleId = 1;
+        int64 RoleId = 1;
         NtyMsg NtyMsg = 2;
     }
     message Rsp {
 
     }
+}
+
+message AuthReq {
+    string Token =1;
+}
+
+message AuthRsp {
+    int64 RoleId = 1;
 }
 
 message NtyMsg {
@@ -28,6 +36,6 @@ message NtyMsg {
 }
 
 message NtyRoleTxt {
-    string RoleId = 1;
+    int64 RoleId = 1;
     string Content = 2;
 }

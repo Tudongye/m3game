@@ -21,7 +21,7 @@ URL = "127.0.0.1:4222"
 Addr = "127.0.0.1:32451"
 
 [[Plugin.Log.log_zap]]
-LogLevel = "INFO "
+LogLevel = "DEBUG"
 Encoding = "console"
 
 

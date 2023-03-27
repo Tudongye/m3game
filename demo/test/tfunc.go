@@ -3,7 +3,6 @@ package test
 import (
 	"log"
 	"m3game/demo/proto/pb"
-	"m3game/meta/metapb"
 	"m3game/plugins/gate/grpcgate"
 )
 
@@ -20,15 +19,15 @@ func FWaitRecv(stream grpcgate.GateSer_CSTransportClient) error {
 
 func FAuth(stream grpcgate.GateSer_CSTransportClient, m map[string]string, token string) error {
 	log.Println("Call.Auth 建立连接...")
-	in := &metapb.AuthReq{
+	in := &pb.AuthReq{
 		Token: token,
 	}
-	out := &metapb.AuthRsp{}
+	out := &pb.AuthRsp{}
 	if err := CallGrpcGate(stream, "", m, in, out); err != nil {
 		log.Printf("CallGrpcGate Fail %s", err.Error())
 		return err
 	}
-	log.Println("PlayerID:", out.PlayerID)
+	log.Println("RoleId:", out.RoleId)
 	return nil
 }
 
@@ -68,7 +67,7 @@ func FRoleModifyName(stream grpcgate.GateSer_CSTransportClient, m map[string]str
 		log.Printf("CallGrpcGate Fail %s", err.Error())
 		return err
 	}
-	log.Println("RoleName:", out.RoleName)
+	log.Println("RoleName:", out.Name)
 	return nil
 }
 
@@ -82,6 +81,6 @@ func FRolePowerUp(stream grpcgate.GateSer_CSTransportClient, m map[string]string
 		log.Printf("CallGrpcGate Fail %s", err.Error())
 		return err
 	}
-	log.Println("RolePower:", out.RolePower)
+	log.Println("RolePower:", out.Power)
 	return nil
 }

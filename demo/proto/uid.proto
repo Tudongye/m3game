@@ -7,45 +7,43 @@ import "options.proto";
 option go_package = "proto/pb";
 
 service UidSer {
-    rpc AllocRoleId(AllocRoleId.Req) returns (AllocRoleId.Rsp); // 分配RoleID
-    rpc AllocClubId(AllocClubId.Req) returns (AllocClubId.Rsp); // 分配ClubID
+    rpc AllocRoleId(AllocRoleId.Req) returns (AllocRoleId.Rsp);  // 分配RoleID
+    rpc AllocClubId(AllocClubId.Req) returns (AllocClubId.Rsp);  // 分配ClubID
 }
 
-// Uid元数据
 message UidMetaDB {
-    option (db_primary_key) = "WorldId";
-    string WorldId = 1;
-    UidMetaCurRoleId CurRoleId = 2;
-    UidMetaCurClubId CurClubId = 3;
+    string WorldId = 1 [(dbfield_option) = { flag: "UMWorldId", primary: true }];
+    int64 CurRoleId = 2 [(dbfield_option) = { flag: "UMCurRoleId" }];
+    int64 CurClubId = 3 [(dbfield_option) = { flag: "UMCurClubId" }];
 }
 
-message UidMetaCurRoleId {
-    int64 Value = 1;
+enum UMFlag {
+    UMUidMetaMin = 0;
+    UMWorldId    = 1;
+    UMCurRoleId  = 2;
+    UMCurClubId  = 3;
 }
 
-message UidMetaCurClubId {
-    int64 Value = 1;
-}
-
-// Uid管理OpenId到RoleId映射关系
 message UidRoleIdDB {
-    option (db_primary_key) = "OpenId";
-    string OpenId = 1;
-    UidRoleIdRoleId RoleId = 2;
+    string OpenId = 1 [(dbfield_option) = { flag: "UROpenId", primary: true }];
+    int64 RoleId  = 2 [(dbfield_option) = { flag: "URRoleId" }];
 }
 
-message UidRoleIdRoleId {
-    string Value = 1;
+enum URFlag {
+    URUidRoleIdMin = 0;
+    UROpenId       = 1;
+    URRoleId       = 2;
 }
 
-// Uid管理OpenId到RoleId映射关系
 message UidClubIdDB {
-    option (db_primary_key) = "ClubId";
-    string ClubId = 1;
-    UidClubIdRoleId RoleId = 2;
+    int64 ClubId  = 1 [(dbfield_option) = { flag: "UCClubId", primary: true }];
+    int64 OwnerId = 2 [(dbfield_option) = { flag: "UCOwnerId" }];
 }
-message UidClubIdRoleId {
-    string Value = 1;
+
+enum UCFlag {
+    UCUidClubIdMin = 0;
+    UCClubId       = 1;
+    UCOwnerId      = 2;
 }
 
 message AllocRoleId {
@@ -54,16 +52,16 @@ message AllocRoleId {
         string OpenId = 1;
     }
     message Rsp {
-        string RoleId = 1;
+        int64 RoleId = 1;
     }
 }
 
 message AllocClubId {
     option (rpc_option).route_key = "";
     message Req {
-        string RoleId = 1;
+        int64 RoleId = 1;
     }
     message Rsp {
-        string ClubId = 1;
+        int64 ClubId = 1;
     }
 }

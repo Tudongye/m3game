@@ -21,13 +21,16 @@ URL = "127.0.0.1:4222"
 LogLevel = "DEBUG"
 Encoding = "console"
 
+[[Plugin.DB.db_mongo]]
+URI = "mongodb://admin:123456@127.0.0.1:27017"
+DataBase = "uiddb"
 
-[[Plugin.DB.db_redis]]
-Host = "127.0.0.1"
-Port = 6379
-Auth = "123456"
-MaxIdle = 100
-MaxActive = 100
+# [[Plugin.DB.db_redis]]
+# Host = "127.0.0.1"
+# Port = 6379
+# Auth = "123456"
+# MaxIdle = 100
+# MaxActive = 100
 
 [[Plugin.Lease.lease_etcd]]
 Endpoints = "127.0.0.1:2379"

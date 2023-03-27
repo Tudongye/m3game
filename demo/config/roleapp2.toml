@@ -18,15 +18,12 @@ ConsulHost = "127.0.0.1:8500"
 URL = "127.0.0.1:4222"
 
 [[Plugin.Log.log_zap]]
-LogLevel = "INFO "
+LogLevel = "DEBUG"
 Encoding = "console"
 
-[[Plugin.DB.db_redis]]
-Host = "127.0.0.1"
-Port = 6379
-Auth = "123456"
-MaxIdle = 100
-MaxActive = 100
+[[Plugin.DB.db_mongo]]
+URI = "mongodb://admin:123456@127.0.0.1:27017"
+DataBase = "roledb"
 
 [Server]
 [[Server.Actor]]
@@ -36,6 +33,9 @@ TickTimeInter = 10  # 定时器轮转时间
 MaxReqChanSize = 10 # 最大接受信道
 MaxReqWaitTime = 30 # 最大等待时间
 LeaseMode = 0   # 启用租约管理
+LeasePrefix = "1"   # 租约前缀
+AllocLeaseTimeOut = 1    # 申请租约超时时间
+WaitFreeLeaseTimeOut = 1  # 预估数据迁出时长
 
 [App]
 PrePareTime = 10 # 启动前准备时长

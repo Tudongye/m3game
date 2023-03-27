@@ -100,6 +100,7 @@ func CallGrpcGate(stream grpcgate.GateSer_CSTransportClient, method string, meta
 		}
 	}
 	if err := proto.Unmarshal(outmsg.Content, out); err != nil {
+		log.Println("--------------------")
 		log.Println(err, string(outmsg.Content))
 		return err
 	}

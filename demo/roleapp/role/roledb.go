@@ -6,17 +6,11 @@ import (
 )
 
 var (
-	rolemeta *db.DBMeta[*pb.RoleDB]
+	_roledbmeta     *db.DBMeta[*pb.RoleDB]
+	_rolewrapermeta *db.WraperMeta[*pb.RoleDB, pb.RFlag]
 )
 
 func init() {
-	rolemeta = db.NewMeta("role_table", roledbCreater)
-}
-
-func roledbCreater() *pb.RoleDB {
-	return &pb.RoleDB{
-		RoleId: "",
-		Name:   &pb.RoleName{},
-		Power:  &pb.RolePower{},
-	}
+	_roledbmeta = db.NewMeta[*pb.RoleDB]("role_table")
+	_rolewrapermeta = db.NewWraperMeta[*pb.RoleDB, pb.RFlag](_roledbmeta)
 }
