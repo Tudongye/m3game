@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service SimpleSer {
+    rpc HelloWorld(HelloWorld.Req) returns (HelloWorld.Rsp);
+}
+
+message HelloWorld {
+    option (rpc_option).route_key = "";
+    message Req {
+        string Req = 1;
+    }
+    message Rsp {
+        string Rsp = 1;
+    }
+}
