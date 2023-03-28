@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service GateSer {
+    rpc SendToCli(SendToCli.Req) returns (SendToCli.Rsp);
+}
+
+message SendToCli {
+    option (rpc_option).ntf = true;
+    message Req {
+        int64 RoleId  = 1;
+        NtyMsg NtyMsg = 2;
+    }
+    message Rsp {}
+}
+
+message AuthReq {
+    string Token = 1;
+}
+
+message AuthRsp {
+    int64 RoleId = 1;
+}
+
+message NtyMsg {
+    oneof msg {
+        NtyRoleTxt NtyRoleTxt = 1;
+    }
+}
+
+message NtyRoleTxt {
+    int64 RoleId   = 1;
+    string Content = 2;
+}

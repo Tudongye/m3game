@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+message ClubDB {
+    int64 ClubId  = 1 [(dbfield_option) = { flag: "CClubId", primary: true }];
+    int64 SlotId  = 2 [(dbfield_option) = { flag: "CSlotId" }];
+    int64 OwnerId = 3 [(dbfield_option) = { flag: "COwnerId" }];
+}
+
+enum CFlag {
+    CClubMin = 0;
+    CClubId  = 1;
+    CSlotId  = 2;
+    COwnerId = 3;
+}
+
+message ClubRoleDB {
+    int64 RoleId = 1 [(dbfield_option) = { flag: "CRRoleId", primary: true }];
+    int64 ClubId = 2 [(dbfield_option) = { flag: "CRClubId" }];
+}
+
+enum CRFlag {
+    CRClubRoleMin = 0;
+    CRRoleId      = 1;
+    CRClubId      = 2;
+}

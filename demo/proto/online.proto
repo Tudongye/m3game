@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service OnlineSer {
+    rpc OnlineCreate(OnlineCreate.Req)
+        returns (OnlineCreate.Rsp);  // 创建在线状态
+    rpc OnlineRead(OnlineRead.Req) returns (OnlineRead.Rsp);  // 获取在线情况
+    rpc OnlineDelete(OnlineDelete.Req)
+        returns (OnlineDelete.Rsp);  // 删除在线状态
+}
+message OnlineRoleDB {
+    int64 RoleId = 1 [(dbfield_option) = { flag: "ORRoleId", primary: true }];
+    OnlineApp OnlineApp = 2 [(dbfield_option) = { flag: "OROnlineApp" }];
+}
+
+message OnlineApp {
+    string AppId = 1;
+    string Ver   = 2;
+}
+
+enum ORFlag {
+    OROnlineRoleMin = 0;
+    ORRoleId        = 1;
+    OROnlineApp     = 2;
+}
+
+message OnlineCreate {
+    option (rpc_option).route_key = "";
+    message Req {
+        int64 RoleId = 1;
+        string AppId = 2;
+    }
+    message Rsp {}
+}
+
+message OnlineRead {
+    option (rpc_option).route_key = "";
+    message Req {
+        int64 RoleId = 1;
+    }
+    message Rsp {
+        string AppId = 1;
+    }
+}
+
+message OnlineDelete {
+    option (rpc_option).route_key = "";
+    message Req {
+        int64 RoleId = 1;
+        string AppId = 2;
+    }
+    message Rsp {}
+}

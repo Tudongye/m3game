@@ -1,0 +1,132 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+import "com.proto";
+
+option go_package = "proto/pb";
+
+service RoleSer {
+    rpc RoleLogin(RoleLogin.Req) returns (RoleLogin.Rsp);        // 登陆注册
+    rpc RoleGetInfo(RoleGetInfo.Req) returns (RoleGetInfo.Rsp);  // 获取详情
+    rpc RoleModifyName(RoleModifyName.Req)
+        returns (RoleModifyName.Rsp);                            // 改名
+    rpc RolePowerUp(RolePowerUp.Req) returns (RolePowerUp.Rsp);  // 战力提升
+    rpc RoleKick(RoleKick.Req) returns (RoleKick.Rsp);           // 服务迁移
+
+    rpc RoleGetClubInfo(RoleGetClubInfo.Req)
+        returns (RoleGetClubInfo.Rsp);  // 获取社团信息
+    rpc RoleGetClubList(RoleGetClubList.Req)
+        returns (RoleGetClubList.Rsp);  // 获取社团列表
+    rpc RoleCreateClub(RoleCreateClub.Req)
+        returns (RoleCreateClub.Rsp);  // 创建社团
+    rpc RoleJoinClub(RoleJoinClub.Req) returns (RoleJoinClub.Rsp);  // 加入社团
+    rpc RoleExitClub(RoleExitClub.Req) returns (RoleExitClub.Rsp);  // 退出社团
+    rpc RoleCancelClub(RoleCancelClub.Req)
+        returns (RoleCancelClub.Rsp);  // 解散社团
+}
+
+message RoleDB {
+    int64 RoleId = 1 [(dbfield_option) = { flag: "RRoleId", primary: true }];
+    string Name  = 2 [(dbfield_option) = { flag: "RName" }];
+    int32 Power  = 3 [(dbfield_option) = { flag: "RPower" }];
+}
+
+enum RFlag {
+    RRoleMin = 0;
+    RRoleId  = 1;
+    RName    = 2;
+    RPower   = 3;
+}
+
+message RoleLogin {
+    option (rpc_option).cs = true;
+    message Req {}
+    message Rsp {
+        RoleDB RoleDB = 1;
+    }
+}
+
+message RoleGetInfo {
+    option (rpc_option).cs = true;
+    message Req {}
+    message Rsp {
+        RoleDB RoleDB         = 1;
+        ClubRoleDB ClubRoleDB = 2;
+    }
+}
+
+message RoleModifyName {
+    option (rpc_option).cs = true;
+    message Req {
+        string NewName = 1;
+    }
+    message Rsp {
+        string Name = 1;
+    }
+}
+
+message RolePowerUp {
+    option (rpc_option).cs = true;
+    message Req {
+        int32 PowerUp = 1;
+    }
+    message Rsp {
+        int32 Power = 1;
+    }
+}
+
+message RoleGetClubList {
+    option (rpc_option).cs = true;
+    message Req {}
+    message Rsp {
+        repeated ClubDB ClubDBs = 1;
+    }
+}
+
+message RoleGetClubInfo {
+    option (rpc_option).cs = true;
+    message Req {
+        int64 ClubId = 1;
+    }
+    message Rsp {
+        ClubDB ClubDB = 1;
+    }
+}
+
+message RoleCreateClub {
+    option (rpc_option).cs = true;
+    message Req {}
+    message Rsp {
+        int64 ClubId = 1;
+    }
+}
+
+message RoleJoinClub {
+    option (rpc_option).cs = true;
+    message Req {
+        int64 ClubId = 1;
+    }
+    message Rsp {}
+}
+
+message RoleExitClub {
+    option (rpc_option).cs = true;
+    message Req {}
+    message Rsp {}
+}
+
+message RoleCancelClub {
+    option (rpc_option).cs = true;
+    message Req {}
+    message Rsp {}
+}
+
+message RoleKick {
+    option (rpc_option).cs = false;
+    message Req {
+        int64 RoleId = 1;
+    }
+    message Rsp {}
+}
