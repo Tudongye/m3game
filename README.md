@@ -329,20 +329,18 @@ M3对于资源文件格式没有要求，只要求资源管理器提供Load接�
 
 M3采用pb来定义游戏实体的DB存储结构。如下是一个简单实体的结构定义。相关实现参看example/actorapp/actor
 
-M3要求实体DB结构的一级字段必须是string（必须是主键） 或 proto.Message（为了区分字段，类型不可重复），且DB结构必须设置一个string类型的主键。
-
 ```
 message ActorDB {
-    option (db_primary_key) = "ActorID";
-    string ActorID = 1;
-    ActorName ActorName = 2;
-    ActorInfo ActorInfo = 3;
+    string ActorID = 1 [(dbfield_option) = { flag: "FActorID", primary: true }];	// 主键
+    string Name    = 2 [(dbfield_option) = { flag: "FActorName" }];
+    int32 Level    = 3 [(dbfield_option) = { flag: "FActorLevel" }];
 }
-message ActorName {
-    string Name = 1;
-}
-message ActorInfo {
-    int32 Level = 1;
+
+enum AcFlag {
+    FActorMin   = 0;
+    FActorID    = 1;
+    FActorName  = 2;
+    FActorLevel = 3;
 }
 ```
 
