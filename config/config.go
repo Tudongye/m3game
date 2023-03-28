@@ -115,7 +115,7 @@ func Init() {
 	flag.Parse()
 	_appid = meta.RouteApp(_rconf.idstr)
 	if env, world, fun, _, err := _appid.Parse(); err != nil {
-		panic(fmt.Sprintf("idstr invaild %s", _appid))
+		log.Fatal("idstr invaild %s", _appid)
 	} else {
 		_svcid = meta.GenRouteSvc(env, world, fun)
 		_worldid = meta.GenRouteWorld(env, world)
@@ -128,7 +128,7 @@ func Init() {
 		_rconf.cfgPath = _defaultCfgPath
 	}
 	if err := _rconf.loadconfig(); err != nil {
-		panic(fmt.Sprintf("LoadConfig Fail %s", err.Error()))
+		log.Fatal("LoadConfig Fail %s", err.Error())
 	}
 }
 

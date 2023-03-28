@@ -5,6 +5,7 @@ import (
 	"io"
 	"m3game/config"
 	"m3game/meta"
+	"m3game/meta/errs"
 	"m3game/meta/metapb"
 	"m3game/plugins/gate"
 	"m3game/plugins/log"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	grpc "google.golang.org/grpc"
 )
 
@@ -53,20 +53,20 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg grpcGateCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "Gate Decode Cfg")
+		return nil, errs.GrpcGateSetUpFail.Wrap(err, "Gate Decode Cfg")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.GrpcGateSetUpFail.Wrap(err, "")
 	}
 	var err error
 	tcpAddr, err := net.ResolveTCPAddr("tcp", cfg.Addr)
 	if err != nil {
-		return nil, errors.Wrap(err, "transport")
+		return nil, errs.GrpcGateSetUpFail.Wrap(err, "transport")
 	}
 	listener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
-		return nil, errors.Wrap(err, "transport.ListenTCP")
+		return nil, errs.GrpcGateSetUpFail.Wrap(err, "transport.ListenTCP")
 	}
 	_grpcgate = &Gate{
 		gser: grpc.NewServer(),
@@ -187,17 +187,17 @@ type CSConn struct {
 
 func (c *CSConn) Send(ctx context.Context, msg *metapb.CSMsg) error {
 	if c.isclosed {
-		return errors.New("CSConn closed")
+		return errs.GrpcGateConnClosed.New("CSConn closed")
 	}
 	select {
 	case <-c.ctx.Done():
-		return errors.New("CSConn closed")
+		return errs.GrpcGateConnClosed.New("CSConn closed")
 	case c.sendch <- msg:
 		return nil
 	case <-ctx.Done():
-		return errors.New("ctx done")
+		return errs.GrpcGateSendFailRPCDone.New("ctx done")
 	default:
-		return errors.New("chan full")
+		return errs.GrpcGateSendFailChanFull.New("chan full")
 	}
 }
 
@@ -226,7 +226,6 @@ func (c *CSConn) recvloop() {
 			break
 		}
 		log.Debug("Recv %s", msg.Method)
-		msg.Metas = append(msg.Metas, &metapb.Meta{Key: meta.M3ActorActorID.String(), Value: c.connid})
 		msg.Metas = append(msg.Metas, &metapb.Meta{Key: meta.M3RouteSrcApp.String(), Value: config.GetAppID().String()})
 		res, err := gate.LogicCall(c.connid, msg)
 		if err != nil {

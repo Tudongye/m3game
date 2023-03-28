@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"m3game/config"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/plugins/router"
 	"m3game/runtime/plugin"
@@ -13,7 +14,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/consul/api"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -51,17 +51,17 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg consulRouterCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "Router Decode Cfg")
+		return nil, errs.ConsulSetupFail.Wrap(err, "Router Decode Cfg")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.ConsulSetupFail.Wrap(err, "")
 	}
 	_consulrouter = &Router{}
 	consulConfig := api.DefaultConfig()
 	consulConfig.Address = cfg.ConsulHost
 	if client, err := api.NewClient(consulConfig); err != nil {
-		return nil, errors.Wrapf(err, "Consul.Api.NewClient Add %s", consulConfig.Address)
+		return nil, errs.ConsulSetupFail.Wrap(err, "Consul.Api.NewClient Add %s", consulConfig.Address)
 	} else {
 		_consulrouter.client = client
 	}
@@ -133,7 +133,7 @@ func (r *Router) Register(app string, svc string, addr string, meta map[string]s
 	log.Info("Register HealthMethod => %s", healthmethod)
 	agent := r.client.Agent()
 	if err := agent.ServiceRegister(reg); err != nil {
-		return errors.Wrapf(err, "Consul.agent.ServiceRegister %s", app)
+		return errs.ConsulRegisterAppFail.Wrap(err, "Consul.agent.ServiceRegister %s", app)
 	}
 	return nil
 }
@@ -145,7 +145,7 @@ func (r *Router) Deregister(app string, svc string) error {
 func (r *Router) GetAllInstances(svcid string) ([]router.Ins, error) {
 	services, _, err := _consulrouter.client.Health().Service(svcid, "", true, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "Consul.Health.Service %s fail", svcid)
+		return nil, errs.ConsulGetAllInstanceFail.Wrap(err, "Consul.Health.Service %s fail", svcid)
 	}
 	var instances []router.Ins
 	for _, service := range services {

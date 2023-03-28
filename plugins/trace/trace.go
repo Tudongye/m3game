@@ -2,7 +2,7 @@ package trace
 
 import (
 	"context"
-	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/runtime/rpc"
 
@@ -20,7 +20,7 @@ var (
 func New(me *trace.TracerProvider) (*trace.TracerProvider, error) {
 	if _traceprovider != nil {
 		log.Fatal("Trace Only One")
-		return nil, fmt.Errorf("Trace is newed ")
+		return nil, errs.TraceInsHasNewed.New("Trace is newed ")
 	}
 	_traceprovider = me
 	return _traceprovider, nil

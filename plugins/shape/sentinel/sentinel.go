@@ -2,7 +2,7 @@ package sentinel
 
 import (
 	"context"
-	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/plugins/shape"
 	"m3game/runtime/plugin"
@@ -12,7 +12,6 @@ import (
 	"github.com/alibaba/sentinel-golang/core/flow"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	sentinelPlugin "github.com/sentinel-group/sentinel-go-adapters/grpc"
 	"google.golang.org/grpc"
 )
@@ -53,14 +52,14 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg sentinelShapeCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "Shape Decode Cfg")
+		return nil, errs.SentinelSteupFail.Wrap(err, "Shape Decode Cfg")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.SentinelSteupFail.Wrap(err, "")
 	}
 	if err := sentinel.InitWithConfigFile(cfg.ConfigFile); err != nil {
-		return nil, err
+		return nil, errs.SentinelSteupFail.Wrap(err, "")
 	}
 	_sentinelshape = &SentinelShape{}
 	if _, err := shape.New(_sentinelshape); err != nil {
@@ -129,7 +128,7 @@ func (s *SentinelShape) RegisterRule(rules []shape.Rule) error {
 				circuitBreakerRule.Strategy = circuitbreaker.SlowRequestRatio
 				circuitBreakerRule.Threshold = float64(brule.Threshold)
 			} else {
-				return fmt.Errorf("Unknow Stategy %s", brule.Strategy)
+				return errs.SentinelRegisterRuleFail.New("Unknow Stategy %s", brule.Strategy)
 			}
 			breakules = append(breakules, circuitBreakerRule)
 		}

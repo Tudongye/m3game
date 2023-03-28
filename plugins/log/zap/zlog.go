@@ -3,13 +3,13 @@ package zlog
 import (
 	"context"
 	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 	"os"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -59,7 +59,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg ZlogCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "Zlog Decode Cfg")
+		return nil, errs.ZlogSetupFail.Wrap(err, "Zlog Decode Cfg")
 	}
 	loglv := log.ConvertLogLv(cfg.LogLevel)
 

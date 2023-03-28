@@ -2,13 +2,13 @@ package mongo
 
 import (
 	"context"
+	"m3game/meta/errs"
 	"m3game/plugins/db"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -51,20 +51,20 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg MongoCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "RedisDB Decode Cfg")
+		return nil, errs.MongoSetupFail.Wrap(err, "RedisDB Decode Cfg")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.MongoSetupFail.Wrap(err, "")
 	}
 	_mongodb = &MongoDB{}
 	if client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.URI)); err != nil {
-		return nil, err
+		return nil, errs.MongoSetupFail.Wrap(err, "")
 	} else {
 		_mongodb.client = client
 	}
 	if err := _mongodb.client.Ping(ctx, readpref.Primary()); err != nil {
-		return nil, err
+		return nil, errs.MongoSetupFail.Wrap(err, "")
 	}
 	_mongodb.database = _mongodb.client.Database(cfg.DataBase)
 	if _, err := db.New(_mongodb); err != nil {
@@ -106,7 +106,7 @@ func (c *MongoDB) Read(ctx context.Context, meta db.DBMetaInter, key interface{}
 	obj := meta.New()
 	if err := coll.FindOne(ctx, bson.M{meta.FlagName(meta.KeyFlag()): key}, options.FindOne().SetProjection(projection)).Decode(obj); err != nil {
 		if err == mongo.ErrNoDocuments {
-			return nil, db.Err_KeyNotFound
+			return nil, errs.DBKeyNotFound.New("Key %v", key)
 		}
 		return nil, err
 	}

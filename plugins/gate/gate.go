@@ -2,7 +2,7 @@ package gate
 
 import (
 	"context"
-	"fmt"
+	"m3game/meta/errs"
 	"m3game/meta/metapb"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
@@ -34,7 +34,7 @@ type GateReciver interface {
 func New(g Gate) (Gate, error) {
 	if _gate != nil {
 		log.Fatal("Gate Only One")
-		return nil, fmt.Errorf("gate is newed %s", _gate.Factory().Name())
+		return nil, errs.GateInsHasNewed.New("gate is newed %s", _gate.Factory().Name())
 	}
 	_gate = g
 	return _gate, nil

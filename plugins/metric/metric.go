@@ -1,7 +1,7 @@
 package metric
 
 import (
-	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 )
 
@@ -13,7 +13,7 @@ var (
 func New(me Metric) (Metric, error) {
 	if _metric != nil {
 		log.Fatal("Metric Only One")
-		return nil, fmt.Errorf("Metric is newed ")
+		return nil, errs.MetricInsHasNewed.New("Metric is newed ")
 	}
 	_metric = me
 	return _metric, nil

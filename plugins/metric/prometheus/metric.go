@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"m3game/config"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/plugins/metric"
 	"m3game/runtime"
@@ -15,7 +16,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/consul/api"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -53,15 +53,15 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg PromCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "Router Decode Cfg")
+		return nil, errs.PromSetupFaul.Wrap(err, "Router Decode Cfg")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.PromSetupFaul.Wrap(err, "")
 	}
 	_metric = &Metric{}
 	if _, err := metric.New(_metric); err != nil {
-		return nil, err
+		return nil, errs.PromSetupFaul.Wrap(err, "")
 	}
 	listenport := fmt.Sprintf(":%d", cfg.Port)
 	http.Handle("/metrics", promhttp.Handler())
@@ -74,7 +74,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 
 	if cfg.ConsulUrl != "" {
 		if err := registerConsul(cfg.ConsulUrl, config.GetSvcID().String(), config.GetAppID().String(), cfg.Port); err != nil {
-			return nil, err
+			return nil, errs.PromSetupFaul.Wrap(err, "")
 		}
 		log.Info("Metric.registerConsul %s svc %s ins %s...", cfg.ConsulUrl, config.GetSvcID(), config.GetAppID())
 	}
@@ -142,7 +142,7 @@ func registerConsul(consulurl string, svc string, ins string, port int) error {
 	consulConfig.Address = consulurl
 	client, err := api.NewClient(consulConfig)
 	if err != nil {
-		return errors.Wrap(err, "Metric.registerConsul")
+		return errs.PromRegisterConsulFail.Wrap(err, "Metric.registerConsul %s", consulurl)
 	}
 	interval := time.Duration(10) * time.Second
 	deregister := time.Duration(1) * time.Minute
@@ -165,7 +165,7 @@ func registerConsul(consulurl string, svc string, ins string, port int) error {
 	}
 	agent := client.Agent()
 	if err := agent.ServiceRegister(reg); err != nil {
-		return errors.Wrapf(err, "Metric.registerConsul")
+		return errs.PromRegisterConsulFail.Wrap(err, "Metric.registerConsul")
 	}
 	return nil
 }

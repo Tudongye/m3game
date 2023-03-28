@@ -4,6 +4,7 @@ package cache
 import (
 	"context"
 	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/db"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
@@ -81,7 +82,7 @@ func (c *CacheDB) Read(ctx context.Context, meta db.DBMetaInter, key interface{}
 	fieldname := genCacheKey(key, meta.Table(), meta.FlagName(meta.KeyFlag()))
 	log.Debug("Read %v", fieldname)
 	if _, ok := c.cache[fieldname]; !ok {
-		return nil, db.Err_KeyNotFound
+		return nil, errs.DBKeyNotFound.New("Key %v", key)
 	}
 	if len(flags) == 0 {
 		flags = meta.AllFlags()
@@ -101,9 +102,9 @@ func (c *CacheDB) Update(ctx context.Context, meta db.DBMetaInter, key interface
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table(), meta.FlagName(meta.KeyFlag()))
-	log.Debug("Read %v", fieldname)
+	log.Debug("Update %v", fieldname)
 	if _, ok := c.cache[fieldname]; !ok {
-		return db.Err_KeyNotFound
+		return errs.DBKeyNotFound.New("Key %v", key)
 	}
 	if len(flags) == 0 {
 		flags = meta.AllFlags()
@@ -122,15 +123,13 @@ func (c *CacheDB) Create(ctx context.Context, meta db.DBMetaInter, key interface
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table(), meta.FlagName(meta.KeyFlag()))
 	if _, ok := c.cache[fieldname]; ok {
-		return db.Err_DuplicateEntry
+		return errs.DBDuplicateEntry.New("Key %v", key)
 	}
 	flags := meta.AllFlags()
-	log.Debug("%v %v %v", key, flags, meta.AllFlags())
 	for _, flag := range flags {
 		fieldname := genCacheKey(key, meta.Table(), meta.FlagName(flag))
 		v := meta.Getter(obj, flag)
 		value, _ := _codec.Encode(meta.FlagKind(flag), v)
-		log.Debug("Set %v %v", fieldname, value)
 		c.cache[fieldname] = value
 	}
 	return nil
@@ -141,7 +140,7 @@ func (c *CacheDB) Delete(ctx context.Context, meta db.DBMetaInter, key interface
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table(), meta.FlagName(meta.KeyFlag()))
 	if _, ok := c.cache[fieldname]; !ok {
-		return db.Err_KeyNotFound
+		return errs.DBKeyNotFound.New("Key %v", key)
 	}
 	for _, flag := range meta.AllFlags() {
 		fieldname := genCacheKey(key, meta.Table(), meta.FlagName(flag))

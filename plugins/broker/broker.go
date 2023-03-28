@@ -1,8 +1,7 @@
 package broker
 
 import (
-	"errors"
-	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 )
@@ -20,7 +19,7 @@ type Broker interface {
 func New(b Broker) (Broker, error) {
 	if _broker != nil {
 		log.Fatal("Broker Only One")
-		return nil, fmt.Errorf("broker is newed %s", _broker.Factory().Name())
+		return nil, errs.BrokerInsHasNewed.New("broker is newed %s", _broker.Factory().Name())
 	}
 	_broker = b
 	return _broker, nil
@@ -36,14 +35,14 @@ func Instance() Broker {
 
 func Publish(topic string, bytes []byte) error {
 	if _broker == nil {
-		return errors.New("broker is nil")
+		return errs.BrokerInsIsNill.New("broker is nil")
 	}
 	return _broker.Publish(topic, bytes)
 }
 
 func Subscribe(topic string, h func([]byte) error) error {
 	if _broker == nil {
-		return errors.New("broker is nil")
+		return errs.BrokerInsIsNill.New("broker is nil")
 	}
 	return _broker.Subscribe(topic, h)
 }

@@ -1,10 +1,10 @@
 package shape
 
 import (
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -64,18 +64,18 @@ func Setup(c map[string]interface{}) error {
 	}
 	var scfg ShapeCfg
 	if err := mapstructure.Decode(c, &scfg); err != nil {
-		return errors.Wrap(err, "Shape Decode Cfg")
+		return errs.ShapeRuleInitFail.Wrap(err, "Shape Decode Cfg")
 	}
 	var cfg ShapeRuleFile
 	v := viper.New()
 	v.SetConfigFile(scfg.RuleConfigFile)
 	v.SetConfigType("toml")
 	if err := v.ReadInConfig(); err != nil {
-		return err
+		return errs.ShapeRuleInitFail.Wrap(err, "")
 	}
 	if err := v.Unmarshal(&cfg); err != nil {
 		log.Error("UnMarshal ShapeRuleFile %s", err.Error())
-		return err
+		return errs.ShapeRuleInitFail.Wrap(err, "")
 	}
 	return Instance().RegisterRule(cfg.Rules)
 }

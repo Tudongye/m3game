@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"m3game/plugins/log"
 	"regexp"
 	"strconv"
 )
@@ -17,7 +18,7 @@ var (
 func init() {
 	var err error
 	if regexAddr, err = regexp.Compile("^([^:]+):([0-9]+)$"); err != nil {
-		panic(fmt.Sprintf("regexAddr.Compile err %s", err))
+		log.Fatal("regexAddr.Compile err %s", err)
 	}
 }
 func GenSessionID(s string) string {

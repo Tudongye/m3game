@@ -2,8 +2,8 @@ package etcd
 
 import (
 	"context"
-	"fmt"
 	"m3game/config"
+	"m3game/meta/errs"
 	"m3game/plugins/lease"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
@@ -51,11 +50,11 @@ func (f *Factory) Name() string {
 func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.PluginIns, error) {
 	var cfg etcdLeaseCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "Lease Decode Cfg")
+		return nil, errs.EtcdSetupFail.Wrap(err, "Lease Decode Cfg")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.EtcdSetupFail.Wrap(err, "")
 	}
 	cfg.EndpointsList = strings.Split(cfg.Endpoints, ",")
 	config := clientv3.Config{
@@ -67,11 +66,11 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var err error
 	if _etcdlease.client, err = clientv3.New(config); err != nil {
-		return nil, err
+		return nil, errs.EtcdSetupFail.Wrap(err, "")
 	}
 	_etcdlease.lease = clientv3.NewLease(_etcdlease.client)
 	if leaseGrantResp, err := _etcdlease.lease.Grant(ctx, int64(cfg.LeaseKeepLiveTime)); err != nil {
-		return nil, err
+		return nil, errs.EtcdSetupFail.Wrap(err, "")
 	} else {
 		_etcdlease.leaseId = leaseGrantResp.ID
 	}
@@ -79,7 +78,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	ctx, cancel := context.WithCancel(ctx)
 	_etcdlease.cancel = cancel
 	if keepRespChan, err = _etcdlease.lease.KeepAlive(ctx, _etcdlease.leaseId); err != nil {
-		return nil, err
+		return nil, errs.EtcdSetupFail.Wrap(err, "")
 	}
 	go func() {
 		t := time.NewTicker(1 * time.Second)
@@ -156,10 +155,10 @@ func (r *Lease) AllocLease(ctx context.Context, id string, f lease.LeaseMoveOutF
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	if r.isstoped {
-		return errors.New("Lease Closed")
+		return errs.EtcdIsClosed.New("Lease Closed")
 	}
 	if _, ok := r.leasemap[id]; ok {
-		return fmt.Errorf("Lease %s alloced", id)
+		return errs.EtcdAllocLeaseFail.New("Lease %s alloced", id)
 	}
 	txn := r.kv.Txn(ctx)
 	txn.If(clientv3.Compare(clientv3.CreateRevision(id), "=", 0)).
@@ -168,7 +167,7 @@ func (r *Lease) AllocLease(ctx context.Context, id string, f lease.LeaseMoveOutF
 	if txnResp, err := txn.Commit(); err != nil {
 		return err
 	} else if !txnResp.Succeeded {
-		return fmt.Errorf("Lease %s Value %s", id, string(txnResp.Responses[0].GetResponseRange().Kvs[0].Value))
+		return errs.EtcdAllocLeaseFail.New("Lease %s Value %s", id, string(txnResp.Responses[0].GetResponseRange().Kvs[0].Value))
 	}
 	r.leasemap[id] = f
 	return nil
@@ -178,7 +177,7 @@ func (r *Lease) FreeLease(ctx context.Context, id string) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	if r.isstoped {
-		return errors.New("Lease Closed")
+		return errs.EtcdIsClosed.New("Lease Closed")
 	}
 	if _, err := r.kv.Delete(context.Background(), id); err != nil {
 		return err

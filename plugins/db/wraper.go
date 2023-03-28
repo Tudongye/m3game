@@ -72,10 +72,10 @@ func (w *WraperMeta[TM, TF]) New(key interface{}) *Wraper[TM, TF] {
 }
 
 type Wraper[TM proto.Message, TF Flag] struct {
-	meta   *WraperMeta[TM, TF]
-	key    interface{}
-	obj    TM
-	dirtys map[TF]bool // 脏标记
+	meta   *WraperMeta[TM, TF] // Meta
+	key    interface{}         // 主键值
+	obj    TM                  // 原始数据
+	dirtys map[TF]bool         // 脏标记
 }
 
 func (w *Wraper[TM, TF]) Obj() TM {

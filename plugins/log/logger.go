@@ -3,6 +3,7 @@ package log
 import (
 	"fmt"
 	golog "log"
+	"m3game/meta/errs"
 )
 
 var (
@@ -26,7 +27,7 @@ func Instance() Logger {
 func New(logger Logger) (Logger, error) {
 	if _logger != nil {
 		Fatal("Gate Only One")
-		return nil, fmt.Errorf("_logger is newed")
+		return nil, errs.LogInsHasNewed.New("_logger is newed")
 	}
 	_logger = logger
 	return _logger, nil

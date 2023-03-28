@@ -1,7 +1,7 @@
 package router
 
 import (
-	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 )
@@ -27,7 +27,7 @@ type Router interface {
 func New(me Router) (Router, error) {
 	if _router != nil {
 		log.Fatal("Metric Only One")
-		return nil, fmt.Errorf("Metric is newed %s", me.Factory().Name())
+		return nil, errs.RouterInsHasNewed.New("Metric is newed %s", me.Factory().Name())
 	}
 	_router = me
 	return _router, nil

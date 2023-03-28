@@ -2,7 +2,7 @@ package shape
 
 import (
 	"context"
-	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 
@@ -23,7 +23,7 @@ var (
 func New(me Shape) (Shape, error) {
 	if _shape != nil {
 		log.Fatal("Shape Only One")
-		return nil, fmt.Errorf("Shape is newed %s", me.Factory().Name())
+		return nil, errs.ShapeInsHasNewed.New("Shape is newed %s", me.Factory().Name())
 	}
 	_shape = me
 	return _shape, nil

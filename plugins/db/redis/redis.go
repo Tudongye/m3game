@@ -4,13 +4,13 @@ package redis
 import (
 	"context"
 	"fmt"
+	"m3game/meta/errs"
 	"m3game/plugins/db"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gomodule/redigo/redis"
-	"github.com/pkg/errors"
 
 	"github.com/mitchellh/mapstructure"
 	"google.golang.org/protobuf/proto"
@@ -58,11 +58,11 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg RedisCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, errors.Wrap(err, "RedisDB Decode Cfg")
+		return nil, errs.RedisSetupFail.Wrap(err, "RedisDB Decode Cfg")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.RedisSetupFail.Wrap(err, "")
 	}
 	_redisdb = &RedisDB{
 		cfg: cfg,
@@ -118,7 +118,7 @@ func (c *RedisDB) Read(ctx context.Context, meta db.DBMetaInter, key interface{}
 	rc := c.pool.Get()
 	defer rc.Close()
 	if v, err := rc.Do("GET", fieldname); err == redis.ErrNil || v == nil || len(v.([]byte)) == 0 {
-		return nil, db.Err_KeyNotFound
+		return nil, errs.DBKeyNotFound.New("Key %v", key)
 	} else if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func (c *RedisDB) Update(ctx context.Context, meta db.DBMetaInter, key interface
 	rc := c.pool.Get()
 	defer rc.Close()
 	if v, err := rc.Do("GET", fieldname); err == redis.ErrNil || v == nil {
-		return db.Err_KeyNotFound
+		return errs.DBKeyNotFound.New("Key %v", key)
 	} else if err != nil {
 		return err
 	}
@@ -174,7 +174,7 @@ func (c *RedisDB) Create(ctx context.Context, meta db.DBMetaInter, key interface
 	rc := c.pool.Get()
 	defer rc.Close()
 	if v, err := rc.Do("GET", fieldname); v != nil && err != redis.ErrNil {
-		return db.Err_DuplicateEntry
+		return errs.DBDuplicateEntry.New("Key %v", key)
 	}
 	flags := meta.AllFlags()
 	var args []interface{}
@@ -196,7 +196,7 @@ func (c *RedisDB) Delete(ctx context.Context, meta db.DBMetaInter, key interface
 	rc := c.pool.Get()
 	defer rc.Close()
 	if v, err := rc.Do("GET", fieldname); err == redis.ErrNil || v == nil {
-		return db.Err_KeyNotFound
+		return errs.DBKeyNotFound.New("Key %v", key)
 	} else if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func (c *RedisDB) Delete(ctx context.Context, meta db.DBMetaInter, key interface
 		return err
 	}
 	if count != len(args) {
-		return fmt.Errorf("Del %d but want %d", count, len(args))
+		return errs.RedisDelFail.New("Del %d but want %d", count, len(args))
 	}
 	return nil
 }

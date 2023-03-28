@@ -2,12 +2,12 @@ package nats
 
 import (
 	"context"
+	"m3game/meta/errs"
 	"m3game/plugins/broker"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/pkg/errors"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/nats-io/nats.go"
@@ -49,21 +49,21 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	var cfg natsBrokerCfg
 	if err := mapstructure.Decode(c, &cfg); err != nil {
-		return nil, err
+		return nil, errs.NatsSetupFail.Wrap(err, "")
 	}
 	validate := validator.New()
 	if err := validate.Struct(&cfg); err != nil {
-		return nil, err
+		return nil, errs.NatsSetupFail.Wrap(err, "")
 	}
 	_broker = &Broker{
 		subs: make(map[string]*nats.Subscription),
 	}
 	if nc, err := nats.Connect(cfg.URL); err != nil {
-		return nil, errors.Wrapf(err, "Nats.Conntect %s", cfg.URL)
+		return nil, errs.NatsSetupFail.Wrap(err, "Nats.Conntect %s", cfg.URL)
 	} else {
 		_broker.nc = nc
 		if js, err := nc.JetStream(nats.PublishAsyncMaxPending(256)); err != nil {
-			return nil, errors.Wrapf(err, "nc.JetStream %s", cfg.URL)
+			return nil, errs.NatsSetupFail.Wrap(err, "nc.JetStream %s", cfg.URL)
 		} else {
 			_broker.js = js
 		}
