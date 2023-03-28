@@ -730,16 +730,18 @@ GateApp 管理玩家链接，本质上是个代理服务，没有数据管理权
 
 ### ClubRoleApp
 
-还没做
+ClubRoleApp 持有玩家与社团的映射关系，没有数据管理权，实时查询ClubApp的相关数据表。这里采用对等部署，随机路由。参看demo/clubroleapp
 
 ### ClubApp
 
-还没做
+ClubApp 管理社团数据，社团数量动态变化，ClubApp将社团按照Slot划分，以Slot为服务单位，采用Actor+Lease模式构建，对等部署。参看demo/clubapp
 
 ### Test
 
 Test 测试客户端
 
 ```
+sh test.sh Test1       // 单次 关键路径（登陆，修改Role数据，拉取Role数据）测试
 sh test.sh MutilTest1  // 100TPS 10000次 关键路径（登陆，修改Role数据，拉取Role数据）测试
+sh test.sh Test2       // 单次 社团路径（登陆，创建社团，退出社团）测试
 ```
