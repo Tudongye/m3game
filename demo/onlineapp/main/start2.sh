@@ -1,1 +1,0 @@
-./main -idstr demo.world1.online.2 -conf ../../config/onlineapp2.toml

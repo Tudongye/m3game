@@ -1,1 +1,0 @@
-./main -testmode $1 -agenturl 127.0.0.1:32451

@@ -1,1 +1,0 @@
-./main -idstr demo.world1.role.2 -conf ../../config/roleapp2.toml
