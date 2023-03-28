@@ -1,1 +1,0 @@
-./main -idstr example.world1.async.1 -conf ../../config/asyncapp.toml
