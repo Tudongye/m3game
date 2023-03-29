@@ -35,7 +35,7 @@ type StatSummary interface {
 	Observe(float64)
 }
 
-func Counter(key string, v float64) StatCounter {
+func Counter(key string) StatCounter {
 	t, ok := _statCounters.Load(key)
 	if ok {
 		return t.(StatCounter)
@@ -45,7 +45,7 @@ func Counter(key string, v float64) StatCounter {
 	return r.(StatCounter)
 }
 
-func Gauge(key string, v float64) StatGauge {
+func Gauge(key string) StatGauge {
 	t, ok := _statGauges.Load(key)
 	if ok {
 		return t.(StatGauge)
@@ -55,7 +55,7 @@ func Gauge(key string, v float64) StatGauge {
 	return r.(StatGauge)
 }
 
-func Histogram(key string, v float64) StatHistogram {
+func Histogram(key string) StatHistogram {
 	t, ok := _statHistograms.Load(key)
 	if ok {
 		return t.(StatHistogram)
@@ -65,7 +65,7 @@ func Histogram(key string, v float64) StatHistogram {
 	return r.(StatHistogram)
 }
 
-func Summary(key string, v float64) StatSummary {
+func Summary(key string) StatSummary {
 	t, ok := _statSummarys.Load(key)
 	if ok {
 		return t.(StatSummary)

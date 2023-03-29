@@ -20,10 +20,11 @@ const (
 	Shape  Type = "shape"  // 流量管理
 	Gate   Type = "gate"   // CS连接
 	Lease  Type = "lease"  // 租约
+	Lua    Type = "lua"    // Lua
 )
 
 var (
-	_pluginserial = []Type{Log, Broker, Router, Trace, Metric, DB, Lease, Shape, Gate} // Plugin加载顺序
+	_pluginserial = []Type{Log, Broker, Router, Trace, Metric, DB, Lease, Shape, Gate, Lua} // Plugin加载顺序
 	_factoryMap   = make(map[string]Factory)
 )
 

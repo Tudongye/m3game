@@ -4,7 +4,9 @@ import (
 	"context"
 	"m3game/meta"
 	"m3game/meta/errs"
+	"m3game/meta/monitor"
 	"m3game/plugins/broker"
+	"m3game/plugins/metric"
 
 	"m3game/plugins/log"
 	"net"
@@ -103,9 +105,15 @@ func (t *Transport) Start(ctx context.Context) error {
 
 func (t *Transport) serverInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if info.FullMethod == _grpcHealthCheckMethod {
+		metric.Counter(monitor.HandleHealthRPCTotal).Inc()
 		return handler(ctx, req)
 	}
-	return t.runtimeReciver.ServerInterceptor(ctx, req, info, handler)
+	metric.Counter(monitor.HandleRPCTotal).Inc()
+	rsp, err := t.runtimeReciver.ServerInterceptor(ctx, req, info, handler)
+	if err != nil {
+		metric.Counter(monitor.HandleRPCFailTotal).Inc()
+	}
+	return rsp, err
 }
 
 func (t *Transport) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
@@ -171,20 +179,30 @@ func (t *Transport) RegisterServerInterceptor(f grpc.UnaryServerInterceptor) {
 }
 
 func (t *Transport) ClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	metric.Counter(monitor.CallPRCTotal).Inc()
 	if md, ok := metadata.FromOutgoingContext(ctx); ok {
 		if vlist, ok := md[string(meta.M3RouteType)]; ok && len(vlist) > 0 {
 			if meta.RouteType(vlist[0]) == meta.RouteTypeBroad ||
 				meta.RouteType(vlist[0]) == meta.RouteTypeMulti {
 				if vlist, ok := md[string(meta.M3RouteTopic)]; ok && len(vlist) > 0 {
-					return t.brokerser.send(ctx, vlist[0], method, req, opts...)
+					err := t.brokerser.send(ctx, vlist[0], method, req, opts...)
+					if err != nil {
+						metric.Counter(monitor.CallRPCFailTotal).Inc()
+					}
+					return err
 				} else {
+					metric.Counter(monitor.CallRPCFailTotal).Inc()
 					return errs.TransportCliCantFindTopic.New("RouteTypeBroad & RouteTypeMulti not find Topic")
 				}
 
 			}
 		}
 	}
-	return invoker(ctx, method, req, resp, cc, opts...)
+	err := invoker(ctx, method, req, resp, cc, opts...)
+	if err != nil {
+		metric.Counter(monitor.CallRPCFailTotal).Inc()
+	}
+	return err
 }
 
 func (t *Transport) Addr() string {

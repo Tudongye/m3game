@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"m3game/meta/errs"
+	"m3game/meta/monitor"
 	"m3game/plugins/log"
+	"m3game/plugins/metric"
 	"regexp"
 	"sync"
 	"time"
@@ -54,6 +56,7 @@ func (am *ActorMgr) NewActor(actorid string) *actorRuntime {
 	if a, loaded := am.actorruntimes.LoadOrStore(actorid, ar); loaded {
 		return a.(*actorRuntime)
 	} else {
+		metric.Gauge(monitor.ActorRuntimeTotal).Inc()
 		ar = a.(*actorRuntime)
 		go am.runActor(ar, actorid)
 		return ar
@@ -65,6 +68,7 @@ func (am *ActorMgr) runActor(ar *actorRuntime, actorid string) {
 		log.Error("actor.run() err %s", err.Error())
 	}
 	ar.cancel()
+	metric.Gauge(monitor.ActorRuntimeTotal).Dec()
 	am.actorruntimes.Delete(actorid)
 }
 
