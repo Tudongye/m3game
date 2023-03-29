@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:32201"
+Addr = "127.0.0.1:32210"
 BroadcastTimeout = 5
 
 [Options]
@@ -24,6 +24,9 @@ Encoding = "console"
 [[Plugin.DB.db_mongo]]
 URI = "mongodb://admin:123456@127.0.0.1:27017"
 DataBase = "uiddb"
+
+[[Plugin.Metric.metric_prom]]
+Port = 32211
 
 # [[Plugin.DB.db_redis]]
 # Host = "127.0.0.1"

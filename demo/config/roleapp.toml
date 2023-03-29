@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:32301"
+Addr = "127.0.0.1:32310"
 BroadcastTimeout = 5
 
 [Options]
@@ -25,6 +25,9 @@ Encoding = "console"
 URI = "mongodb://admin:123456@127.0.0.1:27017"
 DataBase = "roledb"
 
+[[Plugin.Metric.metric_prom]]
+Port = 32311
+
 [Server]
 [[Server.Actor]]
 ActiveTimeOut = 60  # role 存活时间
@@ -38,5 +41,6 @@ LeasePrefix = "1"   # 租约前缀
 AllocLeaseTimeOut = 1    # 申请租约超时时间
 WaitFreeLeaseTimeOut = 1  # 预估数据迁出时长
 
+LuaFile = "../../resource/roleser.lua"
 [App]
 PrePareTime = 10 # 启动前准备时长

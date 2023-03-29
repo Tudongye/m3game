@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:32601"
+Addr = "127.0.0.1:32610"
 BroadcastTimeout = 5
 
 [Options]
@@ -30,6 +30,9 @@ Endpoints = "127.0.0.1:2379"
 DialTimeout = 5
 LeaseKeepLiveTime = 10
 PreExitTime = 5
+
+[[Plugin.Metric.metric_prom]]
+Port = 32611
 
 [Server]
 [[Server.Actor]]

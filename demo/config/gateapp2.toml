@@ -1,5 +1,5 @@
 [Transport]
-Addr = "127.0.0.1:32402"
+Addr = "127.0.0.1:32420"
 BroadcastTimeout = 5
 
 [Options]
@@ -18,12 +18,14 @@ ConsulHost = "127.0.0.1:8500"
 URL = "127.0.0.1:4222"
 
 [[Plugin.Gate.gate_grpc]]
-Addr = "127.0.0.1:32452"
+Addr = "127.0.0.1:32422"
 
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"
 Encoding = "console"
 
+[[Plugin.Metric.metric_prom]]
+Port = 32421
 
 [App]
 PrePareTime = 10 # 启动前准备时长
