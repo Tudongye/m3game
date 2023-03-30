@@ -574,10 +574,6 @@ type LeaseReciver interface {
 
 热更新方式的选择更新基于技术选型（比如你用skynet，那就没啥好说的了）。M3本身并不提供热更新能力，但是在demo/roleapp/roleser中，给出一个使用Lua & “打桩”的方式，实现拒绝RoleId最后一位数为“1”的玩家登陆的热更新实现。
 
-
-
-## 自动化测试
-
 ## Example
 
 example 是一组简单服务的样例，用来展示M3框架的单实例开发方案。
@@ -626,7 +622,7 @@ example使用方式
 
 3、重量级数据。这类数据的总量大，且数据管理权的跨机迁移成本高，数据管理权分散在多台机器。集群部署时，一般会专门指定一个管理进程（管理进程采用元数据方式部署），用于处理数据管理权的调度，尽量减少跨机的管理权迁移
 
-对于集群部署方式，M3采用K8s的方式部署。本节的demo已经支持这种部署方式，详情参看"部署方式"
+集群部署方式与具体的业务行态，实际条件相关，这里只是提供一个思路。M3的demo采用K8s部署，详情参看"部署"
 
 
 ## 灰度发布
@@ -751,7 +747,9 @@ ClubRoleApp 持有玩家与社团的映射关系，没有数据管理权，实�
 
 ClubApp 管理社团数据，社团数量动态变化，ClubApp将社团按照Slot划分，以Slot为服务单位，采用Actor+Lease模式构建，对等部署。参看demo/clubapp
 
-### Test
+## 玩法服务
+
+## Test
 
 Test 测试客户端
 
@@ -761,7 +759,7 @@ sh test.sh MutilTest1  // 100TPS 10000次 关键路径（登陆，修改Role数�
 sh test.sh Test2       // 单次 社团路径（登陆，创建社团，退出社团）测试
 ```
 
-### Demo部署
+## 部署
 
 Demo采用Docker方式进行交付。采用Helm编排服务架构。采用K8s进行程序部署。
 
@@ -769,7 +767,7 @@ Demo采用Docker方式进行交付。采用Helm编排服务架构。采用K8s进
 
 使用demo/dockerbuild.sh脚本即可Docker容器构建。如下是使用的dockerfile
 
-'''
+```
 # 基础镜像，包含一套dev环境
 FROM golang:1.20-rc 
 # Transport 40001 Metric 40002 Gate 40003
@@ -784,7 +782,7 @@ COPY clubroleapp/main/main /go/bin/demo/clubroleapp/main/main
 COPY test/main/main /go/bin/demo/test/main/main
 COPY resource /go/bin/demo/resource
 COPY deploy /go/bin/demo/deploy
-'''
+```
 
 #### Helm
 
