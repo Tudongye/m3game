@@ -1,1 +1,0 @@
-./main -idstr demo.world1.clubrole.1 -conf ../../config/clubroleapp.toml
