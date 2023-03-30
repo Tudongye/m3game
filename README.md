@@ -564,6 +564,18 @@ type LeaseReciver interface {
 
 ## 热更新
 
+这里说的热更新指的是在不影响服务能力前提下，对线上程序的逻辑代码进行更新。对于使用编译型语言进行业务逻辑开发的程序，常见的热更新方式有
+
+1、脚本虚拟机。在编译型语言中引入脚本语言，比如Lua，Python。在合理的位置“打桩”，当程序执行到“桩”点时，就会进入脚本虚拟机中，这时可以利用脚本语言的特性来实现程序热更新。
+
+2、动态链接库。大部分的编译型语言都支持生成、链接动态库文件。可以通过线上更新挂载的动态库文件，实现程序热更新。
+
+3、直接莽。线上更新程序文件，并重启程序，以实现业务逻辑更新的效果。这种方式必然会带来服务能力的损失，但是可以通过一些方式降低损失，比如滚动更新，共享内存等。
+
+热更新方式的选择更新基于技术选型（比如你用skynet，那就没啥好说的了）。M3本身并不提供热更新能力，但是在demo/roleapp/roleser中，给出一个使用Lua & “打桩”的方式，实现拒绝RoleId最后一位数为“1”的玩家登陆的热更新实现。
+
+
+
 ## 自动化测试
 
 ## Example
@@ -613,6 +625,9 @@ example使用方式
 2、轻量级数据。这类数据的总量大，且数据管理权的跨机迁移成本低（时间成本，资源成本），数据管理权分散在多台机器。集群部署时，一般采用对等部署，基于一致性哈希进行寻址，当机器增减时，数据管理权会动态调整。
 
 3、重量级数据。这类数据的总量大，且数据管理权的跨机迁移成本高，数据管理权分散在多台机器。集群部署时，一般会专门指定一个管理进程（管理进程采用元数据方式部署），用于处理数据管理权的调度，尽量减少跨机的管理权迁移
+
+对于集群部署方式，M3采用K8s的方式部署。本节的demo已经支持这种部署方式，详情参看"部署方式"
+
 
 ## 灰度发布
 
@@ -745,3 +760,43 @@ sh test.sh Test1       // 单次 关键路径（登陆，修改Role数据，拉�
 sh test.sh MutilTest1  // 100TPS 10000次 关键路径（登陆，修改Role数据，拉取Role数据）测试
 sh test.sh Test2       // 单次 社团路径（登陆，创建社团，退出社团）测试
 ```
+
+### Demo部署
+
+Demo采用Docker方式进行交付。采用Helm编排服务架构。采用K8s进行程序部署。
+
+#### DockerBuild
+
+使用demo/dockerbuild.sh脚本即可Docker容器构建。如下是使用的dockerfile
+
+'''
+# 基础镜像，包含一套dev环境
+FROM golang:1.20-rc 
+# Transport 40001 Metric 40002 Gate 40003
+EXPOSE 40001/tcp 40002/tcp 40003/tcp
+# 
+COPY uidapp/main/main /go/bin/demo/uidapp/main/main
+COPY roleapp/main/main /go/bin/demo/roleapp/main/main
+COPY onlineapp/main/main /go/bin/demo/onlineapp/main/main
+COPY gateapp/main/main /go/bin/demo/gateapp/main/main
+COPY clubapp/main/main /go/bin/demo/clubapp/main/main
+COPY clubroleapp/main/main /go/bin/demo/clubroleapp/main/main
+COPY test/main/main /go/bin/demo/test/main/main
+COPY resource /go/bin/demo/resource
+COPY deploy /go/bin/demo/deploy
+'''
+
+#### Helm
+
+Helm相关配置在demo/helm/m3demo。部署前需要修改demo/helm/m3demo/values.yaml中的image字段
+```
+m3demoimage: m3demo:latest
+```
+
+#### 部署
+
+![image](https://user-images.githubusercontent.com/16680818/228788248-4fbc57fd-d4d1-47c1-b3a3-4f773b846390.png)
+
+
+
+
