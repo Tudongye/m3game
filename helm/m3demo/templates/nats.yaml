@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: m3demo
+  name: nats
+  labels:
+    app: nats
+spec:
+  type: ClusterIP
+  ports:
+  - name: tcp-4222-4222
+    port: 4222
+    protocol: TCP
+    targetPort: 4222
+  selector:
+    app: nats
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: nats
+  name: nats
+  namespace: m3demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nats
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nats
+    spec:
+      containers:
+      - image: nats
+        imagePullPolicy: Always
+        name: nats
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
