@@ -2,6 +2,7 @@ package grpcgate
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"m3game/config"
 	"m3game/meta"
@@ -9,6 +10,7 @@ import (
 	"m3game/meta/metapb"
 	"m3game/plugins/gate"
 	"m3game/plugins/log"
+	"m3game/runtime"
 	"m3game/runtime/plugin"
 	"net"
 	"sync"
@@ -34,7 +36,7 @@ func init() {
 }
 
 type grpcGateCfg struct {
-	Addr string `mapstructure:"Addr" validate:"required,tcp4_addr"`
+	Port int `mapstructure:"Port"`
 }
 
 type Factory struct {
@@ -60,7 +62,8 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 		return nil, errs.GrpcGateSetUpFail.Wrap(err, "")
 	}
 	var err error
-	tcpAddr, err := net.ResolveTCPAddr("tcp", cfg.Addr)
+	Addr := fmt.Sprintf("%s:%d", runtime.Host(), cfg.Port)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", Addr)
 	if err != nil {
 		return nil, errs.GrpcGateSetUpFail.Wrap(err, "transport")
 	}
@@ -74,7 +77,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}
 	RegisterGateSerServer(_grpcgate.gser, _grpcgate)
 	go func() {
-		log.Info("GrpcGate Listen %s", cfg.Addr)
+		log.Info("GrpcGate Listen %s", Addr)
 		if err := _grpcgate.gser.Serve(listener); err != nil {
 			log.Error("GrpcGate Err %s", err.Error())
 		}

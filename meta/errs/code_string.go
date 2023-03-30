@@ -12,101 +12,149 @@ func _() {
 	_ = x[MsgUnmarshFail-1]
 	_ = x[MsgMarshFail-2]
 	_ = x[MeshNoAvalibleDstApp-101]
-	_ = x[MeshInitFail-101]
+	_ = x[MeshInitFail-102]
 	_ = x[ActorCantAutoCreate-201]
 	_ = x[TransportInitFail-301]
-	_ = x[TransportCliCantFindTopic-301]
-	_ = x[TransportRegisterSerFail-301]
+	_ = x[TransportCliCantFindTopic-302]
+	_ = x[TransportRegisterSerFail-303]
 	_ = x[BrokerSerRegisterSerFail-401]
-	_ = x[BrokerSerSetBrokerFail-401]
-	_ = x[BrokerSerHandlerNotFind-401]
+	_ = x[BrokerSerSetBrokerFail-402]
+	_ = x[BrokerSerHandlerNotFind-403]
 	_ = x[RPCCantFindHashKey-501]
-	_ = x[RPCMethodNotRegister-501]
-	_ = x[RPCCallFuncFail-501]
-	_ = x[RPCInJectFail-501]
+	_ = x[RPCMethodNotRegister-502]
+	_ = x[RPCCallFuncFail-503]
+	_ = x[RPCInJectFail-504]
 	_ = x[PluginsInitFail-601]
-	_ = x[PluginsFactoryNotRegister-601]
-	_ = x[PluginsSetupFail-601]
-	_ = x[PluginsAddPluginFail-601]
-	_ = x[PluginsReloadFail-601]
+	_ = x[PluginsFactoryNotRegister-602]
+	_ = x[PluginsSetupFail-603]
+	_ = x[PluginsAddPluginFail-604]
+	_ = x[PluginsReloadFail-605]
 	_ = x[ActorRuntimeAllocLeaseFail-701]
-	_ = x[ActorRuntimeFreeLeaseFail-701]
-	_ = x[ActorRuntimeCallHandleActorDone-701]
-	_ = x[ActorRuntimeCallHandleRPCDone-701]
-	_ = x[ActorRuntimePushReqFailActorDone-701]
-	_ = x[ActorRuntimePushReqFailChanFull-701]
-	_ = x[ActorRuntimeKickFailActorDone-701]
-	_ = x[ActorRuntimeKickFailRPCDone-701]
+	_ = x[ActorRuntimeFreeLeaseFail-702]
+	_ = x[ActorRuntimeCallHandleActorDone-703]
+	_ = x[ActorRuntimeCallHandleRPCDone-704]
+	_ = x[ActorRuntimePushReqFailActorDone-705]
+	_ = x[ActorRuntimePushReqFailChanFull-706]
+	_ = x[ActorRuntimeKickFailActorDone-707]
+	_ = x[ActorRuntimeKickFailRPCDone-708]
 	_ = x[ActorMoveOutFail-801]
-	_ = x[ActorOnInitFail-801]
-	_ = x[ActorServerInitFail-801]
-	_ = x[ActorKickNoFindActor-801]
+	_ = x[ActorOnInitFail-802]
+	_ = x[ActorServerInitFail-803]
+	_ = x[ActorKickNoFindActor-804]
 	_ = x[RuntimeRegisterRepatedServer-901]
 	_ = x[ResourceLoadFail-1001]
 	_ = x[MetaRouteAppParseFail-1101]
-	_ = x[MetaRouteSvcParseFail-1101]
-	_ = x[MetaRouteWorldParseFail-1101]
+	_ = x[MetaRouteSvcParseFail-1102]
+	_ = x[MetaRouteWorldParseFail-1103]
 	_ = x[BrokerInsIsNill-5001]
-	_ = x[BrokerInsHasNewed-5001]
-	_ = x[NatsSetupFail-5001]
+	_ = x[BrokerInsHasNewed-5002]
+	_ = x[NatsSetupFail-5003]
 	_ = x[DBInsHasNewed-5101]
-	_ = x[DBKeyNotFound-5101]
-	_ = x[DBDuplicateEntry-5101]
-	_ = x[MongoSetupFail-5101]
-	_ = x[RedisSetupFail-5101]
-	_ = x[RedisDelFail-5101]
+	_ = x[DBKeyNotFound-5102]
+	_ = x[DBDuplicateEntry-5103]
+	_ = x[MongoSetupFail-5104]
+	_ = x[RedisSetupFail-5105]
+	_ = x[RedisDelFail-5106]
 	_ = x[GateInsHasNewed-5201]
-	_ = x[GrpcGateSetUpFail-5201]
-	_ = x[GrpcGateConnClosed-5201]
-	_ = x[GrpcGateSendFailRPCDone-5201]
-	_ = x[GrpcGateSendFailChanFull-5201]
+	_ = x[GrpcGateSetUpFail-5202]
+	_ = x[GrpcGateConnClosed-5203]
+	_ = x[GrpcGateSendFailRPCDone-5204]
+	_ = x[GrpcGateSendFailChanFull-5205]
 	_ = x[LeaseInsIsNill-5301]
-	_ = x[LeaseInsHasNewed-5301]
-	_ = x[EtcdSetupFail-5301]
-	_ = x[EtcdIsClosed-5301]
-	_ = x[EtcdAllocLeaseFail-5301]
+	_ = x[LeaseInsHasNewed-5302]
+	_ = x[EtcdSetupFail-5303]
+	_ = x[EtcdIsClosed-5304]
+	_ = x[EtcdAllocLeaseFail-5305]
 	_ = x[LogInsHasNewed-5401]
-	_ = x[ZlogSetupFail-5401]
+	_ = x[ZlogSetupFail-5402]
 	_ = x[MetricInsHasNewed-5501]
-	_ = x[PromSetupFaul-5501]
-	_ = x[PromRegisterConsulFail-5501]
+	_ = x[PromSetupFaul-5502]
+	_ = x[PromRegisterConsulFail-5503]
 	_ = x[RouterInsHasNewed-5601]
-	_ = x[ConsulSetupFail-5601]
-	_ = x[ConsulRegisterAppFail-5601]
-	_ = x[ConsulGetAllInstanceFail-5601]
+	_ = x[ConsulSetupFail-5602]
+	_ = x[ConsulRegisterAppFail-5603]
+	_ = x[ConsulGetAllInstanceFail-5604]
 	_ = x[ShapeInsHasNewed-5701]
-	_ = x[ShapeRuleInitFail-5701]
-	_ = x[SentinelSteupFail-5701]
-	_ = x[SentinelRegisterRuleFail-5701]
+	_ = x[ShapeRuleInitFail-5702]
+	_ = x[SentinelSteupFail-5703]
+	_ = x[SentinelRegisterRuleFail-5704]
 	_ = x[TraceInsHasNewed-5801]
 }
 
-const _Code_name = "UnknowMsgUnmarshFailMsgMarshFailMeshNoAvalibleDstAppActorCantAutoCreateTransportInitFailBrokerSerRegisterSerFailRPCCantFindHashKeyPluginsInitFailActorRuntimeAllocLeaseFailActorMoveOutFailRuntimeRegisterRepatedServerResourceLoadFailMetaRouteAppParseFailBrokerInsIsNillDBInsHasNewedGateInsHasNewedLeaseInsIsNillLogInsHasNewedMetricInsHasNewedRouterInsHasNewedShapeInsHasNewedTraceInsHasNewed"
+const _Code_name = "UnknowMsgUnmarshFailMsgMarshFailMeshNoAvalibleDstAppMeshInitFailActorCantAutoCreateTransportInitFailTransportCliCantFindTopicTransportRegisterSerFailBrokerSerRegisterSerFailBrokerSerSetBrokerFailBrokerSerHandlerNotFindRPCCantFindHashKeyRPCMethodNotRegisterRPCCallFuncFailRPCInJectFailPluginsInitFailPluginsFactoryNotRegisterPluginsSetupFailPluginsAddPluginFailPluginsReloadFailActorRuntimeAllocLeaseFailActorRuntimeFreeLeaseFailActorRuntimeCallHandleActorDoneActorRuntimeCallHandleRPCDoneActorRuntimePushReqFailActorDoneActorRuntimePushReqFailChanFullActorRuntimeKickFailActorDoneActorRuntimeKickFailRPCDoneActorMoveOutFailActorOnInitFailActorServerInitFailActorKickNoFindActorRuntimeRegisterRepatedServerResourceLoadFailMetaRouteAppParseFailMetaRouteSvcParseFailMetaRouteWorldParseFailBrokerInsIsNillBrokerInsHasNewedNatsSetupFailDBInsHasNewedDBKeyNotFoundDBDuplicateEntryMongoSetupFailRedisSetupFailRedisDelFailGateInsHasNewedGrpcGateSetUpFailGrpcGateConnClosedGrpcGateSendFailRPCDoneGrpcGateSendFailChanFullLeaseInsIsNillLeaseInsHasNewedEtcdSetupFailEtcdIsClosedEtcdAllocLeaseFailLogInsHasNewedZlogSetupFailMetricInsHasNewedPromSetupFaulPromRegisterConsulFailRouterInsHasNewedConsulSetupFailConsulRegisterAppFailConsulGetAllInstanceFailShapeInsHasNewedShapeRuleInitFailSentinelSteupFailSentinelRegisterRuleFailTraceInsHasNewed"
 
 var _Code_map = map[Code]string{
 	0:    _Code_name[0:6],
 	1:    _Code_name[6:20],
 	2:    _Code_name[20:32],
 	101:  _Code_name[32:52],
-	201:  _Code_name[52:71],
-	301:  _Code_name[71:88],
-	401:  _Code_name[88:112],
-	501:  _Code_name[112:130],
-	601:  _Code_name[130:145],
-	701:  _Code_name[145:171],
-	801:  _Code_name[171:187],
-	901:  _Code_name[187:215],
-	1001: _Code_name[215:231],
-	1101: _Code_name[231:252],
-	5001: _Code_name[252:267],
-	5101: _Code_name[267:280],
-	5201: _Code_name[280:295],
-	5301: _Code_name[295:309],
-	5401: _Code_name[309:323],
-	5501: _Code_name[323:340],
-	5601: _Code_name[340:357],
-	5701: _Code_name[357:373],
-	5801: _Code_name[373:389],
+	102:  _Code_name[52:64],
+	201:  _Code_name[64:83],
+	301:  _Code_name[83:100],
+	302:  _Code_name[100:125],
+	303:  _Code_name[125:149],
+	401:  _Code_name[149:173],
+	402:  _Code_name[173:195],
+	403:  _Code_name[195:218],
+	501:  _Code_name[218:236],
+	502:  _Code_name[236:256],
+	503:  _Code_name[256:271],
+	504:  _Code_name[271:284],
+	601:  _Code_name[284:299],
+	602:  _Code_name[299:324],
+	603:  _Code_name[324:340],
+	604:  _Code_name[340:360],
+	605:  _Code_name[360:377],
+	701:  _Code_name[377:403],
+	702:  _Code_name[403:428],
+	703:  _Code_name[428:459],
+	704:  _Code_name[459:488],
+	705:  _Code_name[488:520],
+	706:  _Code_name[520:551],
+	707:  _Code_name[551:580],
+	708:  _Code_name[580:607],
+	801:  _Code_name[607:623],
+	802:  _Code_name[623:638],
+	803:  _Code_name[638:657],
+	804:  _Code_name[657:677],
+	901:  _Code_name[677:705],
+	1001: _Code_name[705:721],
+	1101: _Code_name[721:742],
+	1102: _Code_name[742:763],
+	1103: _Code_name[763:786],
+	5001: _Code_name[786:801],
+	5002: _Code_name[801:818],
+	5003: _Code_name[818:831],
+	5101: _Code_name[831:844],
+	5102: _Code_name[844:857],
+	5103: _Code_name[857:873],
+	5104: _Code_name[873:887],
+	5105: _Code_name[887:901],
+	5106: _Code_name[901:913],
+	5201: _Code_name[913:928],
+	5202: _Code_name[928:945],
+	5203: _Code_name[945:963],
+	5204: _Code_name[963:986],
+	5205: _Code_name[986:1010],
+	5301: _Code_name[1010:1024],
+	5302: _Code_name[1024:1040],
+	5303: _Code_name[1040:1053],
+	5304: _Code_name[1053:1065],
+	5305: _Code_name[1065:1083],
+	5401: _Code_name[1083:1097],
+	5402: _Code_name[1097:1110],
+	5501: _Code_name[1110:1127],
+	5502: _Code_name[1127:1140],
+	5503: _Code_name[1140:1162],
+	5601: _Code_name[1162:1179],
+	5602: _Code_name[1179:1194],
+	5603: _Code_name[1194:1215],
+	5604: _Code_name[1215:1239],
+	5701: _Code_name[1239:1255],
+	5702: _Code_name[1255:1272],
+	5703: _Code_name[1272:1289],
+	5704: _Code_name[1289:1313],
+	5801: _Code_name[1313:1329],
 }
 
 func (i Code) String() string {

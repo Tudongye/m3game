@@ -78,7 +78,7 @@ func NewMeta[TM proto.Message](table string) *DBMeta[TM] {
 		if dbfieldoption.Primary {
 			// 主键
 			meta.keyflag = append(meta.keyflag, int32(number))
-			log.Info("DB %s KeyField => %s", meta.name, meta.keyflag)
+			log.Info("DB %s KeyField => %v", meta.name, meta.keyflag)
 		}
 		meta.allflags = append(meta.allflags, int32(number))
 		log.Info("DB %s Field => %s", meta.name, name)

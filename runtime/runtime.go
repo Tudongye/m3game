@@ -66,6 +66,14 @@ func Addr() string {
 	return _runtime.transport.Addr()
 }
 
+func Host() string {
+	return _runtime.transport.Host()
+}
+
+func Port() int {
+	return _runtime.transport.Port()
+}
+
 func New() *Runtime {
 	if _runtime != nil {
 		return _runtime

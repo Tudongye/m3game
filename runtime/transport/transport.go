@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+	"fmt"
 	"m3game/meta"
 	"m3game/meta/errs"
 	"m3game/meta/monitor"
@@ -45,8 +46,10 @@ func init() {
 }
 
 type TransportCfg struct {
-	Addr             string `mapstructure:"Addr" validate:"required,tcp4_addr"` // 监听地址
-	BroadcastTimeout int    `mapstructure:"BroadcastTimeout" validate:"gt=0"`   // BrokerSer的Handler超时时间
+	Host             string `mapstructure:"Host" validate:"required"`         // 监听地址
+	Port             int    `mapstructure:"Port" validate:"gt=0"`             // 监听地址
+	BroadcastTimeout int    `mapstructure:"BroadcastTimeout" validate:"gt=0"` // BrokerSer的Handler超时时间
+	Addr             string
 }
 
 func New(c map[string]interface{}, runtimeReciver RuntimeReciver) (*Transport, error) {
@@ -64,6 +67,7 @@ func New(c map[string]interface{}, runtimeReciver RuntimeReciver) (*Transport, e
 	if err := validate.Struct(&cfg); err != nil {
 		return nil, err
 	}
+	cfg.Addr = fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	_transport = &Transport{
 		cfg:            cfg,
 		runtimeReciver: runtimeReciver,
@@ -207,4 +211,12 @@ func (t *Transport) ClientInterceptor(ctx context.Context, method string, req, r
 
 func (t *Transport) Addr() string {
 	return t.cfg.Addr
+}
+
+func (t *Transport) Host() string {
+	return t.cfg.Host
+}
+
+func (t *Transport) Port() int {
+	return t.cfg.Port
 }

@@ -45,6 +45,7 @@ func (p *M3GPickerBuilder) Build(info base.PickerBuildInfo) balancer.Picker {
 	if len(info.ReadySCs) == 0 {
 		return base.NewErrPicker(balancer.ErrNoSubConnAvailable)
 	}
+
 	subConns := make(map[string]balancer.SubConn)
 	routeHelper := NewRouteHelper()
 	for subConn, conInfo := range info.ReadySCs {
@@ -98,9 +99,11 @@ func (p *M3GPicker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
 func (p *M3GPicker) pickP2P(metad metadata.MD) (balancer.PickResult, error) {
 	vlist := metad[string(meta.M3RouteDstApp)]
 	if len(vlist) != 1 {
+		log.Error("Invaild Para")
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
 	if dstappid, err := p.routeHelper.RouteP2P(vlist[0]); err != nil {
+		log.Error("%s", err.Error())
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {
 		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
@@ -109,6 +112,7 @@ func (p *M3GPicker) pickP2P(metad metadata.MD) (balancer.PickResult, error) {
 
 func (p *M3GPicker) pickRandom(metad metadata.MD) (balancer.PickResult, error) {
 	if dstappid, err := p.routeHelper.RouteRandom(); err != nil {
+		log.Error("%s", err.Error())
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {
 		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
@@ -118,9 +122,11 @@ func (p *M3GPicker) pickRandom(metad metadata.MD) (balancer.PickResult, error) {
 func (p *M3GPicker) pickHash(metad metadata.MD) (balancer.PickResult, error) {
 	vlist := metad[string(meta.M3RouteHashKey)]
 	if len(vlist) != 1 {
+		log.Error("Invaild Para")
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	}
 	if dstappid, err := p.routeHelper.RouteHash(vlist[0]); err != nil {
+		log.Error("%s", err.Error())
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {
 		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
@@ -129,6 +135,7 @@ func (p *M3GPicker) pickHash(metad metadata.MD) (balancer.PickResult, error) {
 
 func (p *M3GPicker) pickSingle(metad metadata.MD) (balancer.PickResult, error) {
 	if dstappid, err := p.routeHelper.RouteSingle(); err != nil {
+		log.Error("%s", err.Error())
 		return balancer.PickResult{}, balancer.ErrNoSubConnAvailable
 	} else {
 		return balancer.PickResult{SubConn: p.subConns[dstappid]}, nil
