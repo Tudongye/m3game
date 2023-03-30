@@ -1,1 +1,0 @@
-./main -idstr demo.world1.gate.1 -conf ../../config/gateapp.toml
