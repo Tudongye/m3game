@@ -1,5 +1,6 @@
 [Transport]
-Addr = "127.0.0.1:22203"
+Host = "127.0.0.1"
+Port = 22203
 BroadcastTimeout = 5
 
 [Options]

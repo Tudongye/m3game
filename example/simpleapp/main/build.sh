@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "SimpleApp Build..."
 cd simpleapp/main
-go build .
+go build -tags netgo .

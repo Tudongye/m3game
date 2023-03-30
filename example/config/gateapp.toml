@@ -1,5 +1,6 @@
 [Transport]
-Addr = "127.0.0.1:22100"
+Host = "127.0.0.1"
+Port = 22100
 BroadcastTimeout = 5
 
 [Options]
@@ -21,7 +22,7 @@ URL = "127.0.0.1:4222"
 ConfigFile = "../../resource/sentinel.yml"
 
 [[Plugin.Gate.gate_grpc]]
-Addr = "127.0.0.1:22000"
+Port = 22000
 
 [[Plugin.Metric.metric_prom]]
 Port = 32100

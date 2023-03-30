@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "ActorApp Build..."
 cd actorapp/main
-go build .
+go build -tags netgo .

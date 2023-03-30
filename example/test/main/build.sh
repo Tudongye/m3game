@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "Test Build..."
 cd test/main
-go build .
+go build -tags netgo .
