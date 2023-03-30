@@ -14,6 +14,7 @@ import (
 	_ "m3game/plugins/db/mongo"
 	"m3game/plugins/log"
 	_ "m3game/plugins/log/zap"
+	_ "m3game/plugins/metric/prometheus"
 	"m3game/plugins/router"
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"

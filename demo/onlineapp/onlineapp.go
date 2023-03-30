@@ -57,9 +57,9 @@ func (a *OnlineApp) Init(c map[string]interface{}) error {
 }
 
 func (a *OnlineApp) Start(ctx context.Context) {
-	log.Info("UidApp PrepareTime %d", a.cfg.PrePareTime)
+	log.Info("OnlineApp PrepareTime %d", a.cfg.PrePareTime)
 	time.Sleep(time.Duration(a.cfg.PrePareTime) * time.Second)
-	log.Info("UidApp Ready")
+	log.Info("OnlineApp Ready")
 	t := time.NewTicker(1 * time.Second)
 	defer t.Stop()
 	for {

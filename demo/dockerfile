@@ -1,0 +1,14 @@
+# 基础镜像，包含一套dev环境
+FROM golang:1.20-rc 
+# Transport 40001 Metric 40002 Gate 40003
+EXPOSE 40001/tcp 40002/tcp 40003/tcp
+# 
+COPY uidapp/main/main /go/bin/demo/uidapp/main/main
+COPY roleapp/main/main /go/bin/demo/roleapp/main/main
+COPY onlineapp/main/main /go/bin/demo/onlineapp/main/main
+COPY gateapp/main/main /go/bin/demo/gateapp/main/main
+COPY clubapp/main/main /go/bin/demo/clubapp/main/main
+COPY clubroleapp/main/main /go/bin/demo/clubroleapp/main/main
+COPY test/main/main /go/bin/demo/test/main/main
+COPY resource /go/bin/demo/resource
+COPY deploy /go/bin/demo/deploy

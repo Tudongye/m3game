@@ -1,1 +1,1 @@
-./main -idstr demo.world1.uid.1 -conf ../../config/uidapp.toml
+./main -idstr demo.world1.uid.uidapp-0 -conf ../../config/uidapp.toml

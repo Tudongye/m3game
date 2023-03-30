@@ -2,15 +2,19 @@ package roleser
 
 import (
 	"context"
+	"fmt"
 	"m3game/demo/clubapp/clubcli"
 	"m3game/demo/proto/pb"
 	"m3game/demo/roleapp/role"
 	"m3game/demo/uidapp/uidcli"
 	"m3game/meta"
 	"m3game/plugins/log"
+	"m3game/runtime/app"
 	"m3game/runtime/rpc"
 	mactor "m3game/runtime/server/actor"
 
+	"github.com/go-playground/validator/v10"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 
 	"google.golang.org/grpc"
@@ -54,6 +58,25 @@ func RoleLogic(ctx context.Context, f func(role *role.Role) error) error {
 type RoleSer struct {
 	*mactor.Server
 	pb.UnimplementedRoleSerServer
+	cfg Config
+}
+
+type Config struct {
+	LuaFile string `mapstructure:"LuaFile" validate:"required"`
+}
+
+func (s *RoleSer) Init(c map[string]interface{}, app app.App) error {
+	if err := s.Server.Init(c, app); err != nil {
+		return err
+	}
+	if err := mapstructure.Decode(c, &s.cfg); err != nil {
+		return fmt.Errorf("Decode RoleSer Config %s", err.Error())
+	}
+	validate := validator.New()
+	if err := validate.Struct(&s.cfg); err != nil {
+		return fmt.Errorf("Decode RoleSer Config %s", err.Error())
+	}
+	return nil
 }
 
 func (s *RoleSer) TransportRegister() func(grpc.ServiceRegistrar) error {
@@ -73,6 +96,13 @@ func (d *RoleSer) RoleLogin(ctx context.Context, in *pb.RoleLogin_Req) (*pb.Role
 	if role.Ready() {
 		return out, _err_actor_readyed
 	}
+
+	if ret, err := LuaRoleHook(d.cfg.LuaFile, role.ActorID()); err != nil {
+		return out, err
+	} else if !ret {
+		return out, errors.New("")
+	}
+
 	if err := role.Login(ctx); err != nil {
 		return out, err
 	}

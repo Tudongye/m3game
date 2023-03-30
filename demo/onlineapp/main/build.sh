@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "OnlineApp Build..."
 cd onlineapp/main
-go build .
+go build -tags netgo .
