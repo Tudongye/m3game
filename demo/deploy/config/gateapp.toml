@@ -1,6 +1,6 @@
 [Transport]
-Host = "127.0.0.1"
-Port = 32410
+Host = "{{Transport_Host}}"
+Port = 40001
 BroadcastTimeout = 5
 
 [Options]
@@ -13,20 +13,20 @@ RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "9.135.206.18:8500"
+ConsulHost = "{{Router_Consul_Consul_Host}}"
 
 [[Plugin.Broker.broker_nats]]
-URL = "127.0.0.1:4222"
+URL = "{{Broker_Nats_URL}}"
 
 [[Plugin.Gate.gate_grpc]]
-Port = 32412
+Port = 40003
 
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"
 Encoding = "console"
 
 [[Plugin.Metric.metric_prom]]
-Port = 32411
+Port = 40002
 
 
 [App]

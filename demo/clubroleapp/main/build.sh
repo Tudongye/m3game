@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "ClubRoleApp Build..."
 cd clubroleapp/main
-go build .
+go build -tags netgo .

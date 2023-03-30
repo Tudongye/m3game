@@ -1,5 +1,6 @@
 [Transport]
-Addr = "127.0.0.1:32420"
+Host = "127.0.0.1"
+Port = 32420
 BroadcastTimeout = 5
 
 [Options]
@@ -18,7 +19,7 @@ ConsulHost = "127.0.0.1:8500"
 URL = "127.0.0.1:4222"
 
 [[Plugin.Gate.gate_grpc]]
-Addr = "127.0.0.1:32422"
+Port = 32422
 
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"

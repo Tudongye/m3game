@@ -1,6 +1,6 @@
 [Transport]
-Host = "127.0.0.1"
-Port = 32310
+Host = "{{Transport_Host}}"
+Port = 40001
 BroadcastTimeout = 5
 
 [Options]
@@ -13,21 +13,21 @@ RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "127.0.0.1:8500"
+ConsulHost = "{{Router_Consul_Consul_Host}}"
 
 [[Plugin.Broker.broker_nats]]
-URL = "127.0.0.1:4222"
+URL = "{{Broker_Nats_URL}}"
 
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"
 Encoding = "console"
 
 [[Plugin.DB.db_mongo]]
-URI = "mongodb://admin:123456@127.0.0.1:27017"
+URI = "{{DB_Mongo_DB}}"
 DataBase = "roledb"
 
 [[Plugin.Metric.metric_prom]]
-Port = 32311
+Port = 40002
 
 [Server]
 [[Server.Actor]]

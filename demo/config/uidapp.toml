@@ -1,5 +1,6 @@
 [Transport]
-Addr = "127.0.0.1:32110"
+Host = "127.0.0.1"
+Port = 32110
 BroadcastTimeout = 5
 
 [Options]
@@ -12,7 +13,7 @@ RuleConfigFile = "../../resource/rules.toml"
 
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "127.0.0.1:8500"
+ConsulHost = "9.135.206.18:8500"
 
 [[Plugin.Broker.broker_nats]]
 URL = "127.0.0.1:4222"
