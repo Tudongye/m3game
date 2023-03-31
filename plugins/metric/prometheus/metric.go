@@ -73,10 +73,9 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	}()
 
 	if cfg.ConsulUrl != "" {
-		if err := registerConsul(cfg.ConsulUrl, config.GetSvcID().String(), config.GetAppID().String(), cfg.Port); err != nil {
+		if err := registerConsul(cfg.ConsulUrl, cfg.ConsulSvc, fmt.Sprintf("%s.%s", cfg.ConsulAppPrefix, config.GetAppID().String()), cfg.Port); err != nil {
 			return nil, errs.PromSetupFaul.Wrap(err, "")
 		}
-		log.Info("Metric.registerConsul %s svc %s ins %s...", cfg.ConsulUrl, config.GetSvcID(), config.GetAppID())
 	}
 	return _metric, nil
 }
@@ -94,8 +93,10 @@ func (f *Factory) CanUnload(plugin.PluginIns) bool {
 }
 
 type PromCfg struct {
-	Port      int    `mapstructure:"Port" validate:"gt=0"` // Prom监听端口
-	ConsulUrl string `mapstructure:"ConsulHost"`           // Consul注册
+	Port            int    `mapstructure:"Port" validate:"gt=0"` // Prom监听端口
+	ConsulUrl       string `mapstructure:"ConsulHost"`           // Consul注册
+	ConsulSvc       string `mapstructure:"ConsulSvc"`
+	ConsulAppPrefix string `mapstructure:"ConsulAppPrefix"`
 }
 
 type Metric struct {
@@ -138,6 +139,7 @@ func (*Metric) NewSummary(key string, group string) metric.StatSummary {
 }
 
 func registerConsul(consulurl string, svc string, ins string, port int) error {
+	log.Debug("Metric registerConsul")
 	consulConfig := api.DefaultConfig()
 	consulConfig.Address = consulurl
 	client, err := api.NewClient(consulConfig)
@@ -167,5 +169,6 @@ func registerConsul(consulurl string, svc string, ins string, port int) error {
 	if err := agent.ServiceRegister(reg); err != nil {
 		return errs.PromRegisterConsulFail.Wrap(err, "Metric.registerConsul")
 	}
+	log.Info("Metric.registerConsul %s svc %s ins %s...", consulurl, svc, ins)
 	return nil
 }

@@ -23,6 +23,7 @@ require (
 	go.mongodb.org/mongo-driver v1.11.3
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.40.0
 	go.opentelemetry.io/otel v1.14.0
+	go.opentelemetry.io/otel/exporters/jaeger v1.14.0
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.14.0
 	go.opentelemetry.io/otel/sdk v1.14.0
 	go.uber.org/zap v1.24.0

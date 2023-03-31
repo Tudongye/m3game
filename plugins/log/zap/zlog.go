@@ -3,10 +3,12 @@ package zlog
 import (
 	"context"
 	"fmt"
+	"m3game/config"
 	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -62,6 +64,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 		return nil, errs.ZlogSetupFail.Wrap(err, "Zlog Decode Cfg")
 	}
 	loglv := log.ConvertLogLv(cfg.LogLevel)
+	cfg.Filename = strings.Replace(cfg.Filename, "{appid}", config.GetAppID().String(), -1)
 
 	var zw zapcore.WriteSyncer
 	if cfg.Filename != "" {
