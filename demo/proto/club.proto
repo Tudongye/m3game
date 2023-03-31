@@ -11,7 +11,8 @@ service ClubSer {
     rpc ClubCreate(ClubCreate.Req) returns (ClubCreate.Rsp);  // 创建社团
     rpc ClubRead(ClubRead.Req) returns (ClubRead.Rsp);  // 获取社团信息
     rpc ClubDelete(ClubDelete.Req) returns (ClubDelete.Rsp);  // 解散社团
-    rpc ClubRoleInfo(ClubRoleInfo.Req) returns (ClubRoleInfo.Rsp);  // 获取玩家社团数据
+    rpc ClubRoleInfo(ClubRoleInfo.Req)
+        returns (ClubRoleInfo.Rsp);  // 获取玩家社团数据
 
     rpc ClubJoin(ClubJoin.Req) returns (ClubJoin.Rsp);  // 加入社团
     rpc ClubExit(ClubExit.Req) returns (ClubExit.Rsp);  // 退出社团
@@ -24,6 +25,7 @@ service ClubDaemonSer {
 
 message ClubCreate {
     option (rpc_option).route_key = "SlotId";
+    option (rpc_option).trace     = true;
     message Req {
         int64 SlotId = 1;
         int64 ClubId = 2;
@@ -34,6 +36,7 @@ message ClubCreate {
 
 message ClubRead {
     option (rpc_option).route_key = "SlotId";
+    option (rpc_option).trace     = true;
     message Req {
         int64 SlotId = 1;
         int64 ClubId = 2;
@@ -45,6 +48,7 @@ message ClubRead {
 
 message ClubRoleInfo {
     option (rpc_option).route_key = "SlotId";
+    option (rpc_option).trace     = true;
     message Req {
         int64 SlotId = 1;
         int64 ClubId = 2;
@@ -57,6 +61,7 @@ message ClubRoleInfo {
 
 message ClubJoin {
     option (rpc_option).route_key = "SlotId";
+    option (rpc_option).trace     = true;
     message Req {
         int64 SlotId = 1;
         int64 ClubId = 2;
@@ -67,6 +72,7 @@ message ClubJoin {
 
 message ClubExit {
     option (rpc_option).route_key = "SlotId";
+    option (rpc_option).trace     = true;
     message Req {
         int64 SlotId = 1;
         int64 ClubId = 2;
@@ -77,6 +83,7 @@ message ClubExit {
 
 message ClubDelete {
     option (rpc_option).route_key = "SlotId";
+    option (rpc_option).trace     = true;
     message Req {
         int64 SlotId = 1;
         int64 ClubId = 2;
@@ -87,6 +94,7 @@ message ClubDelete {
 
 message ClubKick {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {
         string LeaseId = 1;
     }
@@ -95,6 +103,7 @@ message ClubKick {
 
 message ClubList {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {}
     message Rsp {
         ClubDB ClubDBs = 1;

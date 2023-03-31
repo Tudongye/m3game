@@ -49,6 +49,7 @@ enum UCFlag {
 
 message AllocRoleId {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {
         string OpenId = 1;
     }
@@ -59,6 +60,7 @@ message AllocRoleId {
 
 message AllocClubId {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {
         int64 RoleId = 1;
     }

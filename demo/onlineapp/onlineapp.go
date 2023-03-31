@@ -21,6 +21,8 @@ import (
 	"m3game/runtime/server"
 	"time"
 
+	_ "m3game/plugins/trace/jaeger"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"

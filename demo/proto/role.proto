@@ -41,7 +41,8 @@ enum RFlag {
 }
 
 message RoleLogin {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {}
     message Rsp {
         RoleDB RoleDB = 1;
@@ -49,7 +50,8 @@ message RoleLogin {
 }
 
 message RoleGetInfo {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {}
     message Rsp {
         RoleDB RoleDB         = 1;
@@ -58,7 +60,8 @@ message RoleGetInfo {
 }
 
 message RoleModifyName {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {
         string NewName = 1;
     }
@@ -68,7 +71,8 @@ message RoleModifyName {
 }
 
 message RolePowerUp {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {
         int32 PowerUp = 1;
     }
@@ -78,7 +82,8 @@ message RolePowerUp {
 }
 
 message RoleGetClubList {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {}
     message Rsp {
         repeated ClubDB ClubDBs = 1;
@@ -86,7 +91,8 @@ message RoleGetClubList {
 }
 
 message RoleGetClubInfo {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {
         int64 ClubId = 1;
     }
@@ -96,7 +102,8 @@ message RoleGetClubInfo {
 }
 
 message RoleCreateClub {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {}
     message Rsp {
         int64 ClubId = 1;
@@ -104,7 +111,8 @@ message RoleCreateClub {
 }
 
 message RoleJoinClub {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {
         int64 ClubId = 1;
     }
@@ -112,19 +120,22 @@ message RoleJoinClub {
 }
 
 message RoleExitClub {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {}
     message Rsp {}
 }
 
 message RoleCancelClub {
-    option (rpc_option).cs = true;
+    option (rpc_option).cs    = true;
+    option (rpc_option).trace = true;
     message Req {}
     message Rsp {}
 }
 
 message RoleKick {
-    option (rpc_option).cs = false;
+    option (rpc_option).cs    = false;
+    option (rpc_option).trace = true;
     message Req {
         int64 RoleId = 1;
     }

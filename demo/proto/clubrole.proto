@@ -13,6 +13,7 @@ service ClubRoleSer {
 
 message ClubRoleRead {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {
         int64 RoleId = 1;
     }

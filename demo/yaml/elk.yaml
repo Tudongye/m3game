@@ -1,0 +1,207 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: m3demo
+  name: elasticsearch
+  labels:
+    app: elasticsearch
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9200
+    name: api
+  - port: 9300
+    name: elasticsearch  
+  selector: 
+    app: elasticsearch
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: elasticsearch
+  name: elasticsearch
+  namespace: m3demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - env:
+        - name: discovery.type
+          value: single-node
+        - name: ES_JAVA_OPTS
+          value: -Xms512m -Xmx512m
+        - name: MINIMUM_MASTER_NODES
+          value: "1"
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.12.0-amd64
+        name: elasticsearch
+        ports:
+        - containerPort: 9200
+          name: db
+          protocol: TCP
+        - containerPort: 9300
+          name: transport
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: m3demo
+  name: logstash
+  labels:
+    app: logstash
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5044
+    name: logstash
+  - port: 9600
+    name: logstash-panel
+  selector: 
+    app: logstash
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: m3demo
+data:
+  logstash.conf: |-
+    input {
+        beats {
+            port => 5044
+    }
+    }
+
+    filter {
+    json {
+        source => "message"
+    }
+    }
+    
+    output {
+    elasticsearch {
+        hosts => ["elasticsearch:9200"]
+    }
+    }
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  namespace: m3demo
+  labels: 
+    name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+      name: logstash
+  template:
+    metadata:
+      labels: 
+        app: logstash
+        name: logstash
+    spec:
+      containers:
+      - name: logstash
+        image: docker.elastic.co/logstash/logstash:7.12.0
+        ports:
+        - containerPort: 5044
+          protocol: TCP
+        - containerPort: 9600
+          protocol: TCP
+
+        volumeMounts:
+        - name: logstash-config
+          mountPath: /usr/share/logstash/pipeline/logstash.conf
+          subPath: logstash.conf
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+      volumes:
+      - name: logstash-config
+        configMap:
+          name: logstash-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  namespace: m3demo
+spec:
+  ports:
+  - protocol: TCP
+    port: 5601
+    targetPort: 5601
+  selector:
+    app: kibana
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  namespace: m3demo
+  labels:
+    name: kibana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+        name: kibana
+    spec:
+      containers:
+      - name: kibana
+        image: docker.elastic.co/kibana/kibana:7.12.0
+        ports:
+        - containerPort: 5601
+          protocol: TCP
+        env:
+        - name: ELASTICSEARCH_URL
+          value: http://elasticsearch:9200
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config-to-logstash
+  namespace: m3demo
+data:
+  filebeat.yml: |-
+    filebeat.inputs:
+    - type: log
+      paths:
+        - /var/log/m3demo/app.log
+    output.logstash:
+      hosts: ['logstash:5044']

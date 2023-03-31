@@ -11,7 +11,8 @@ service GateSer {
 }
 
 message SendToCli {
-    option (rpc_option).ntf = true;
+    option (rpc_option).ntf   = true;
+    option (rpc_option).trace = true;
     message Req {
         int64 RoleId  = 1;
         NtyMsg NtyMsg = 2;

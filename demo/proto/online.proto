@@ -31,6 +31,7 @@ enum ORFlag {
 
 message OnlineCreate {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {
         int64 RoleId = 1;
         string AppId = 2;
@@ -40,6 +41,7 @@ message OnlineCreate {
 
 message OnlineRead {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {
         int64 RoleId = 1;
     }
@@ -50,6 +52,7 @@ message OnlineRead {
 
 message OnlineDelete {
     option (rpc_option).route_key = "";
+    option (rpc_option).trace     = true;
     message Req {
         int64 RoleId = 1;
         string AppId = 2;
