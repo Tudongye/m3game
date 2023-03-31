@@ -81,4 +81,4 @@ tolerations: []
 
 affinity: {}
 
-m3demoimage: m3demo:latest
+m3demoimage: m3demo

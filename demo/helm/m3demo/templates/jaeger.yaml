@@ -1,0 +1,219 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: m3demo
+  name: jaeger-collector
+  labels:
+    app: jaeger-collector
+spec:
+  type: ClusterIP
+  ports:
+    - name: tcp-9411-9411
+      port: 9411
+      protocol: TCP
+      targetPort: 9411
+    - name: jaeger-grpc-pb
+      port: 14250
+      protocol: TCP
+      targetPort: 14250
+    - name: jaeger-thrift
+      port: 14267
+      protocol: TCP
+      targetPort: 14267
+    - name: jaeger-client
+      port: 14268
+      protocol: TCP
+      targetPort: 14268
+    - name: health
+      port: 14269
+      protocol: TCP
+      targetPort: 14269
+  selector:
+    app: jaeger-collector
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: jaeger-collector
+  name: jaeger-collector
+  namespace: m3demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger-collector
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jaeger-collector
+    spec:
+      containers:
+        - image: jaegertracing/jaeger-collector:1.28
+          name: jaeger-collector
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          env:
+            - name: PODIP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SPAN_STORAGE_TYPE
+              value: elasticsearch 
+            - name: ES_SERVER_URLS
+              value: http://elasticsearch:9200
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: m3demo
+  name: jaeger-agent
+  labels:
+    app: jaeger-agent
+spec:
+  type: ClusterIP
+  ports:
+    - name: jaeger-other
+      port: 6831
+      protocol: UDP
+      targetPort: 6831
+    - name: jaeger-bytes
+      port: 6832
+      protocol: UDP
+      targetPort: 6832
+    - name: jaeger-tcp
+      port: 5778
+      protocol: TCP
+      targetPort: 5778
+    - name: zipkin
+      port: 5775
+      protocol: TCP
+      targetPort: 5775
+  selector:
+    app: jaeger-agent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: jaeger-agent
+  name: jaeger-agent
+  namespace: m3demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger-agent
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jaeger-agent
+    spec:
+      containers:
+        - image: jaegertracing/jaeger-agent:1.28
+          name: jaeger-agent
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          env:
+            - name: PODIP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: REPORTER_GRPC_HOST_PORT
+              value: jaeger-collector:14250 
+            - name: LOG_LEVEL
+              value: debug
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: m3demo
+  name: jaeger-query
+  labels:
+    app: jaeger-query
+spec:
+  type: ClusterIP
+  ports:
+    - name: ui
+      port: 16686
+      protocol: TCP
+      targetPort: 16686
+    - name: health
+      port: 16687
+      protocol: TCP
+      targetPort: 16687
+  selector:
+    app: jaeger-query
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: jaeger-query
+  name: jaeger-query
+  namespace: m3demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger-query
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jaeger-query
+    spec:
+      containers:
+        - image: jaegertracing/jaeger-query:1.28
+          name: jaeger-query
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          env:
+            - name: PODIP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SPAN_STORAGE_TYPE
+              value: elasticsearch 
+            - name: ES_SERVER_URLS
+              value: http://elasticsearch:9200
+            - name: JAEGER_AGENT_PORT
+              value: "6831"
+      restartPolicy: Always

@@ -49,19 +49,18 @@ spec:
           name: clubroleapp
           resources:
             limits:
-              cpu: 500m
-              memory: 1Gi
+              cpu: 100m
+              memory: 256Mi
             requests:
-              cpu: 250m
+              cpu: 100m
               memory: 256Mi
           workingDir: /go/bin/demo/deploy
-          command:
-          - sh
-          - start.sh
-          - k8s
-          - world1
-          - clubrole
-          - $(ENV_M3DEMO_Ins)
+          volumeMounts:
+          - name: log
+            mountPath: /var/log/m3demo
+          - name: m3demo-conf
+            mountPath: /go/bin/demo/deploy/configtemp/
+          command: [ "/bin/sh", "-c", "touch /var/log/m3demo/app.log;cp configtemp config -rf;sh start.sh k8s world1 clubrole $(ENV_M3DEMO_Ins)" ]
           env:
             - name: ENV_M3DEMO_Ins
               valueFrom:
@@ -83,4 +82,37 @@ spec:
               value: mongodb://mongo:27017
             - name: ENV_M3DEMO_Lease_Etcd_Endpoints
               value: etcd:2379
+            - name: ENV_M3DEMO_Trace_Jaeger_Host
+              value: jaeger-agent
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:7.12.0
+          args: [
+            "-c", "/etc/filebeat.yml",
+            "-e",
+          ]
+          resources:
+            limits:
+              cpu: 100m
+              memory: 256Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+          - mountPath: /var/log/m3demo
+            name: log
+          - name: filebeat-conf
+            mountPath: /etc/filebeat.yml
+            readOnly: true
+            subPath: filebeat.yml
       restartPolicy: Always
+      volumes:
+      - name: log 
+        emptyDir: {}
+      - name: m3demo-conf
+        configMap:
+          defaultMode: 0640
+          name: m3demo-conf
+      - name: filebeat-conf
+        configMap:
+          defaultMode: 0640
+          name: filebeat-config-to-logstash

@@ -28,5 +28,8 @@ Encoding = "console"
 [[Plugin.Metric.metric_prom]]
 Port = 32421
 
+[[Plugin.Trace.trace_jaeger]]
+Host = "127.0.0.1"
+
 [App]
 PrePareTime = 10 # 启动前准备时长

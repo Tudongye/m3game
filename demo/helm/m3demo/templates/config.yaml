@@ -1,0 +1,322 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: m3demo-conf
+  namespace: m3demo
+data:
+  clubapp.toml: |-                
+          [Transport]
+          Host = "{{Transport_Host}}"
+          Port = 40001
+          BroadcastTimeout = 5
+
+          [Options]
+          [[Options.Mesh]]
+          WatcherInterSecond = 1
+          [[Options.Resource]]
+          CfgPath = "../../resource"
+          [[Options.Shape]]
+          RuleConfigFile = "../../resource/rules.toml"
+
+          [[Plugin.Log.log_zap]]
+          LogLevel = "DEBUG"
+          Encoding = "console"
+          Filename = "/var/log/m3demo/app.log"
+          MaxSize = 100
+          MaxAge = 3
+          MaxBackups = 100
+
+          [Plugin]
+          [[Plugin.Router.router_consul]]
+          ConsulHost = "consul:8500"
+
+          [[Plugin.Broker.broker_nats]]
+          URL = "nats:4222"
+
+          [[Plugin.DB.db_mongo]]
+          URI = "mongodb://mongo:27017"
+          DataBase = "clubdb"
+
+          [[Plugin.Lease.lease_etcd]]
+          Endpoints = "etcd:2379"
+          DialTimeout = 5
+          LeaseKeepLiveTime = 10
+          PreExitTime = 5
+
+          [[Plugin.Metric.metric_prom]]
+          Port = 40002
+          ConsulHost = "consul:8500"
+          ConsulSvc = "M3Demo_Metric"
+          ConsulAppPrefix = "Metric"
+
+          [[Plugin.Trace.trace_jaeger]]
+          Host = "jaeger-agent"
+
+
+          [Server]
+          [[Server.Actor]]
+          ActiveTimeOut = 0  # role 存活时间
+          SaveTimeInter = 0  # role自动存储时间
+          TickTimeInter = 1  # 定时器轮转时间
+          MaxReqChanSize = 10 # 最大接受信道
+          MaxReqWaitTime = 30 # 最大等待时间
+          LeaseMode = 1   # 启用租约管理
+          LeasePrefix = "clubslot"   # 租约前缀
+          AllocLeaseTimeOut = 10    # 申请租约超时时间
+          WaitFreeLeaseTimeOut = 3  # 预估数据迁出时长
+
+          [App]
+          PrePareTime = 10 # 启动前准备时长
+          SlotNum = 1024 # Slot数
+  clubroleapp.toml: |-                
+          [Transport]
+          Host = "{{Transport_Host}}"
+          Port = 40001
+          BroadcastTimeout = 5
+
+          [Options]
+          [[Options.Mesh]]
+          WatcherInterSecond = 1
+          [[Options.Resource]]
+          CfgPath = "../../resource"
+          [[Options.Shape]]
+          RuleConfigFile = "../../resource/rules.toml"
+
+          [Plugin]
+          [[Plugin.Router.router_consul]]
+          ConsulHost = "consul:8500"
+
+          [[Plugin.Broker.broker_nats]]
+          URL = "nats:4222"
+
+          [[Plugin.Log.log_zap]]
+          LogLevel = "DEBUG"
+          Encoding = "console"
+          Filename = "/var/log/m3demo/app.log"
+          MaxSize = 100
+          MaxAge = 3
+          MaxBackups = 100
+
+          [[Plugin.DB.db_mongo]]
+          URI = "mongodb://mongo:27017"
+          DataBase = "clubdb"
+
+          [[Plugin.Metric.metric_prom]]
+          Port = 40002
+          ConsulHost = "consul:8500"
+          ConsulSvc = "M3Demo_Metric"
+          ConsulAppPrefix = "Metric"
+
+          [[Plugin.Trace.trace_jaeger]]
+          Host = "jaeger-agent"
+
+          [App]
+          PrePareTime = 10 # 启动前准备时长
+  gateapp.toml: |-          
+          [Transport]
+          Host = "{{Transport_Host}}"
+          Port = 40001
+          BroadcastTimeout = 5
+
+          [Options]
+          [[Options.Mesh]]
+          WatcherInterSecond = 1
+          [[Options.Resource]]
+          CfgPath = "../../resource"
+          [[Options.Shape]]
+          RuleConfigFile = "../../resource/rules.toml"
+
+          [Plugin]
+          [[Plugin.Router.router_consul]]
+          ConsulHost = "consul:8500"
+
+          [[Plugin.Broker.broker_nats]]
+          URL = "nats:4222"
+
+          [[Plugin.Gate.gate_grpc]]
+          Port = 40003
+
+          [[Plugin.Log.log_zap]]
+          LogLevel = "DEBUG"
+          Encoding = "console"
+          Filename = "/var/log/m3demo/app.log"
+          MaxSize = 100
+          MaxAge = 3
+          MaxBackups = 100
+
+          [[Plugin.Metric.metric_prom]]
+          Port = 40002
+          ConsulHost = "consul:8500"
+          ConsulSvc = "M3Demo_Metric"
+          ConsulAppPrefix = "Metric"
+
+          [[Plugin.Trace.trace_jaeger]]
+          Host = "jaeger-agent"
+
+
+          [App]
+          PrePareTime = 10 # 启动前准备时长      
+  onlineapp.toml: |-  
+          [Transport]
+          Host = "{{Transport_Host}}"
+          Port = 40001
+          BroadcastTimeout = 5
+
+          [Options]
+          [[Options.Mesh]]
+          WatcherInterSecond = 1
+          [[Options.Resource]]
+          CfgPath = "../../resource"
+          [[Options.Shape]]
+          RuleConfigFile = "../../resource/rules.toml"
+
+          [Plugin]
+          [[Plugin.Router.router_consul]]
+          ConsulHost = "consul:8500"
+
+          [[Plugin.Broker.broker_nats]]
+          URL = "nats:4222"
+
+          [[Plugin.Log.log_zap]]
+          LogLevel = "DEBUG"
+          Encoding = "console"
+          Filename = "/var/log/m3demo/app.log"
+          MaxSize = 100
+          MaxAge = 3
+          MaxBackups = 100
+
+          [[Plugin.DB.db_mongo]]
+          URI = "mongodb://mongo:27017"
+          DataBase = "uiddb"
+
+          [[Plugin.Metric.metric_prom]]
+          Port = 40002
+          ConsulHost = "consul:8500"
+          ConsulSvc = "M3Demo_Metric"
+          ConsulAppPrefix = "Metric"
+
+          [[Plugin.Lease.lease_etcd]]
+          Endpoints = "etcd:2379"
+          DialTimeout = 5
+          LeaseKeepLiveTime = 10
+          PreExitTime = 5
+
+          [[Plugin.Trace.trace_jaeger]]
+          Host = "jaeger-agent"
+
+          [App]
+          PrePareTime = 10 # 启动前准备时长
+          CachePoolSize = 10000 # 缓存池
+          VoteLease = "/single/onlineapp"
+          AppAliveTimeOut = 10    # 
+  roleapp.toml: |-        
+          [Transport]
+          Host = "{{Transport_Host}}"
+          Port = 40001
+          BroadcastTimeout = 5
+
+          [Options]
+          [[Options.Mesh]]
+          WatcherInterSecond = 1
+          [[Options.Resource]]
+          CfgPath = "../../resource"
+          [[Options.Shape]]
+          RuleConfigFile = "../../resource/rules.toml"
+
+          [Plugin]
+          [[Plugin.Router.router_consul]]
+          ConsulHost = "consul:8500"
+
+          [[Plugin.Broker.broker_nats]]
+          URL = "nats:4222"
+
+          [[Plugin.Log.log_zap]]
+          LogLevel = "DEBUG"
+          Encoding = "console"
+          Filename = "/var/log/m3demo/app.log"
+          MaxSize = 100
+          MaxAge = 3
+          MaxBackups = 100
+
+          [[Plugin.DB.db_mongo]]
+          URI = "mongodb://mongo:27017"
+          DataBase = "roledb"
+
+          [[Plugin.Metric.metric_prom]]
+          Port = 40002
+          ConsulHost = "consul:8500"
+          ConsulSvc = "M3Demo_Metric"
+          ConsulAppPrefix = "Metric"
+
+          [[Plugin.Trace.trace_jaeger]]
+          Host = "jaeger-agent"
+
+          [Server]
+          [[Server.Actor]]
+          ActiveTimeOut = 60  # role 存活时间
+          SaveTimeInter = 10  # role自动存储时间
+          TickTimeInter = 10  # 定时器轮转时间
+          MaxReqChanSize = 10 # 最大接受信道
+          MaxReqWaitTime = 30 # 最大等待时间
+          AutoCreate = 1 # 自动创建Actor
+          LeaseMode = 0   # 启用租约管理
+          LeasePrefix = "1"   # 租约前缀
+          AllocLeaseTimeOut = 1    # 申请租约超时时间
+          WaitFreeLeaseTimeOut = 1  # 预估数据迁出时长
+
+          LuaFile = "../../resource/roleser.lua"
+          [App]
+          PrePareTime = 10 # 启动前准备时长
+  uidapp.toml: |-                
+          [Transport]
+          Host = "{{Transport_Host}}"
+          Port = 40001
+          BroadcastTimeout = 5
+
+          [Options]
+          [[Options.Mesh]]
+          WatcherInterSecond = 1
+          [[Options.Resource]]
+          CfgPath = "../../resource"
+          [[Options.Shape]]
+          RuleConfigFile = "../../resource/rules.toml"
+
+          [Plugin]
+          [[Plugin.Router.router_consul]]
+          ConsulHost = "consul:8500"
+
+          [[Plugin.Broker.broker_nats]]
+          URL = "nats:4222"
+
+          [[Plugin.Log.log_zap]]
+          LogLevel = "INFO "
+          Encoding = "console"
+          Filename = "/var/log/m3demo/app.log"
+          MaxSize = 100
+          MaxAge = 3
+          MaxBackups = 100
+
+          [[Plugin.DB.db_mongo]]
+          URI = "mongodb://mongo:27017"
+          DataBase = "uiddb"
+
+          [[Plugin.Lease.lease_etcd]]
+          Endpoints = "etcd:2379"
+          DialTimeout = 5
+          LeaseKeepLiveTime = 10
+          PreExitTime = 5
+
+          [[Plugin.Metric.metric_prom]]
+          Port = 40002
+          ConsulHost = "consul:8500"
+          ConsulSvc = "M3Demo_Metric"
+          ConsulAppPrefix = "Metric"
+
+          [[Plugin.Trace.trace_jaeger]]
+          Host = "jaeger-agent"
+
+          [App]
+          PrePareTime = 10 # 启动前准备时长
+          CachePoolSize = 10000 # 缓存池
+          VoteLease = "/single/uidapp"

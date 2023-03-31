@@ -49,6 +49,8 @@ echo "DB_Mongo_DB: $ENV_M3DEMO_DB_Mongo_DB"
 sed -i~ "s|{{DB_Mongo_DB}}|$ENV_M3DEMO_DB_Mongo_DB|g" $ConfigPath
 echo "Lease_Etcd_Endpoints: $ENV_M3DEMO_Lease_Etcd_Endpoints"
 sed -i~ "s|{{Lease_Etcd_Endpoints}}|$ENV_M3DEMO_Lease_Etcd_Endpoints|g" $ConfigPath
+echo "Trace_Jaeger_Host: $ENV_M3DEMO_Trace_Jaeger_Host"
+sed -i~ "s|{{Trace_Jaeger_Host}}|$ENV_M3DEMO_Trace_Jaeger_Host|g" $ConfigPath
 
 # 拉起服务
 if [ "$Func" = "uid" ]; then

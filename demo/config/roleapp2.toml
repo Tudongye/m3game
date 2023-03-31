@@ -29,6 +29,9 @@ DataBase = "roledb"
 [[Plugin.Metric.metric_prom]]
 Port = 32321
 
+[[Plugin.Trace.trace_jaeger]]
+Host = "127.0.0.1"
+
 [Server]
 [[Server.Actor]]
 ActiveTimeOut = 60  # role 存活时间

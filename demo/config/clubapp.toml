@@ -35,6 +35,9 @@ PreExitTime = 5
 [[Plugin.Metric.metric_prom]]
 Port = 32611
 
+[[Plugin.Trace.trace_jaeger]]
+Host = "127.0.0.1"
+
 [Server]
 [[Server.Actor]]
 ActiveTimeOut = 0  # role 存活时间

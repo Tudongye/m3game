@@ -35,6 +35,9 @@ PreExitTime = 5
 [[Plugin.Metric.metric_prom]]
 Port = 32121
 
+[[Plugin.Trace.trace_jaeger]]
+Host = "127.0.0.1"
+
 [App]
 PrePareTime = 10 # 启动前准备时长
 CachePoolSize = 10000 # 缓存池
