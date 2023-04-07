@@ -181,16 +181,16 @@ step4 制作配置文件
 
 ```
 [Transport]
-Host = "9.135.72.251"
+Host = "127.0.0.1"
 Port = 22105
 BroadcastTimeout = 5
 CloseBroker = 1 
 [Options]
 [[Options.Mesh]]
-WatcherInterSecond = 1		// 服务发现间隔
+WatcherInterSecond = 1		
 [Plugin]
 [[Plugin.Router.router_consul]]
-ConsulHost = "127.0.0.1:8500"	
+ConsulHost = "127.0.0.1:8500"	 # 替换成你自己的consul地址
 ```
 
 Step5 编译运行
