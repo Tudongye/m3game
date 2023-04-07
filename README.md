@@ -181,16 +181,16 @@ step4 制作配置文件
 
 ```
 [Transport]
-Addr = "127.0.0.1:22105"	// 内部监听端口
-BroadTimeOut = 5		// 广播处理超时
+Host = "9.135.72.251"
+Port = 22105
+BroadcastTimeout = 5
+CloseBroker = 1 
 [Options]
 [[Options.Mesh]]
 WatcherInterSecond = 1		// 服务发现间隔
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"	
-[[Plugin.Broker.broker_nats]]
-NatsURL = "127.0.0.1:4222"
 ```
 
 Step5 编译运行
@@ -199,8 +199,7 @@ Step5 编译运行
 go build .
 ./main -idstr example.world1.simple.1 -conf ../../config/simpleapp.toml
 ```
-
-![image](https://user-images.githubusercontent.com/16680818/224407634-3c464a0d-17bb-4f1b-8668-92a54a50d612.png)
+![image](https://user-images.githubusercontent.com/16680818/230610348-20fb07fb-ec5d-41d1-a2a6-bfe1e4450a6e.png)
 
 # 单实例开发方案(已完成)
 
