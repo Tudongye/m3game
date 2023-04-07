@@ -49,6 +49,7 @@ type TransportCfg struct {
 	Host             string `mapstructure:"Host" validate:"required"`         // 监听地址
 	Port             int    `mapstructure:"Port" validate:"gt=0"`             // 监听地址
 	BroadcastTimeout int    `mapstructure:"BroadcastTimeout" validate:"gt=0"` // BrokerSer的Handler超时时间
+	CloseBroker      int    `mapstructure:"CloseBroker"`                      // 是否关闭Broker
 	Addr             string
 }
 
@@ -149,16 +150,18 @@ func (t *Transport) Prepare(ctx context.Context) error {
 			grpc_middleware.ChainUnaryServer(t.serverInterceptors...),
 		),
 	)
-	t.brokerser = newBrokerSer(
-		t.cfg,
-		grpc_middleware.ChainUnaryServer(t.serverInterceptors...),
-	)
-	brokerins := broker.Instance()
-	if brokerins == nil {
-		return errs.TransportInitFail.New("Broker-Plugin not find")
-	}
-	if err := t.brokerser.setBroker(brokerins); err != nil {
-		return err
+	if t.cfg.CloseBroker == 0 {
+		t.brokerser = newBrokerSer(
+			t.cfg,
+			grpc_middleware.ChainUnaryServer(t.serverInterceptors...),
+		)
+		brokerins := broker.Instance()
+		if brokerins == nil {
+			return errs.TransportInitFail.New("Broker-Plugin not find")
+		}
+		if err := t.brokerser.setBroker(brokerins); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -168,8 +171,10 @@ func (t *Transport) RegisterServer(f func(grpc.ServiceRegistrar) error) error {
 	if err := f(t.server); err != nil {
 		return errs.TransportRegisterSerFail.Wrap(err, "server.register")
 	}
-	if err := f(t.brokerser); err != nil {
-		return errs.BrokerSerRegisterSerFail.Wrap(err, "brokerser.register")
+	if t.cfg.CloseBroker == 0 {
+		if err := f(t.brokerser); err != nil {
+			return errs.BrokerSerRegisterSerFail.Wrap(err, "brokerser.register")
+		}
 	}
 	return nil
 }
@@ -189,11 +194,15 @@ func (t *Transport) ClientInterceptor(ctx context.Context, method string, req, r
 			if meta.RouteType(vlist[0]) == meta.RouteTypeBroad ||
 				meta.RouteType(vlist[0]) == meta.RouteTypeMulti {
 				if vlist, ok := md[string(meta.M3RouteTopic)]; ok && len(vlist) > 0 {
-					err := t.brokerser.send(ctx, vlist[0], method, req, opts...)
-					if err != nil {
-						metric.Counter(monitor.CallRPCFailTotal).Inc()
+					if t.cfg.CloseBroker == 0 {
+						err := t.brokerser.send(ctx, vlist[0], method, req, opts...)
+						if err != nil {
+							metric.Counter(monitor.CallRPCFailTotal).Inc()
+						}
+						return err
+					} else {
+						return errs.BrokerSerClose.New("")
 					}
-					return err
 				} else {
 					metric.Counter(monitor.CallRPCFailTotal).Inc()
 					return errs.TransportCliCantFindTopic.New("RouteTypeBroad & RouteTypeMulti not find Topic")
