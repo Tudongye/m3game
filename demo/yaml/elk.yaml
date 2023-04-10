@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: m3demo
+  namespace: m3demobase
   name: elasticsearch
   labels:
     app: elasticsearch
@@ -24,7 +24,7 @@ metadata:
   labels:
     app: elasticsearch
   name: elasticsearch
-  namespace: m3demo
+  namespace: m3demobase
 spec:
   replicas: 1
   selector:
@@ -66,7 +66,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: m3demo
+  namespace: m3demobase
   name: logstash
   labels:
     app: logstash
@@ -85,7 +85,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: logstash-config
-  namespace: m3demo
+  namespace: m3demobase
 data:
   logstash.conf: |-
     input {
@@ -102,7 +102,7 @@ data:
     
     output {
     elasticsearch {
-        hosts => ["elasticsearch:9200"]
+        hosts => ["elasticsearch.m3demobase.svc.cluster.local:9200"]
     }
     }
 
@@ -111,7 +111,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: logstash
-  namespace: m3demo
+  namespace: m3demobase
   labels: 
     name: logstash
 spec:
@@ -138,13 +138,6 @@ spec:
         - name: logstash-config
           mountPath: /usr/share/logstash/pipeline/logstash.conf
           subPath: logstash.conf
-        resources:
-          limits:
-            cpu: 100m
-            memory: 256Mi
-          requests:
-            cpu: 100m
-            memory: 256Mi
       volumes:
       - name: logstash-config
         configMap:
@@ -154,7 +147,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: kibana
-  namespace: m3demo
+  namespace: m3demobase
 spec:
   ports:
   - protocol: TCP
@@ -167,7 +160,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: kibana
-  namespace: m3demo
+  namespace: m3demobase
   labels:
     name: kibana
 spec:
@@ -189,7 +182,7 @@ spec:
           protocol: TCP
         env:
         - name: ELASTICSEARCH_URL
-          value: http://elasticsearch:9200
+          value: http://elasticsearch.m3demobase.svc.cluster.local:9200
 
 ---
 apiVersion: v1
@@ -204,4 +197,4 @@ data:
       paths:
         - /var/log/m3demo/app.log
     output.logstash:
-      hosts: ['logstash:5044']
+      hosts: ['logstash.m3demobase.svc.cluster.local:5044']

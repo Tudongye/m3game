@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: m3demo
+  namespace: m3demobase
   name: jaeger-collector
   labels:
     app: jaeger-collector
@@ -38,7 +38,7 @@ metadata:
   labels:
     app: jaeger-collector
   name: jaeger-collector
-  namespace: m3demo
+  namespace: m3demobase
 spec:
   replicas: 1
   selector:
@@ -73,13 +73,13 @@ spec:
             - name: SPAN_STORAGE_TYPE
               value: elasticsearch 
             - name: ES_SERVER_URLS
-              value: http://elasticsearch:9200
+              value: http://elasticsearch.m3demobase.svc.cluster.local:9200
       restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: m3demo
+  namespace: m3demobase
   name: jaeger-agent
   labels:
     app: jaeger-agent
@@ -112,7 +112,7 @@ metadata:
   labels:
     app: jaeger-agent
   name: jaeger-agent
-  namespace: m3demo
+  namespace: m3demobase
 spec:
   replicas: 1
   selector:
@@ -145,7 +145,7 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             - name: REPORTER_GRPC_HOST_PORT
-              value: jaeger-collector:14250 
+              value: jaeger-collector.m3demobase.svc.cluster.local:14250 
             - name: LOG_LEVEL
               value: debug
       restartPolicy: Always
@@ -153,7 +153,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: m3demo
+  namespace: m3demobase
   name: jaeger-query
   labels:
     app: jaeger-query
@@ -178,7 +178,7 @@ metadata:
   labels:
     app: jaeger-query
   name: jaeger-query
-  namespace: m3demo
+  namespace: m3demobase
 spec:
   replicas: 1
   selector:
@@ -213,7 +213,7 @@ spec:
             - name: SPAN_STORAGE_TYPE
               value: elasticsearch 
             - name: ES_SERVER_URLS
-              value: http://elasticsearch:9200
+              value: http://elasticsearch.m3demobase.svc.cluster.local:9200
             - name: JAEGER_AGENT_PORT
               value: "6831"
       restartPolicy: Always

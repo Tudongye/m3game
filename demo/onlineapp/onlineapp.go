@@ -15,6 +15,7 @@ import (
 	"m3game/plugins/router"
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
+	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/mesh"
@@ -112,7 +113,7 @@ func (a *OnlineApp) VoteMain(ctx context.Context) (bool, error) {
 	}
 	// 计算逻辑主备
 	logicAppId := ""
-	if routeinss, err := router.GetAllInstances(svcid); err != nil || len(routeinss) == 0 {
+	if routeinss, err := router.Instance().GetAllInstances(svcid); err != nil || len(routeinss) == 0 {
 		return false, errors.Wrapf(err, "Vote GetInss %s", svcid)
 	} else {
 		routehelper := mesh.NewRouteHelper()
@@ -155,7 +156,7 @@ func (a *OnlineApp) VoteMain(ctx context.Context) (bool, error) {
 	return false, nil
 }
 
-func (d *OnlineApp) HealthCheck() bool {
+func (d *OnlineApp) Alive(app string, svc string) bool {
 	return true
 }
 

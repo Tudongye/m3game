@@ -29,24 +29,24 @@ data:
 
           [Plugin]
           [[Plugin.Router.router_consul]]
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
 
           [[Plugin.Broker.broker_nats]]
-          URL = "nats:4222"
+          URL = "nats.m3demobase.svc.cluster.local:4222"
 
           [[Plugin.DB.db_mongo]]
-          URI = "mongodb://mongo:27017"
+          URI = "mongodb://mongo.m3demobase.svc.cluster.local:27017"
           DataBase = "clubdb"
 
           [[Plugin.Lease.lease_etcd]]
-          Endpoints = "etcd:2379"
+          Endpoints = "etcd.m3demobase.svc.cluster.local:2379"
           DialTimeout = 5
           LeaseKeepLiveTime = 10
           PreExitTime = 5
 
           [[Plugin.Metric.metric_prom]]
           Port = 40002
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
           ConsulSvc = "M3Demo_Metric"
           ConsulAppPrefix = "Metric"
 
@@ -85,10 +85,10 @@ data:
 
           [Plugin]
           [[Plugin.Router.router_consul]]
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
 
           [[Plugin.Broker.broker_nats]]
-          URL = "nats:4222"
+          URL = "nats.m3demobase.svc.cluster.local:4222"
 
           [[Plugin.Log.log_zap]]
           LogLevel = "DEBUG"
@@ -99,12 +99,12 @@ data:
           MaxBackups = 100
 
           [[Plugin.DB.db_mongo]]
-          URI = "mongodb://mongo:27017"
+          URI = "mongodb://mongo.m3demobase.svc.cluster.local:27017"
           DataBase = "clubdb"
 
           [[Plugin.Metric.metric_prom]]
           Port = 40002
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
           ConsulSvc = "M3Demo_Metric"
           ConsulAppPrefix = "Metric"
 
@@ -129,10 +129,10 @@ data:
 
           [Plugin]
           [[Plugin.Router.router_consul]]
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
 
           [[Plugin.Broker.broker_nats]]
-          URL = "nats:4222"
+          URL = "nats.m3demobase.svc.cluster.local:4222"
 
           [[Plugin.Gate.gate_grpc]]
           Port = 40003
@@ -147,7 +147,7 @@ data:
 
           [[Plugin.Metric.metric_prom]]
           Port = 40002
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
           ConsulSvc = "M3Demo_Metric"
           ConsulAppPrefix = "Metric"
 
@@ -173,10 +173,10 @@ data:
 
           [Plugin]
           [[Plugin.Router.router_consul]]
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
 
           [[Plugin.Broker.broker_nats]]
-          URL = "nats:4222"
+          URL = "nats.m3demobase.svc.cluster.local:4222"
 
           [[Plugin.Log.log_zap]]
           LogLevel = "DEBUG"
@@ -187,17 +187,17 @@ data:
           MaxBackups = 100
 
           [[Plugin.DB.db_mongo]]
-          URI = "mongodb://mongo:27017"
+          URI = "mongodb://mongo.m3demobase.svc.cluster.local:27017"
           DataBase = "uiddb"
 
           [[Plugin.Metric.metric_prom]]
           Port = 40002
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
           ConsulSvc = "M3Demo_Metric"
           ConsulAppPrefix = "Metric"
 
           [[Plugin.Lease.lease_etcd]]
-          Endpoints = "etcd:2379"
+          Endpoints = "etcd.m3demobase.svc.cluster.local:2379"
           DialTimeout = 5
           LeaseKeepLiveTime = 10
           PreExitTime = 5
@@ -226,10 +226,10 @@ data:
 
           [Plugin]
           [[Plugin.Router.router_consul]]
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
 
           [[Plugin.Broker.broker_nats]]
-          URL = "nats:4222"
+          URL = "nats.m3demobase.svc.cluster.local:4222"
 
           [[Plugin.Log.log_zap]]
           LogLevel = "DEBUG"
@@ -240,12 +240,12 @@ data:
           MaxBackups = 100
 
           [[Plugin.DB.db_mongo]]
-          URI = "mongodb://mongo:27017"
+          URI = "mongodb://mongo.m3demobase.svc.cluster.local:27017"
           DataBase = "roledb"
 
           [[Plugin.Metric.metric_prom]]
           Port = 40002
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
           ConsulSvc = "M3Demo_Metric"
           ConsulAppPrefix = "Metric"
 
@@ -284,10 +284,10 @@ data:
 
           [Plugin]
           [[Plugin.Router.router_consul]]
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
 
           [[Plugin.Broker.broker_nats]]
-          URL = "nats:4222"
+          URL = "nats.m3demobase.svc.cluster.local:4222"
 
           [[Plugin.Log.log_zap]]
           LogLevel = "INFO "
@@ -298,18 +298,18 @@ data:
           MaxBackups = 100
 
           [[Plugin.DB.db_mongo]]
-          URI = "mongodb://mongo:27017"
+          URI = "mongodb://mongo.m3demobase.svc.cluster.local:27017"
           DataBase = "uiddb"
 
           [[Plugin.Lease.lease_etcd]]
-          Endpoints = "etcd:2379"
+          Endpoints = "etcd.m3demobase.svc.cluster.local:2379"
           DialTimeout = 5
           LeaseKeepLiveTime = 10
           PreExitTime = 5
 
           [[Plugin.Metric.metric_prom]]
           Port = 40002
-          ConsulHost = "consul:8500"
+          ConsulHost = "consul.m3demobase.svc.cluster.local:8500"
           ConsulSvc = "M3Demo_Metric"
           ConsulAppPrefix = "Metric"
 

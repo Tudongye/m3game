@@ -1,0 +1,13 @@
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1beta1.m3demo.metrics.k8s.io
+spec:
+  service:
+    name: prom-metrics-server
+    namespace: m3demobase
+  group: m3demo.metrics.k8s.io
+  version: v1beta1
+  insecureSkipTLSVerify: true
+  groupPriorityMinimum: 100
+  versionPriority: 100

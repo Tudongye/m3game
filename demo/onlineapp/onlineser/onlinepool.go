@@ -207,7 +207,7 @@ func (u *OnlinePool) LoadAppCache() error {
 	env, world, _ := config.GetWorldID().Parse()
 	rolesvcid := meta.GenRouteSvc(env, world, proto.RoleFuncID)
 	timenow := time.Now().Unix()
-	if inns, err := router.GetAllInstances(rolesvcid.String()); err != nil {
+	if inns, err := router.Instance().GetAllInstances(rolesvcid.String()); err != nil {
 		return err
 	} else {
 		for _, ins := range inns {

@@ -88,20 +88,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-            - name: ENV_M3DEMO_Transport_Host
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
-            - name: ENV_M3DEMO_Router_Consul_Consul_Host
-              value: consul:8500
-            - name: ENV_M3DEMO_Broker_Nats_URL
-              value: nats:4222
-            - name: ENV_M3DEMO_DB_Mongo_DB
-              value: mongodb://mongo:27017
-            - name: ENV_M3DEMO_Lease_Etcd_Endpoints
-              value: etcd:2379
-            - name: ENV_M3DEMO_Trace_Jaeger_Host
-              value: jaeger-agent
         - name: filebeat
           image: docker.elastic.co/beats/filebeat:7.12.0
           args: [

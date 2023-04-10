@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: m3demo
+  namespace: m3demobase
   name: nginx
   labels:
     app: nginx
@@ -52,7 +52,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-passwd
-  namespace: m3demo
+  namespace: m3demobase
 data:
   nginx.passwd: |-                
         admin:$apr1$gd8bjt9E$ssWO7ruD4CxJ0u1Yij55p.
@@ -61,7 +61,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-conf
-  namespace: m3demo
+  namespace: m3demobase
 data:
   nginx.conf: |-                
         user  root;
@@ -80,7 +80,7 @@ data:
             auth_basic "Please input password elasticsearch";
             auth_basic_user_file /etc/nginx/nginx.passwd;
             location / {
-              proxy_pass http://elasticsearch:9200/;
+              proxy_pass http://elasticsearch.m3demobase.svc.cluster.local:9200/;
             }
           }
           server {
@@ -88,7 +88,7 @@ data:
             auth_basic "Please input password consul";
             auth_basic_user_file /etc/nginx/nginx.passwd;
             location / {
-              proxy_pass http://consul:8500/;
+              proxy_pass http://consul.m3demobase.svc.cluster.local:8500/;
             }
           }
           server {
@@ -96,7 +96,7 @@ data:
             auth_basic "Please input password logstash";
             auth_basic_user_file /etc/nginx/nginx.passwd;
             location / {
-              proxy_pass http://logstash:9600/;
+              proxy_pass http://logstash.m3demobase.svc.cluster.local:9600/;
             }
           }
           server {
@@ -104,7 +104,7 @@ data:
             auth_basic "Please input password kibana";
             auth_basic_user_file /etc/nginx/nginx.passwd;
             location / {
-              proxy_pass http://kibana:5601/;
+              proxy_pass http://kibana.m3demobase.svc.cluster.local:5601/;
             }
           }
           server {
@@ -112,7 +112,7 @@ data:
             auth_basic "Please input password jaeger-query";
             auth_basic_user_file /etc/nginx/nginx.passwd;
             location / {
-              proxy_pass http://jaeger-query:16686/;
+              proxy_pass http://jaeger-query.m3demobase.svc.cluster.local:16686/;
             }
           }
           server {
@@ -120,14 +120,14 @@ data:
             auth_basic "Please input password prometheus";
             auth_basic_user_file /etc/nginx/nginx.passwd;
             location / {
-              proxy_pass http://prometheus:9090/;
+              proxy_pass http://prometheus.m3demobase.svc.cluster.local:9090/;
             }
           }
           server {
             listen 30012;
             location / {
               proxy_set_header Host $http_host;
-              proxy_pass http://grafana:3000/;
+              proxy_pass http://grafana.m3demobase.svc.cluster.local:3000/;
             }
           }
         }
@@ -136,7 +136,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx
-  namespace: m3demo
+  namespace: m3demobase
   labels: 
     name: nginx
 spec:
