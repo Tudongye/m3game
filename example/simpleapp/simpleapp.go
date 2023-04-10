@@ -4,8 +4,7 @@ import (
 	"context"
 	"m3game/example/proto"
 	"m3game/example/simpleapp/simpleser"
-	_ "m3game/plugins/broker/nats"
-	_ "m3game/plugins/router/consul"
+	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
@@ -23,7 +22,7 @@ type SimpleApp struct {
 }
 
 // 健康检测
-func (d *SimpleApp) HealthCheck() bool {
+func (d *SimpleApp) Alive(app string, svc string) bool {
 	return true
 }
 

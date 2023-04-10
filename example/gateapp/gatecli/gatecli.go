@@ -10,6 +10,7 @@ import (
 	"m3game/example/proto"
 	"m3game/example/proto/pb"
 	"m3game/plugins/log"
+	"m3game/plugins/transport"
 
 	"github.com/pkg/errors"
 
@@ -43,7 +44,7 @@ func Init(srcapp meta.RouteApp, opts ...grpc.DialOption) error {
 	opts = append(opts,
 		grpc.WithInsecure(),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
-		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.Instance().ClientInterceptors()...)),
 		grpc.WithTimeout(time.Second*10),
 	)
 	if _client.conn, err = grpc.Dial(target, opts...); err != nil {

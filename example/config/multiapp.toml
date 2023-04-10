@@ -14,6 +14,8 @@ RuleConfigFile = "../../resource/rules.toml"
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
+AliveHost = "127.0.0.1"
+AlivePort = 20042
 
 [[Plugin.Broker.broker_nats]]
 URL = "127.0.0.1:4222"
@@ -24,6 +26,10 @@ ConfigFile = "../../resource/sentinel.yml"
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"
 Encoding = "console"
+
+[[Plugin.Trans.trans_tcp]]
+Host = "127.0.0.1"
+Port = 20041
 
 [App]
 PrePareTime = 10 # 启动前准备时长

@@ -14,6 +14,8 @@ RuleConfigFile = "../../resource/rules.toml"
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
+AliveHost = "127.0.0.1"
+AlivePort = 20032
 
 [[Plugin.Broker.broker_nats]]
 URL = "127.0.0.1:4222"
@@ -22,14 +24,19 @@ URL = "127.0.0.1:4222"
 ConfigFile = "../../resource/sentinel.yml"
 
 [[Plugin.Gate.gate_grpc]]
-Port = 22000
+Port = 20034
 
 [[Plugin.Metric.metric_prom]]
-Port = 32100
+Host = "127.0.0.1"
+Port = 20033
 
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"
 Encoding = "console"
+
+[[Plugin.Trans.trans_tcp]]
+Host = "127.0.0.1"
+Port = 20031
 
 
 [App]

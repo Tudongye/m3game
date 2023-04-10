@@ -1,8 +1,3 @@
-[Transport]
-Host = "127.0.0.1"
-Port = 22102
-BroadcastTimeout = 5
-
 [Options]
 [[Options.Mesh]]
 WatcherInterSecond = 1
@@ -14,6 +9,8 @@ RuleConfigFile = "../../resource/rules.toml"
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
+AliveHost = "127.0.0.1"
+AlivePort = 20022
 
 [[Plugin.Broker.broker_nats]]
 URL = "127.0.0.1:4222"
@@ -24,6 +21,10 @@ ConfigFile = "../../resource/sentinel.yml"
 [[Plugin.Log.log_zap]]
 LogLevel = "DEBUG"
 Encoding = "console"
+
+[[Plugin.Trans.trans_tcp]]
+Host = "127.0.0.1"
+Port = 20021
 
 [App]
 PrePareTime = 10 # 启动前准备时长

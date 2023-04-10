@@ -10,6 +10,7 @@ import (
 	"m3game/plugins/router"
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
+	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
@@ -48,7 +49,7 @@ func (a *AsyncApp) Init(c map[string]interface{}) error {
 	}
 	return nil
 }
-func (d *AsyncApp) HealthCheck() bool {
+func (d *AsyncApp) Alive(app string, svc string) bool {
 	return true
 }
 
