@@ -108,8 +108,7 @@ package simpleapp
 import (
 	"m3game/example/proto"
 	"m3game/example/simpleapp/simpleser"
-	_ "m3game/plugins/broker/nats"
-	_ "m3game/plugins/router/consul"
+	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
@@ -180,17 +179,10 @@ func (s *SimpleSer) TransportRegister() func(grpc.ServiceRegistrar) error {
 step4 制作配置文件
 
 ```
-[Transport]
-Host = "127.0.0.1"
-Port = 22105
-BroadcastTimeout = 5
-CloseBroker = 1 
-[Options]
-[[Options.Mesh]]
-WatcherInterSecond = 1		
 [Plugin]
-[[Plugin.Router.router_consul]]
-ConsulHost = "127.0.0.1:8500"	 # 替换成你自己的consul地址
+[[Plugin.Trans.trans_tcp]]	 // grpcser地址
+Host = "127.0.0.1"
+Port = 20051
 ```
 
 Step5 编译运行
