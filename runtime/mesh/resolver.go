@@ -49,7 +49,7 @@ func (cr *Resolver) watcher() {
 	for {
 		<-time.After(time.Second * time.Duration(_cfg.WatcherInterSecond))
 		var newAddrs []resolver.Address
-		instances, err := router.GetAllInstances(cr.svc)
+		instances, err := router.Instance().GetAllInstances(cr.svc)
 		if err != nil {
 			log.Error("GetAllInstance %s fail err : %s", cr.svc, err.Error())
 			continue

@@ -9,8 +9,8 @@ type App interface {
 	Prepare(ctx context.Context) error     // 启动
 	Start(ctx context.Context)             // 启动
 	Stop() error                           // 停止
-	Reload(map[string]interface{}) error   // 重载                                                   // RPC主调拦截器
-	HealthCheck() bool                     // 健康检查
+	Reload(map[string]interface{}) error   // 重载
+	Alive(app string, svc string) bool     // 健康检查
 }
 
 func New(pfuncid string) *appBase {
@@ -47,6 +47,6 @@ func (a *appBase) Reload(map[string]interface{}) error {
 	return nil
 }
 
-func (a *appBase) HealthCheck() bool {
+func (a *appBase) Alive(app string, svc string) bool {
 	return false
 }

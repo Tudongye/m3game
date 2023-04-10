@@ -22,6 +22,9 @@ func Init(c map[string]interface{}) error {
 	if err := mapstructure.Decode(c, &_cfg); err != nil {
 		return errs.MeshInitFail.Wrap(err, "Decode MeshCfg")
 	}
+	if _cfg.WatcherInterSecond == 0 {
+		_cfg.WatcherInterSecond = 1
+	}
 	validate := validator.New()
 	if err := validate.Struct(&_cfg); err != nil {
 		return err

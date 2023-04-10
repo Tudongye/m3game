@@ -21,10 +21,11 @@ const (
 	Gate   Type = "gate"   // CS连接
 	Lease  Type = "lease"  // 租约
 	Lua    Type = "lua"    // Lua
+	Trans  Type = "trans"  // 内部通信
 )
 
 var (
-	_pluginserial = []Type{Log, Broker, Router, Trace, Metric, DB, Lease, Shape, Gate, Lua} // Plugin加载顺序
+	_pluginserial = []Type{Log, Trans, Broker, Router, Trace, Metric, DB, Lease, Shape, Gate, Lua} // Plugin加载顺序
 	_factoryMap   = make(map[string]Factory)
 )
 

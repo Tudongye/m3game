@@ -2,21 +2,7 @@ package client
 
 import (
 	"m3game/meta"
-
-	"google.golang.org/grpc"
 )
-
-var (
-	_clientInterceptors []grpc.UnaryClientInterceptor
-)
-
-func RegisterClientInterceptor(f grpc.UnaryClientInterceptor) {
-	_clientInterceptors = append(_clientInterceptors, f)
-}
-
-func ClientInterceptors() []grpc.UnaryClientInterceptor {
-	return _clientInterceptors
-}
 
 type Client interface {
 	SrcApp() meta.RouteApp

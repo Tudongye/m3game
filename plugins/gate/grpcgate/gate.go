@@ -10,7 +10,6 @@ import (
 	"m3game/meta/metapb"
 	"m3game/plugins/gate"
 	"m3game/plugins/log"
-	"m3game/runtime"
 	"m3game/runtime/plugin"
 	"net"
 	"sync"
@@ -62,7 +61,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 		return nil, errs.GrpcGateSetUpFail.Wrap(err, "")
 	}
 	var err error
-	Addr := fmt.Sprintf("%s:%d", runtime.Host(), cfg.Port)
+	Addr := fmt.Sprintf(":%d", cfg.Port)
 	tcpAddr, err := net.ResolveTCPAddr("tcp", Addr)
 	if err != nil {
 		return nil, errs.GrpcGateSetUpFail.Wrap(err, "transport")

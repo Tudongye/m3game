@@ -8,7 +8,9 @@ import (
 	"m3game/plugins/log"
 	"m3game/plugins/router"
 	"m3game/runtime/plugin"
-	"m3game/util"
+	"net/http"
+	"strconv"
+	"sync"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -33,6 +35,8 @@ const (
 
 type consulRouterCfg struct {
 	ConsulHost string `mapstructure:"ConsulHost" validate:"required"`
+	AliveHost  string `mapstructure:"AliveHost" validate:"required"` // 本地心跳检测IP
+	AlivePort  int    `mapstructure:"AlivePort" validate:"gt=0"`     // 本地心跳检测Port
 }
 
 type Factory struct {
@@ -57,7 +61,9 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	if err := validate.Struct(&cfg); err != nil {
 		return nil, errs.ConsulSetupFail.Wrap(err, "")
 	}
-	_consulrouter = &Router{}
+	_consulrouter = &Router{
+		cfg: cfg,
+	}
 	consulConfig := api.DefaultConfig()
 	consulConfig.Address = cfg.ConsulHost
 	if client, err := api.NewClient(consulConfig); err != nil {
@@ -66,6 +72,24 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 		_consulrouter.client = client
 	}
 
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		queryValues := r.URL.Query()
+		app := queryValues.Get("app")
+		svc := queryValues.Get("svc")
+		if !_consulrouter.aliveCheck(app, svc) {
+			w.WriteHeader(http.StatusInternalServerError)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+	})
+
+	server := &http.Server{Addr: ":" + strconv.Itoa(cfg.AlivePort)}
+	go func() {
+		log.Debug("Consul Alive HTTP server listening on %v", server.Addr)
+		if err := server.ListenAndServe(); err != nil {
+			log.Fatal("Consul Alive HTTP server failed: %v", err)
+		}
+	}()
 	if _, err := router.New(_consulrouter); err != nil {
 		return nil, err
 	}
@@ -100,20 +124,18 @@ func (f *Factory) CanUnload(p plugin.PluginIns) bool {
 
 type Router struct {
 	client *api.Client
+	cfg    consulRouterCfg
+	livefs sync.Map
 }
 
 func (r *Router) Factory() plugin.Factory {
 	return _factory
 }
 
-func (r *Router) Register(app string, svc string, addr string, meta map[string]string) error {
-	ip, port, err := util.Addr2IPPort(addr)
-	if err != nil {
-		return err
-	}
+func (r *Router) Register(app string, svc string, host string, port int, meta map[string]string, livef func(app string, svc string) bool) error {
 	interval := time.Duration(10) * time.Second
 	deregister := time.Duration(1) * time.Minute
-	healthmethod := fmt.Sprintf("%v:%v/Health/%v", ip, port, app)
+	healthmethod := fmt.Sprintf("http://%v:%v/health?svc=%v&app=%v", r.cfg.AliveHost, r.cfg.AlivePort, svc, app)
 	if meta == nil {
 		meta = make(map[string]string)
 	}
@@ -122,12 +144,14 @@ func (r *Router) Register(app string, svc string, addr string, meta map[string]s
 		Name:    svc,        // 服务名称
 		Tags:    []string{}, // tag，可以为空
 		Port:    port,       // 服务端口
-		Address: ip,         // 服务 IP
+		Address: host,       // 服务 IP
 		Meta:    meta,
 		Check: &api.AgentServiceCheck{ // 健康检查
-			Interval:                       interval.String(),   // 健康检查间隔
-			GRPC:                           healthmethod,        // grpc 支持，执行健康检查的地址，service 会传到 Health.Check 函数中
-			DeregisterCriticalServiceAfter: deregister.String(), // 注销时间，相当于过期时间
+			HTTP:                           healthmethod,
+			Method:                         "GET",
+			Interval:                       interval.String(),
+			Timeout:                        "3s",
+			DeregisterCriticalServiceAfter: deregister.String(),
 		},
 	}
 	log.Info("Register HealthMethod => %s", healthmethod)
@@ -135,6 +159,8 @@ func (r *Router) Register(app string, svc string, addr string, meta map[string]s
 	if err := agent.ServiceRegister(reg); err != nil {
 		return errs.ConsulRegisterAppFail.Wrap(err, "Consul.agent.ServiceRegister %s", app)
 	}
+	r.livefs.Store(app, livef)
+
 	return nil
 }
 
@@ -152,4 +178,14 @@ func (r *Router) GetAllInstances(svcid string) ([]router.Ins, error) {
 		instances = append(instances, newInstance(service.Service.Address, service.Service.Port, service.Service.ID, service.Service.Meta))
 	}
 	return instances, nil
+}
+
+func (r *Router) aliveCheck(app string, svc string) bool {
+	if v, ok := r.livefs.Load(app); !ok {
+		return false
+	} else if f, ok := v.(func(app string, svc string) bool); !ok {
+		return false
+	} else {
+		return f(app, svc)
+	}
 }

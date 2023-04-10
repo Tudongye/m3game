@@ -7,14 +7,11 @@ import (
 	"m3game/meta/errs"
 	"m3game/plugins/log"
 	"m3game/plugins/metric"
-	"m3game/runtime"
+	"m3game/plugins/router"
 	"m3game/runtime/plugin"
-	"m3game/util"
 	"net/http"
-	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/hashicorp/consul/api"
 	"github.com/mitchellh/mapstructure"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -37,6 +34,12 @@ func init() {
 	plugin.RegisterFactory(_factory)
 }
 
+type PromCfg struct {
+	Host            string `mapstructure:"Host" validate:"required"` // 监听地址
+	Port            int    `mapstructure:"Port" validate:"gt=0"`     // 监听端口
+	ConsulSvc       string `mapstructure:"ConsulSvc"`
+	ConsulAppPrefix string `mapstructure:"ConsulAppPrefix"`
+}
 type Factory struct {
 }
 
@@ -63,6 +66,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 	if _, err := metric.New(_metric); err != nil {
 		return nil, errs.PromSetupFaul.Wrap(err, "")
 	}
+
 	listenport := fmt.Sprintf(":%d", cfg.Port)
 	http.Handle("/metrics", promhttp.Handler())
 	log.Info("Metric.Listen %s...", listenport)
@@ -72,11 +76,21 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 		}
 	}()
 
-	if cfg.ConsulUrl != "" {
-		if err := registerConsul(cfg.ConsulUrl, cfg.ConsulSvc, fmt.Sprintf("%s.%s", cfg.ConsulAppPrefix, config.GetAppID().String()), cfg.Port); err != nil {
+	if cfg.ConsulSvc != "" {
+		if err := router.Instance().Register(
+			fmt.Sprintf("%s.%s", cfg.ConsulAppPrefix, config.GetAppID().String()),
+			cfg.ConsulSvc,
+			cfg.Host,
+			cfg.Port,
+			nil,
+			func(string, string) bool {
+				return true
+			},
+		); err != nil {
 			return nil, errs.PromSetupFaul.Wrap(err, "")
 		}
 	}
+
 	return _metric, nil
 }
 
@@ -90,13 +104,6 @@ func (f *Factory) Reload(plugin.PluginIns, map[string]interface{}) error {
 
 func (f *Factory) CanUnload(plugin.PluginIns) bool {
 	return false
-}
-
-type PromCfg struct {
-	Port            int    `mapstructure:"Port" validate:"gt=0"` // Prom监听端口
-	ConsulUrl       string `mapstructure:"ConsulHost"`           // Consul注册
-	ConsulSvc       string `mapstructure:"ConsulSvc"`
-	ConsulAppPrefix string `mapstructure:"ConsulAppPrefix"`
 }
 
 type Metric struct {
@@ -136,39 +143,4 @@ func (*Metric) NewSummary(key string, group string) metric.StatSummary {
 			Name:       key,
 			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		})
-}
-
-func registerConsul(consulurl string, svc string, ins string, port int) error {
-	log.Debug("Metric registerConsul")
-	consulConfig := api.DefaultConfig()
-	consulConfig.Address = consulurl
-	client, err := api.NewClient(consulConfig)
-	if err != nil {
-		return errs.PromRegisterConsulFail.Wrap(err, "Metric.registerConsul %s", consulurl)
-	}
-	interval := time.Duration(10) * time.Second
-	deregister := time.Duration(1) * time.Minute
-	addr := runtime.Addr()
-	ip, _, err := util.Addr2IPPort(addr)
-	if err != nil {
-		return err
-	}
-	reg := &api.AgentServiceRegistration{
-		ID:      ins,        // 服务节点的名称
-		Name:    svc,        // 服务名称
-		Tags:    []string{}, // tag，可以为空
-		Port:    port,       // 服务端口
-		Address: ip,         // 服务 IP
-		Check: &api.AgentServiceCheck{ // 健康检查
-			Interval:                       interval.String(), // 健康检查间隔
-			TCP:                            addr,
-			DeregisterCriticalServiceAfter: deregister.String(), // 注销时间，相当于过期时间
-		},
-	}
-	agent := client.Agent()
-	if err := agent.ServiceRegister(reg); err != nil {
-		return errs.PromRegisterConsulFail.Wrap(err, "Metric.registerConsul")
-	}
-	log.Info("Metric.registerConsul %s svc %s ins %s...", consulurl, svc, ins)
-	return nil
 }

@@ -19,9 +19,12 @@ const (
 	TransportInitFail                Code = 301  // Transport初始化失败
 	TransportCliCantFindTopic        Code = 302  // Transport ClientInterceptor 无法找到Topic
 	TransportRegisterSerFail         Code = 303  // Transport 向Grpc注册服务失败
+	TransportInsHasNewed             Code = 304  // Transport实例已创建
+	TransportSetupFail               Code = 305  // Transport创建实例失败
 	BrokerSerRegisterSerFail         Code = 401  // BrokerSer 向BrokerSer注册服务失败
 	BrokerSerSetBrokerFail           Code = 402  // BrokerSer 设置Broker
 	BrokerSerHandlerNotFind          Code = 403  // BrokerSer 未找到Handler
+	BrokerSerClose                   Code = 405  // BrokerSer 已关闭
 	RPCCantFindHashKey               Code = 501  // RPC未找到HashKey
 	RPCMethodNotRegister             Code = 502  // Method没有注册到RPC
 	RPCCallFuncFail                  Code = 503  // RPC调起用户Func失败

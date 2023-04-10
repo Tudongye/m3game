@@ -9,13 +9,12 @@ import (
 	"m3game/plugins/router"
 	"m3game/plugins/shape"
 	"m3game/plugins/trace"
+	"m3game/plugins/transport"
 	"m3game/runtime/app"
-	"m3game/runtime/client"
 	"m3game/runtime/mesh"
 	"m3game/runtime/plugin"
 	"m3game/runtime/resource"
 	"m3game/runtime/server"
-	"m3game/runtime/transport"
 	"m3game/util"
 	"os"
 	"os/signal"
@@ -62,18 +61,6 @@ func PreExit() error {
 	return nil
 }
 
-func Addr() string {
-	return _runtime.transport.Addr()
-}
-
-func Host() string {
-	return _runtime.transport.Host()
-}
-
-func Port() int {
-	return _runtime.transport.Port()
-}
-
 func New() *Runtime {
 	if _runtime != nil {
 		return _runtime
@@ -88,7 +75,6 @@ type Runtime struct {
 	app         app.App
 	servers     map[string]server.Server
 	cancel      context.CancelFunc
-	transport   *transport.Transport
 	resourcemgr *resource.ResourceMgr
 }
 
@@ -139,15 +125,6 @@ func (r *Runtime) Run(c context.Context, app app.App, servers []server.Server) e
 		}
 	}
 
-	// 创建传输层对象
-	log.Info("Transport.New...")
-	if trans, err := transport.New(cfg.Transport, r); err != nil {
-		log.Error("Transport.New err %s", err.Error())
-		return err
-	} else {
-		r.transport = trans
-	}
-
 	// 初始化插件
 	log.Info("Plugins.Init...")
 	if err := plugin.InitPlugins(ctx, v); err != nil {
@@ -181,7 +158,7 @@ func (r *Runtime) Run(c context.Context, app app.App, servers []server.Server) e
 
 	// 传输层预启动
 	log.Info("Transport.Prepare...")
-	if err := r.transport.Prepare(ctx); err != nil {
+	if err := transport.Instance().Prepare(ctx); err != nil {
 		log.Error("Transport.Prepare err %s", err.Error())
 		return err
 	}
@@ -189,7 +166,7 @@ func (r *Runtime) Run(c context.Context, app app.App, servers []server.Server) e
 	// 将业务Server注册到传输层
 	log.Info("Server.Register...")
 	for _, server := range servers {
-		if err := r.transport.RegisterServer(server.TransportRegister()); err != nil {
+		if err := transport.Instance().RegisterSer(server.TransportRegister()); err != nil {
 			log.Error("Transport.RegisterServer %s err %s", server.Name(), err.Error())
 			return err
 		}
@@ -201,7 +178,7 @@ func (r *Runtime) Run(c context.Context, app app.App, servers []server.Server) e
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		r.transport.Start(ctx)
+		transport.Instance().Start(ctx)
 	}()
 
 	// 业务Server预启动
@@ -241,10 +218,19 @@ func (r *Runtime) Run(c context.Context, app app.App, servers []server.Server) e
 	}()
 
 	// 向服务网格注册本地实例
-	log.Info("Router.Register...")
-	if err := router.Register(config.GetAppID().String(), config.GetSvcID().String(), _runtime.transport.Addr(), map[string]string{meta.M3AppVer.String(): config.GetVer()}); err != nil {
-		log.Error("Router.Register err %s", err.Error())
-		return err
+	if router.Instance() != nil {
+		log.Info("Router.Register...")
+		if err := router.Instance().Register(
+			config.GetAppID().String(),
+			config.GetSvcID().String(),
+			transport.Instance().Host(),
+			transport.Instance().Port(),
+			map[string]string{meta.M3AppVer.String(): config.GetVer()},
+			app.Alive,
+		); err != nil {
+			log.Error("Router.Register err %s", err.Error())
+			return err
+		}
 	}
 
 	wg.Add(1)
@@ -265,13 +251,6 @@ func (r *Runtime) Run(c context.Context, app app.App, servers []server.Server) e
 	return nil
 }
 
-func (r *Runtime) HealthCheck(idstr string) bool {
-	if string(config.GetAppID()) != idstr {
-		return false
-	}
-	return r.app.HealthCheck()
-}
-
 func (r *Runtime) registerServer(s server.Server) error {
 	if _, ok := r.servers[s.Name()]; ok {
 		return errs.RuntimeRegisterRepatedServer.New("Register repeated ServerName %s", string(s.Name()))
@@ -281,38 +260,35 @@ func (r *Runtime) registerServer(s server.Server) error {
 }
 
 func (r *Runtime) setupPluginInterceptor(cfg RuntimeCfg) error {
-	client.RegisterClientInterceptor(r.ClientInterceptor)
+	transport.Instance().RegisterServerInterceptor(r.serverInterceptor)
+	transport.Instance().RegisterClientInterceptor(r.clientInterceptor)
 
 	log.Info("SetupPluginInterceptor.Shape...")
 	if err := shape.Setup(cfg.Options.Shape); err != nil {
 		return err
 	}
-	r.transport.RegisterServerInterceptor(shape.ServerInterceptor())
-	client.RegisterClientInterceptor(shape.ClientInterceptor())
+	transport.Instance().RegisterServerInterceptor(shape.ServerInterceptor())
+	transport.Instance().RegisterClientInterceptor(shape.ClientInterceptor())
 
 	log.Info("SetupPluginInterceptor.Trace...")
-	r.transport.RegisterServerInterceptor(trace.ServerInterceptor())
-	client.RegisterClientInterceptor(trace.ClientInterceptor())
+	transport.Instance().RegisterServerInterceptor(trace.ServerInterceptor())
+	transport.Instance().RegisterClientInterceptor(trace.ClientInterceptor())
 
 	return nil
 }
 
-func (r *Runtime) ServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (r *Runtime) serverInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	ser := info.Server.(server.Server)
 	ctx = server.WithServer(ctx, ser)
 	return ser.ServerInterceptor(ctx, req, info, handler)
 }
 
-func (r *Runtime) ClientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+func (r *Runtime) clientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	ser := server.ParseServer(ctx)
 	if ser == nil {
-		// if not server call, direct call transport
-		return r.transport.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
+		return invoker(ctx, method, req, resp, cc, opts...)
 	}
-	f := func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
-		return r.transport.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
-	}
-	return ser.ClientInterceptor(ctx, method, req, resp, cc, f, opts...)
+	return ser.ClientInterceptor(ctx, method, req, resp, cc, invoker, opts...)
 }
 
 func (r *Runtime) reload() error {
@@ -330,10 +306,6 @@ func (r *Runtime) reload() error {
 
 	log.Info("Resource.Reload...")
 	if err := r.resourcemgr.ReLoad(cfg.Options.Resource); err != nil {
-		return err
-	}
-	log.Info("Transport.Reload...")
-	if err := r.transport.Reload(cfg.Transport); err != nil {
 		return err
 	}
 	log.Info("Plugin.Reload...")

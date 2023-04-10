@@ -19,7 +19,7 @@ type Ins interface {
 
 type Router interface {
 	plugin.PluginIns
-	Register(app string, svc string, addr string, meta map[string]string) error
+	Register(app string, svc string, host string, port int, meta map[string]string, livef func(app string, svc string) bool) error
 	Deregister(app string, svc string) error
 	GetAllInstances(svcid string) ([]Ins, error)
 }
@@ -35,20 +35,8 @@ func New(me Router) (Router, error) {
 
 func Instance() Router {
 	if _router == nil {
-		log.Fatal("Router not newd")
+		log.Error("Router not newd")
 		return nil
 	}
 	return _router
-}
-
-func Register(app string, svc string, addr string, meta map[string]string) error {
-	return Instance().Register(app, svc, addr, meta)
-}
-
-func Deregister(app string, svc string) error {
-	return Instance().Deregister(app, svc)
-}
-
-func GetAllInstances(svcid string) ([]Ins, error) {
-	return Instance().GetAllInstances(svcid)
 }
