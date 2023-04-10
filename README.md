@@ -18,6 +18,8 @@ M3Game是一个采用Golang构建游戏后端的尝试，期望能探索出一�
 
 4、这里有一个很有意思的置脏管理模块，只需要在pb中定义好数据和脏标记，就可以轻松实现置脏&批量写回功能。
 
+5、使用Nats替换了Grpc底层的http2传输协议，使Grpc支持广播和消息缓存。
+
 ![未命名文件 (2)](https://user-images.githubusercontent.com/16680818/222721483-8f14f7f2-7bb9-4eb2-8688-1367a67ed2ac.png)
 
 Mutil，Async，Actor-Server: 游戏后台常见的业务模式，分别对应并发，单线程异步，Actor模式
@@ -57,6 +59,8 @@ Shape-Plugin：流量治理组件，当前有一个sentinel实现
 Gate-Plugin：服务网关组件，当前有一个grpc-stream实现
 
 Lease-Plugin：租约管理组件，当前有一个etcd实现
+
+Transport-Plugin：Grpc传输层组件，当前有一个http2（原生） 和 一个Nats的实现。
 
 ## 集群化部署架构
 
@@ -180,7 +184,7 @@ step4 制作配置文件
 
 ```
 [Plugin]
-[[Plugin.Trans.trans_tcp]]	 // grpcser地址
+[[Plugin.Trans.trans_tcp]]	 // 采用http2传输层
 Host = "127.0.0.1"
 Port = 20051
 ```
@@ -244,6 +248,15 @@ func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (strin
 		return out.Rsp, nil
 	}
 }
+## RPC Tranport
+
+M3的服务之间的RPC调用采用Grpc框架，Grpc底层采用http2，不支持广播，不支持消息缓存。
+
+M3使用Tranport组件来处理Grpc的传输协议，除了基于原生http2的tcptrans，M3还是实现了一个基于Nats的natstrans，使Grpc支持广播与消息缓存。相关实现参看plugins/transport/natstrans.
+
+![未命名文件 (6)](https://user-images.githubusercontent.com/16680818/224411628-ce6afe7c-67b5-425e-bf32-003c600b08b5.png)
+
+
 ```
 
 ## 三种业务模型
@@ -283,7 +296,7 @@ Mesh使用Router插件进行服务注册和服务发现，Router插件是M3的�
 
 M3使用Grpc的Resolver & Picker方式将Mesh与RPC路由相关联，相关逻辑参看runtime/mesh/resolver.go，balance.go
 
-当前支持 P2P，Random，Hash，BroadCast，MutilCast，Single路由模式
+当前支持 P2P，Random，Hash，BroadCast，Single路由模式
 
 |  路由模式   | 选路参数  | 选路规则  |
 |  ----  | ----  | ----  |
@@ -291,16 +304,7 @@ M3使用Grpc的Resolver & Picker方式将Mesh与RPC路由相关联，相关逻�
 | Random  | 目标服务ID | 在目标服务中随机 |
 | Hash  | 目标服务ID & 哈希Key | 在目标服务中按哈希key，一致性哈希映射寻路 |
 | BroadCast  | 目标服务ID | 对目标服务所有实例广播 |
-| MutilCast  | 目标TopicID | 对订阅目标TopciID的所有实例广播 |
 | Single  | 目标服务ID | 对目标服务中ID最小的实例寻路 |
-
-### 广播
-
-M3基于Broker插件，实现了GrpcSer兼容的BrokerSer，用于处理BroadCast和MutilCast等单向Notify式RPC调用。plugins/broker/nats 是一个基于Nats的Broker实现。
-
-M3使用BrokerSer来处理广播，BrokerSer的相关实现参看 runtime/transport/brokerser.go。 
-
-![未命名文件 (6)](https://user-images.githubusercontent.com/16680818/224411628-ce6afe7c-67b5-425e-bf32-003c600b08b5.png)
 
 
 ## 资源管理
