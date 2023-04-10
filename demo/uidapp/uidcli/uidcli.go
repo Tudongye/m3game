@@ -2,12 +2,10 @@ package uidcli
 
 import (
 	"context"
-	"fmt"
 	"m3game/plugins/log"
 	"m3game/plugins/transport"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
-	"time"
 
 	"m3game/demo/proto"
 	"m3game/demo/proto/pb"
@@ -16,7 +14,6 @@ import (
 
 	"m3game/meta"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 )
 
@@ -40,29 +37,22 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	}
 
 	var err error
-	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
-	opts = append(opts,
-		grpc.WithInsecure(),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
-		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.Instance().ClientInterceptors()...)),
-		grpc.WithTimeout(time.Second*10),
-	)
-	if _client.conn, err = grpc.Dial(target, opts...); err != nil {
-		return nil, errors.Wrapf(err, "Dial Target %s", target)
+	if _client.conn, err = transport.Instance().ClientConn(_client.DstSvc().String(), opts...); err != nil {
+		return nil, errors.Wrapf(err, "Dial Target %s", _client.DstSvc().String())
 	} else {
 		_client.UidSerClient = pb.NewUidSerClient(_client.conn)
 		return _client, nil
 	}
 }
 
-func Conn() *grpc.ClientConn {
+func Conn() grpc.ClientConnInterface {
 	return _client.conn
 }
 
 type Client struct {
 	client.Client
 	pb.UidSerClient
-	conn *grpc.ClientConn
+	conn grpc.ClientConnInterface
 }
 
 func AllocRoleId(ctx context.Context, openid string, opts ...grpc.CallOption) (int64, error) {
