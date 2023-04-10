@@ -22,6 +22,7 @@ import (
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
 	_ "m3game/plugins/trace/jaeger"
+	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/rpc"
@@ -143,7 +144,7 @@ func (d *GateApp) AuthCall(req []byte) (string, []byte, error) {
 	return fmt.Sprintf("%d", authrsp.RoleId), rsp, nil
 }
 
-func (d *GateApp) HealthCheck() bool {
+func (d *GateApp) Alive(app string, svc string) bool {
 	return true
 }
 

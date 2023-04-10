@@ -14,6 +14,8 @@ RuleConfigFile = "../../resource/rules.toml"
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
+AliveHost = "127.0.0.1"
+AlivePort = 32513
 
 [[Plugin.Broker.broker_nats]]
 URL = "127.0.0.1:4222"
@@ -27,10 +29,14 @@ URI = "mongodb://admin:123456@127.0.0.1:27017"
 DataBase = "clubdb"
 
 [[Plugin.Metric.metric_prom]]
+Host = "127.0.0.1"
 Port = 32511
 
 [[Plugin.Trace.trace_jaeger]]
 Host = "127.0.0.1"
 
+[[Plugin.Trans.trans_tcp]]
+Host = "127.0.0.1"
+Port = 32510
 [App]
 PrePareTime = 10 # 启动前准备时长

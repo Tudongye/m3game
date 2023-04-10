@@ -8,6 +8,7 @@ import (
 	"m3game/demo/proto/pb"
 	"m3game/meta"
 	"m3game/plugins/log"
+	"m3game/plugins/transport"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
 	"time"
@@ -42,7 +43,7 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	opts = append(opts,
 		grpc.WithInsecure(),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
-		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(client.ClientInterceptors()...)),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.Instance().ClientInterceptors()...)),
 		grpc.WithTimeout(time.Second*10),
 	)
 	if _client.conn, err = grpc.Dial(target, opts...); err != nil {

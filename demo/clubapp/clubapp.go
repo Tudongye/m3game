@@ -20,6 +20,7 @@ import (
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
 	_ "m3game/plugins/trace/jaeger"
+	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/mesh"
@@ -107,7 +108,7 @@ func (d *ClubApp) VoteSlots(ctx context.Context) ([]string, error) {
 	appid := config.GetAppID().String()
 	svcid := config.GetSvcID().String()
 	var slots []string
-	if routeinss, err := router.GetAllInstances(svcid); err != nil || len(routeinss) == 0 {
+	if routeinss, err := router.Instance().GetAllInstances(svcid); err != nil || len(routeinss) == 0 {
 		return slots, errors.Wrapf(err, "Vote GetInss %s", svcid)
 	} else {
 		routehelper := mesh.NewRouteHelper()
@@ -128,7 +129,7 @@ func (d *ClubApp) VoteSlots(ctx context.Context) ([]string, error) {
 	return slots, nil
 }
 
-func (d *ClubApp) HealthCheck() bool {
+func (d *ClubApp) Alive(app string, svc string) bool {
 	return true
 }
 

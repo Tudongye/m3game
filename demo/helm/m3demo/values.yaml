@@ -81,4 +81,4 @@ tolerations: []
 
 affinity: {}
 
-m3demoimage: m3demo
+m3demoimage: {{ .Values.m3demoimage }}

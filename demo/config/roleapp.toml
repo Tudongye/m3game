@@ -1,8 +1,3 @@
-[Transport]
-Host = "127.0.0.1"
-Port = 32310
-BroadcastTimeout = 5
-
 [Options]
 [[Options.Mesh]]
 WatcherInterSecond = 1
@@ -14,6 +9,8 @@ RuleConfigFile = "../../resource/rules.toml"
 [Plugin]
 [[Plugin.Router.router_consul]]
 ConsulHost = "127.0.0.1:8500"
+AliveHost = "127.0.0.1"
+AlivePort = 32313
 
 [[Plugin.Broker.broker_nats]]
 URL = "127.0.0.1:4222"
@@ -27,10 +24,15 @@ URI = "mongodb://admin:123456@127.0.0.1:27017"
 DataBase = "roledb"
 
 [[Plugin.Metric.metric_prom]]
+Host = "127.0.0.1"
 Port = 32311
 
 [[Plugin.Trace.trace_jaeger]]
 Host = "127.0.0.1"
+
+[[Plugin.Trans.trans_tcp]]
+Host = "127.0.0.1"
+Port = 32310
 
 [Server]
 [[Server.Actor]]

@@ -13,6 +13,7 @@ import (
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
 	_ "m3game/plugins/trace/jaeger"
+	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"
@@ -73,7 +74,7 @@ func (d *ClubRoleApp) Start(ctx context.Context) {
 	}
 }
 
-func (d *ClubRoleApp) HealthCheck() bool {
+func (d *ClubRoleApp) Alive(app string, svc string) bool {
 	return true
 }
 
