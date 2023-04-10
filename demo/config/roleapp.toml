@@ -30,9 +30,12 @@ Port = 32311
 [[Plugin.Trace.trace_jaeger]]
 Host = "127.0.0.1"
 
-[[Plugin.Trans.trans_tcp]]
-Host = "127.0.0.1"
-Port = 32310
+# [[Plugin.Trans.trans_tcp]]
+# Host = "127.0.0.1"
+# Port = 32310
+
+[[Plugin.Trans.trans_nats]]
+URL = "127.0.0.1:4222"
 
 [Server]
 [[Server.Actor]]

@@ -36,9 +36,13 @@ Port = 32111
 [[Plugin.Trace.trace_jaeger]]
 Host = "127.0.0.1"
 
-[[Plugin.Trans.trans_tcp]]
-Host = "127.0.0.1"
-Port = 32110
+# [[Plugin.Trans.trans_tcp]]
+# Host = "127.0.0.1"
+# Port = 32110
+
+[[Plugin.Trans.trans_nats]]
+URL = "127.0.0.1:4222"
+
 [App]
 PrePareTime = 10 # 启动前准备时长
 CachePoolSize = 10000 # 缓存池

@@ -2,12 +2,10 @@ package gatecli
 
 import (
 	"context"
-	"fmt"
 	"m3game/plugins/log"
 	"m3game/plugins/transport"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
-	"time"
 
 	"m3game/demo/proto"
 	"m3game/demo/proto/pb"
@@ -16,7 +14,6 @@ import (
 
 	"m3game/meta"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"google.golang.org/grpc"
 )
 
@@ -39,29 +36,22 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 		Client: client.New(srcapp, dstsvc),
 	}
 	var err error
-	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
-	opts = append(opts,
-		grpc.WithInsecure(),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
-		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.Instance().ClientInterceptors()...)),
-		grpc.WithTimeout(time.Second*10),
-	)
-	if _client.conn, err = grpc.Dial(target, opts...); err != nil {
-		return nil, errors.Wrapf(err, "Dial Target %s", target)
+	if _client.conn, err = transport.Instance().ClientConn(_client.DstSvc().String(), opts...); err != nil {
+		return nil, errors.Wrapf(err, "Dial Target %s", _client.DstSvc().String())
 	} else {
 		_client.GateSerClient = pb.NewGateSerClient(_client.conn)
 		return _client, nil
 	}
 }
 
-func Conn() *grpc.ClientConn {
+func Conn() grpc.ClientConnInterface {
 	return _client.conn
 }
 
 type Client struct {
 	client.Client
 	pb.GateSerClient
-	conn *grpc.ClientConn
+	conn grpc.ClientConnInterface
 }
 
 func SendToCli(ctx context.Context, roleid int64, ntymsg *pb.NtyMsg, dstapp meta.RouteApp, opts ...grpc.CallOption) error {

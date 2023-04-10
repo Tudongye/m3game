@@ -11,9 +11,7 @@ import (
 	"m3game/plugins/transport"
 	"m3game/runtime/client"
 	"m3game/runtime/rpc"
-	"time"
 
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -39,15 +37,8 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	}
 
 	var err error
-	target := fmt.Sprintf("router://%s", _client.DstSvc().String())
-	opts = append(opts,
-		grpc.WithInsecure(),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
-		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.Instance().ClientInterceptors()...)),
-		grpc.WithTimeout(time.Second*10),
-	)
-	if _client.conn, err = grpc.Dial(target, opts...); err != nil {
-		return nil, errors.Wrapf(err, "Dial Target %s", target)
+	if _client.conn, err = transport.Instance().ClientConn(_client.DstSvc().String(), opts...); err != nil {
+		return _client, errors.Wrapf(err, "Dial Target %s", _client.DstSvc().String())
 	} else {
 		_client.ClubSerClient = pb.NewClubSerClient(_client.conn)
 		return _client, nil
@@ -57,10 +48,10 @@ func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 type Client struct {
 	client.Client
 	pb.ClubSerClient
-	conn *grpc.ClientConn
+	conn grpc.ClientConnInterface
 }
 
-func Conn() *grpc.ClientConn {
+func Conn() grpc.ClientConnInterface {
 	return _client.conn
 }
 
