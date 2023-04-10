@@ -64,7 +64,7 @@ Transport-Plugin：Grpc传输层组件，当前有一个http2（原生） 和 �
 
 ## 集群化部署架构
 
-![未命名文件 (12)](https://user-images.githubusercontent.com/16680818/227127493-b41dbfa7-3d65-4b1a-9331-0baf45b4b8fd.png)
+![未命名文件 (15)](https://user-images.githubusercontent.com/16680818/230932844-7a46e390-a5e8-49ff-93d4-1f62624ba6f8.png)
 
 ## M3内部依赖
 
@@ -651,7 +651,7 @@ Demo是一个全服互通游戏，玩家(Role)可以自由组建社团(Club)，�
 
 在本demo中外围服务包括GateApp, UidApp, OnlineApp, RoleApp, ClubApp，ClubMgrApp组成的部分，管理玩家(Role) 和 社团(Club)数据。
 
-![未命名文件 (12)](https://user-images.githubusercontent.com/16680818/227127493-b41dbfa7-3d65-4b1a-9331-0baf45b4b8fd.png)
+![未命名文件 (15)](https://user-images.githubusercontent.com/16680818/230932844-7a46e390-a5e8-49ff-93d4-1f62624ba6f8.png)
 
 GateApp: 网关服务，无状态服务，客户端任意链接
 
