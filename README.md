@@ -248,6 +248,7 @@ func Hello(ctx context.Context, hellostr string, opts ...grpc.CallOption) (strin
 		return out.Rsp, nil
 	}
 }
+
 ## RPC Tranport
 
 M3的服务之间的RPC调用采用Grpc框架，Grpc底层采用http2，不支持广播，不支持消息缓存。
