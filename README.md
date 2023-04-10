@@ -257,7 +257,7 @@ M3的服务之间的RPC调用采用Grpc框架，Grpc底层采用http2，不支�
 
 M3使用Tranport组件来处理Grpc的传输协议，除了基于原生http2的tcptrans，M3还是实现了一个基于Nats的natstrans，使Grpc支持广播与消息缓存。相关实现参看plugins/transport/natstrans.
 
-![未命名文件 (6)](https://user-images.githubusercontent.com/16680818/224411628-ce6afe7c-67b5-425e-bf32-003c600b08b5.png)
+![未命名文件 (16)](https://user-images.githubusercontent.com/16680818/231014897-6774444c-41f9-4ef2-b1c5-30436708295a.png)
 
 
 
