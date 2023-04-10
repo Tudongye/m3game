@@ -20,6 +20,7 @@ import (
 	"m3game/plugins/router"
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
+	_ "m3game/plugins/transport/natstrans"
 	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
@@ -65,11 +66,11 @@ func (a *GateApp) Init(c map[string]interface{}) error {
 }
 
 func (d *GateApp) Prepare(ctx context.Context) error {
-	if err := multicli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
+	if _, err := multicli.New(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
 		return err
-	} else if err := actorcli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
+	} else if _, err := actorcli.New(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
 		return err
-	} else if err := actorregcli.Init(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
+	} else if _, err := actorregcli.New(config.GetAppID(), grpc.WithCodec(&gate.GateCodec{})); err != nil {
 		return err
 	}
 	gate.SetReciver(d)

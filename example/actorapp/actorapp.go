@@ -60,11 +60,11 @@ func (a *ActorApp) Init(c map[string]interface{}) error {
 }
 
 func (d *ActorApp) Prepare(ctx context.Context) error {
-	if err := asynccli.Init(config.GetAppID()); err != nil {
+	if _, err := asynccli.New(config.GetAppID()); err != nil {
 		return err
-	} else if err := gatecli.Init(config.GetAppID()); err != nil {
+	} else if _, err := gatecli.New(config.GetAppID()); err != nil {
 		return err
-	} else if err := actorregcli.Init(config.GetAppID()); err != nil {
+	} else if _, err := actorregcli.New(config.GetAppID()); err != nil {
 		return err
 	}
 	lease.SetReciver(d)

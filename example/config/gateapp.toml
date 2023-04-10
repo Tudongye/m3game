@@ -38,6 +38,5 @@ Encoding = "console"
 Host = "127.0.0.1"
 Port = 20031
 
-
 [App]
 PrePareTime = 10 # 启动前准备时长
