@@ -14,10 +14,10 @@ const (
 	M3RouteDstApp  M3Meta = "m3routedstapp"  // 目标App，P2P
 	M3RouteHashKey M3Meta = "m3routehashkey" // 哈希Key, Hash
 	M3RouteTopic   M3Meta = "m3routetopic"   // 目标主题，Multi
-	M3RouteIsNty   M3Meta = "m3routeisnty"
+	M3RouteIsNty   M3Meta = "m3routeisnty"   // 是Nty
 
 	M3ClientSerial M3Meta = "m3clientserial" // 客户端序列号
-
+	M3GateMsg      M3Meta = "m3gatemsg"      // 是Gate消息
 	// Mesh相关
 	M3AppVer M3Meta = "m3appver"
 )

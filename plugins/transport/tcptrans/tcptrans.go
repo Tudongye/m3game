@@ -11,10 +11,12 @@ import (
 	"m3game/plugins/transport"
 	"m3game/runtime/plugin"
 	"net"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
@@ -155,6 +157,21 @@ func (t *TcpTrans) ClientInterceptors() []grpc.UnaryClientInterceptor {
 	return t.clientInterceptors
 }
 
+func (t *TcpTrans) ClientConn(target string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error) {
+	ttarget := fmt.Sprintf("router://%s", target)
+	opts = append(opts,
+		grpc.WithInsecure(),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"Balance_m3g"}`),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.Instance().ClientInterceptors()...)),
+		grpc.WithTimeout(time.Second*10),
+	)
+	if conn, err := grpc.Dial(ttarget, opts...); err != nil {
+		return nil, errors.Wrapf(err, "Dial Target %s", ttarget)
+	} else {
+		return conn, err
+	}
+}
+
 func (t *TcpTrans) serverInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	metric.Counter(monitor.HandleRPCTotal).Inc()
 	rsp, err := handler(ctx, req)
@@ -163,14 +180,14 @@ func (t *TcpTrans) serverInterceptor(ctx context.Context, req interface{}, info 
 	}
 	return rsp, err
 }
+
 func (t *TcpTrans) clientInterceptor(ctx context.Context, method string, req, resp interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	metric.Counter(monitor.CallPRCTotal).Inc()
 	if md, ok := metadata.FromOutgoingContext(ctx); ok {
 		if vlist, ok := md[string(meta.M3RouteType)]; ok && len(vlist) > 0 {
-			if meta.RouteType(vlist[0]) == meta.RouteTypeBroad ||
-				meta.RouteType(vlist[0]) == meta.RouteTypeMulti {
+			if meta.RouteType(vlist[0]) == meta.RouteTypeBroad {
 				metric.Counter(monitor.CallRPCFailTotal).Inc()
-				return errs.TransportCliCantFindTopic.New("RouteTypeBroad & RouteTypeMulti not find Topic")
+				return errs.TransportCliCantFindTopic.New("RouteTypeBroad not find Topic")
 			}
 		}
 	}

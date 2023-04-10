@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+import "msg.proto";
+option go_package = "transport/natstrans";
+
+message TransMsg {
+    string Method       = 1;  // 调用方法
+    repeated Meta Metas = 2;  // Meta
+    bytes Content       = 3;  // 消息体
+    int64 Serial        = 4;  // RPC序列
+    bool Ack            = 5;  // 是否为回包
+    string SrcApp       = 6;  // 发送方
+    int32 ErrCode       = 7;  // 错误码
+    string ErrContent   = 8;  // 错误内容
+    bool Nty            = 9;  // 是否为Nty
+}

@@ -18,7 +18,6 @@ const (
 	RouteTypeRandom RouteType = "RouteTypeRandom"
 	RouteTypeHash   RouteType = "RouteTypeHash"
 	RouteTypeBroad  RouteType = "RouteTypeBroad"
-	RouteTypeMulti  RouteType = "RouteTypeMulti"
 	RouteTypeSingle RouteType = "RouteTypeSingle"
 )
 

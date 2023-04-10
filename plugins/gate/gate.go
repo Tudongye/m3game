@@ -2,6 +2,7 @@ package gate
 
 import (
 	"context"
+	"m3game/meta"
 	"m3game/meta/errs"
 	"m3game/meta/metapb"
 	"m3game/plugins/log"
@@ -74,6 +75,7 @@ func CallGrpcCli(ctx context.Context, c grpc.ClientConnInterface, in *metapb.CSM
 	for _, meta := range in.Metas {
 		metas[meta.Key] = meta.Value
 	}
+	metas[meta.M3GateMsg.String()] = "1"
 	md := metadata.New(metas)
 	ctx = metadata.NewOutgoingContext(ctx, md)
 	if err := c.Invoke(ctx, in.Method, inmsg, outmsg, opts...); err != nil {

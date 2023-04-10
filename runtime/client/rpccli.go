@@ -67,18 +67,6 @@ func RPCCallSingle[T1, T2 proto.Message](c Client, f func(context.Context, T1, .
 	return rpcCall(method, f, ctx, t1, opts...)
 }
 
-// RPC Multi Route
-func RPCCallMulti[T1, T2 proto.Message](c Client, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, topicid string, opts ...grpc.CallOption) (T2, error) {
-	t1fullname := t1.ProtoReflect().Descriptor().FullName()
-	method := rpc.Meta(t1fullname)
-	var t2 T2
-	if method == nil {
-		return t2, errs.RPCMethodNotRegister.New("Method not find %s", t1fullname)
-	}
-	ctx = FillRouteHeadMulti(ctx, c.SrcApp(), topicid)
-	return rpcCall(method, f, ctx, t1, opts...)
-}
-
 // RPC BroadCast Route
 func RPCCallBroadCast[T1, T2 proto.Message](c Client, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, opts ...grpc.CallOption) (T2, error) {
 	t1fullname := t1.ProtoReflect().Descriptor().FullName()

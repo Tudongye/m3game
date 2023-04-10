@@ -11,7 +11,6 @@ import (
 	"m3game/plugins/trace"
 	"m3game/plugins/transport"
 	"m3game/runtime/app"
-	"m3game/runtime/mesh"
 	"m3game/runtime/plugin"
 	"m3game/runtime/resource"
 	"m3game/runtime/server"
@@ -102,13 +101,6 @@ func (r *Runtime) Run(c context.Context, app app.App, servers []server.Server) e
 	var cfg RuntimeCfg
 	if err := v.Unmarshal(&cfg); err != nil {
 		log.Error("UnMarshal RuntimeCfg err %s", err.Error())
-		return err
-	}
-
-	// 初始化服务网格
-	log.Info("Mesh.Init...")
-	if err := mesh.Init(cfg.Options.Mesh); err != nil {
-		log.Error("Mesh.Init err %s", err.Error())
 		return err
 	}
 

@@ -46,15 +46,6 @@ func FillRouteHeadSingle(ctx context.Context, srcapp meta.RouteApp, dstsvc meta.
 	)
 }
 
-func FillRouteHeadMulti(ctx context.Context, srcapp meta.RouteApp, topic string) context.Context {
-	return metadata.AppendToOutgoingContext(ctx,
-		meta.M3RouteType.String(), meta.RouteTypeMulti.String(),
-		meta.M3RouteSrcApp.String(), srcapp.String(),
-		meta.M3RouteTopic.String(), topic,
-		meta.M3RouteIsNty.String(), meta.IsNtyTrue.String(),
-	)
-}
-
 func FillRouteHeadBroad(ctx context.Context, srcapp meta.RouteApp, dstsvc meta.RouteSvc) context.Context {
 	return metadata.AppendToOutgoingContext(ctx,
 		meta.M3RouteType.String(), meta.RouteTypeBroad.String(),

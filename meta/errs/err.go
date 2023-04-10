@@ -25,6 +25,13 @@ const (
 	BrokerSerSetBrokerFail           Code = 402  // BrokerSer 设置Broker
 	BrokerSerHandlerNotFind          Code = 403  // BrokerSer 未找到Handler
 	BrokerSerClose                   Code = 405  // BrokerSer 已关闭
+	NatsTransportReqCtxDone          Code = 406  // NatsTrans Ctx已取消
+	NatsTransportReqTimeOut          Code = 407  // NatsTrans 请求已超时
+	NatsTransportAckNotfindCB        Code = 408  // NatsTrans Ack回包找不到对应的CallBack
+	NatsTransportAckCBTimeOut        Code = 409  // NatsTrans Ack回包CallBack已超时
+	NatsTransportBalanceErr          Code = 410  // NatsTrans 路由寻路异常
+	NatsTransportBalanceNoAva        Code = 411  // NatsTrans 路由寻路未找到可用路由
+	NatsTransportBalanceNotFind      Code = 412  // NatsTrans 未找到对应的Balancer
 	RPCCantFindHashKey               Code = 501  // RPC未找到HashKey
 	RPCMethodNotRegister             Code = 502  // Method没有注册到RPC
 	RPCCallFuncFail                  Code = 503  // RPC调起用户Func失败
@@ -86,11 +93,6 @@ const (
 	TraceInsHasNewed                 Code = 5801 // Trace实例已创建
 )
 
-type M3Err struct {
-	error
-	Code Code
-}
-
 func (m Code) New(format string, params ...interface{}) *M3Err {
 	return &M3Err{
 		error: errors.Errorf("%d-%s: %s", m, m.String(), fmt.Sprintf(format, params...)),
@@ -112,4 +114,16 @@ func (m Code) Is(err error) bool {
 		return true
 	}
 	return false
+}
+
+type M3Err struct {
+	error
+	Code Code
+}
+
+func New(code int, format string, params ...interface{}) *M3Err {
+	return &M3Err{
+		error: errors.Errorf(format, params...),
+		Code:  Code(code),
+	}
 }

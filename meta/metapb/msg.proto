@@ -9,12 +9,6 @@ message Meta {
     string Value = 2;
 }
 
-message BrokerMsg {
-    string Method       = 1;
-    repeated Meta Metas = 2;
-    bytes Content       = 3;
-}
-
 message CSMsg {
     string Method       = 1;
     repeated Meta Metas = 2;
