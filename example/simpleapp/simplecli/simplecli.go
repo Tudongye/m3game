@@ -5,12 +5,11 @@ import (
 	"m3game/plugins/log"
 	"m3game/plugins/transport"
 	"m3game/runtime/client"
+	"m3game/runtime/mesh"
 	"m3game/runtime/rpc"
 
 	"m3game/example/proto"
 	"m3game/example/proto/pb"
-
-	"m3game/meta"
 
 	"github.com/pkg/errors"
 
@@ -28,11 +27,11 @@ func init() {
 	}
 }
 
-func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
+func New(srcapp mesh.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	dstsvc := meta.GenDstRouteSvc(srcapp, proto.SimpleAppFuncID)
+	dstsvc := mesh.GenDstRouteSvc(srcapp, proto.SimpleAppFuncID)
 	_client = &Client{
 		Client: client.New(srcapp, dstsvc),
 	}

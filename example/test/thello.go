@@ -19,7 +19,7 @@ func TTrace() {
 	if err != nil {
 		panic(err.Error())
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		panic(err.Error())
@@ -59,7 +59,7 @@ func TBreak() {
 	if err != nil {
 		panic(err.Error())
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		panic(err.Error())
@@ -99,7 +99,7 @@ func THello() {
 	if err != nil {
 		panic(err.Error())
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		panic(err.Error())

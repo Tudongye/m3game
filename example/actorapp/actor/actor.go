@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"m3game/example/gateapp/gatecli"
 	"m3game/example/proto/pb"
-	"m3game/meta"
 	"m3game/plugins/db"
 	"m3game/plugins/log"
+	"m3game/runtime/mesh"
 	"m3game/runtime/server/actor"
 
 	"github.com/pkg/errors"
@@ -80,7 +80,7 @@ func (a *Actor) OnTick() error {
 
 func (a *Actor) OnExit() error {
 	log.InfoP(a.logp, "OnExit")
-	if err := gatecli.SendToCli(context.Background(), a.playerid, "Exited", meta.RouteApp(a.gateapp)); err != nil {
+	if err := gatecli.SendToCli(context.Background(), a.playerid, "Exited", mesh.RouteApp(a.gateapp)); err != nil {
 		log.ErrorP(a.logp, "SendCli fail %s", err.Error())
 	}
 	return nil

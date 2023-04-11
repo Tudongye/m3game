@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"m3game/meta/metapb"
+	"m3game/plugins/gate"
 	"m3game/plugins/gate/grpcgate"
 	"strings"
 
@@ -72,14 +73,14 @@ func Start() {
 	}
 }
 
-func CallGrpcGate(stream grpcgate.GateSer_CSTransportClient, method string, metas map[string]string, in proto.Message, out proto.Message) error {
+func CallGrpcGate(stream grpcgate.GGateSer_CSTransportClient, method string, metas map[string]string, in proto.Message, out proto.Message) error {
 	log.Printf("CallGrpcGate %s\n", method)
 	inbyte, err := proto.Marshal(in)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	inmsg := &metapb.CSMsg{
+	inmsg := &gate.CSMsg{
 		Method:  method,
 		Content: inbyte,
 	}
@@ -91,7 +92,7 @@ func CallGrpcGate(stream grpcgate.GateSer_CSTransportClient, method string, meta
 	clientserial += 1
 	log.Println("inmsg", inmsg.Metas)
 	stream.Send(inmsg)
-	var outmsg *metapb.CSMsg
+	var outmsg *gate.CSMsg
 	for {
 		var err error
 		outmsg, err = stream.Recv()

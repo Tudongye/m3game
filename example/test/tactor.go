@@ -20,7 +20,7 @@ func TActorCommon() {
 	if err != nil {
 		panic(err.Error())
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		panic(err.Error())
@@ -135,7 +135,7 @@ func TActorBroadCast() {
 	if err != nil {
 		panic(err.Error())
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		panic(err.Error())
@@ -216,7 +216,7 @@ func TActorMove() {
 	if err != nil {
 		panic(err.Error())
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		panic(err.Error())

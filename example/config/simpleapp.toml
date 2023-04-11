@@ -1,4 +1,4 @@
 [Plugin]
-[[Plugin.Trans.trans_tcp]]
+[[Plugin.Trans.trans_http2]]
 Host = "127.0.0.1"
 Port = 20051

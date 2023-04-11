@@ -10,7 +10,7 @@ import (
 	"m3game/plugins/router"
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
-	_ "m3game/plugins/transport/tcptrans"
+	_ "m3game/plugins/transport/http2trans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"

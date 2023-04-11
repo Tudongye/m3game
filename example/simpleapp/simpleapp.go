@@ -4,7 +4,7 @@ import (
 	"context"
 	"m3game/example/proto"
 	"m3game/example/simpleapp/simpleser"
-	_ "m3game/plugins/transport/tcptrans"
+	_ "m3game/plugins/transport/http2trans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/server"

@@ -5,14 +5,13 @@ import (
 	"m3game/plugins/log"
 	"m3game/plugins/transport"
 	"m3game/runtime/client"
+	"m3game/runtime/mesh"
 	"m3game/runtime/rpc"
 
 	"m3game/example/proto"
 	"m3game/example/proto/pb"
 
 	"github.com/pkg/errors"
-
-	"m3game/meta"
 
 	"google.golang.org/grpc"
 )
@@ -27,11 +26,11 @@ func init() {
 	}
 }
 
-func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
+func New(srcapp mesh.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	dstsvc := meta.GenDstRouteSvc(srcapp, proto.MultiAppFuncID)
+	dstsvc := mesh.GenDstRouteSvc(srcapp, proto.MultiAppFuncID)
 	_client = &Client{
 		Client: client.New(srcapp, dstsvc),
 	}

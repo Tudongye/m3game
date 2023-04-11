@@ -3,6 +3,7 @@ package gatecli
 import (
 	"context"
 	"m3game/runtime/client"
+	"m3game/runtime/mesh"
 	"m3game/runtime/rpc"
 
 	"m3game/example/proto"
@@ -11,8 +12,6 @@ import (
 	"m3game/plugins/transport"
 
 	"github.com/pkg/errors"
-
-	"m3game/meta"
 
 	"google.golang.org/grpc"
 )
@@ -27,11 +26,11 @@ func init() {
 	}
 }
 
-func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
+func New(srcapp mesh.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	dstsvc := meta.GenDstRouteSvc(srcapp, proto.GateAppFuncID)
+	dstsvc := mesh.GenDstRouteSvc(srcapp, proto.GateAppFuncID)
 	_client = &Client{
 		Client: client.New(srcapp, dstsvc),
 	}
@@ -55,7 +54,7 @@ func Conn() grpc.ClientConnInterface {
 	return _client.conn
 }
 
-func SendToCli(ctx context.Context, playerid string, content string, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
+func SendToCli(ctx context.Context, playerid string, content string, dstapp mesh.RouteApp, opts ...grpc.CallOption) error {
 	var in pb.SendToCli_Req
 	in.PlayerID = playerid
 	in.Content = content

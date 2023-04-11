@@ -10,7 +10,6 @@ import (
 	"m3game/example/multiapp/multicli"
 	"m3game/example/proto"
 	"m3game/example/proto/pb"
-	"m3game/meta/metapb"
 	_ "m3game/plugins/broker/nats"
 	"m3game/plugins/gate"
 	_ "m3game/plugins/gate/grpcgate"
@@ -20,8 +19,8 @@ import (
 	"m3game/plugins/router"
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
+	_ "m3game/plugins/transport/http2trans"
 	_ "m3game/plugins/transport/natstrans"
-	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/rpc"
@@ -102,11 +101,11 @@ func (d *GateApp) Start(ctx context.Context) {
 	}
 }
 
-func (d *GateApp) LogicCall(s string, in *metapb.CSMsg) (*metapb.CSMsg, error) {
+func (d *GateApp) LogicCall(s string, in *gate.CSMsg) (*gate.CSMsg, error) {
 	if !rpc.IsRPCClientMethod(in.Method) {
 		return nil, fmt.Errorf("Method %s invaild", in.Method)
 	}
-	var out *metapb.CSMsg
+	var out *gate.CSMsg
 	var err error
 	if strings.HasPrefix(in.Method, "/proto.ActorRegSer") {
 		out, err = gate.CallGrpcCli(context.Background(), actorregcli.Conn(), in)
