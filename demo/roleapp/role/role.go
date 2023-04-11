@@ -9,10 +9,10 @@ import (
 	"m3game/demo/onlineapp/onlinecli"
 	"m3game/demo/proto/pb"
 	"m3game/demo/roleapp/rolecli"
-	"m3game/meta"
 	"m3game/meta/errs"
 	"m3game/plugins/db"
 	"m3game/plugins/log"
+	"m3game/runtime/mesh"
 	"m3game/runtime/server/actor"
 	"strconv"
 	"time"
@@ -172,7 +172,7 @@ func (a *Role) Login(ctx context.Context) error {
 		return err
 	} else if appid != "" && appid != config.GetAppID().String() {
 		// 踢下线
-		if err := rolecli.RoleKick(ctx, a.DB().RoleId, meta.RouteApp(appid)); err != nil {
+		if err := rolecli.RoleKick(ctx, a.DB().RoleId, mesh.RouteApp(appid)); err != nil {
 			log.Error("%s", err.Error())
 			return err
 		}

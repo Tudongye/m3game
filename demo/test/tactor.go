@@ -46,7 +46,7 @@ func TTest1(Token string) error {
 		log.Println(err)
 		return err
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		log.Println(err)
@@ -91,7 +91,7 @@ func TTest2(Token string) error {
 		log.Println(err)
 		return err
 	}
-	cli := grpcgate.NewGateSerClient(conn)
+	cli := grpcgate.NewGGateSerClient(conn)
 	stream, err := cli.CSTransport(context.Background())
 	if err != nil {
 		log.Println(err)

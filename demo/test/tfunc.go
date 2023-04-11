@@ -6,7 +6,7 @@ import (
 	"m3game/plugins/gate/grpcgate"
 )
 
-func FWaitRecv(stream grpcgate.GateSer_CSTransportClient) error {
+func FWaitRecv(stream grpcgate.GGateSer_CSTransportClient) error {
 	log.Println("WaitRecv 等待服务端主动推送...")
 	if msg, err := stream.Recv(); err != nil {
 		log.Println(err)
@@ -17,7 +17,7 @@ func FWaitRecv(stream grpcgate.GateSer_CSTransportClient) error {
 	return nil
 }
 
-func FAuth(stream grpcgate.GateSer_CSTransportClient, m map[string]string, token string) error {
+func FAuth(stream grpcgate.GGateSer_CSTransportClient, m map[string]string, token string) error {
 	log.Println("Call.Auth 建立连接...")
 	in := &pb.AuthReq{
 		Token: token,
@@ -31,7 +31,7 @@ func FAuth(stream grpcgate.GateSer_CSTransportClient, m map[string]string, token
 	return nil
 }
 
-func FRoleLogin(stream grpcgate.GateSer_CSTransportClient, m map[string]string) error {
+func FRoleLogin(stream grpcgate.GGateSer_CSTransportClient, m map[string]string) error {
 	log.Println("Call.RoleLogin 登陆...")
 	in := &pb.RoleLogin_Req{}
 	out := &pb.RoleLogin_Rsp{}
@@ -43,7 +43,7 @@ func FRoleLogin(stream grpcgate.GateSer_CSTransportClient, m map[string]string) 
 	return nil
 }
 
-func FRoleGetInfo(stream grpcgate.GateSer_CSTransportClient, m map[string]string) error {
+func FRoleGetInfo(stream grpcgate.GGateSer_CSTransportClient, m map[string]string) error {
 	log.Println("Call.RoleGetInfo 获取详情...")
 	in := &pb.RoleGetInfo_Req{}
 	out := &pb.RoleGetInfo_Rsp{}
@@ -56,7 +56,7 @@ func FRoleGetInfo(stream grpcgate.GateSer_CSTransportClient, m map[string]string
 	return nil
 }
 
-func FRoleModifyName(stream grpcgate.GateSer_CSTransportClient, m map[string]string, name string) error {
+func FRoleModifyName(stream grpcgate.GGateSer_CSTransportClient, m map[string]string, name string) error {
 	log.Println("Call.RoleModifyName 改名...", name)
 	in := &pb.RoleModifyName_Req{
 		NewName: name,
@@ -70,7 +70,7 @@ func FRoleModifyName(stream grpcgate.GateSer_CSTransportClient, m map[string]str
 	return nil
 }
 
-func FRolePowerUp(stream grpcgate.GateSer_CSTransportClient, m map[string]string, up int) error {
+func FRolePowerUp(stream grpcgate.GGateSer_CSTransportClient, m map[string]string, up int) error {
 	log.Println("Call.RolePowerUp 火力提升...", up)
 	in := &pb.RolePowerUp_Req{
 		PowerUp: int32(up),
@@ -84,7 +84,7 @@ func FRolePowerUp(stream grpcgate.GateSer_CSTransportClient, m map[string]string
 	return nil
 }
 
-func FRoleGetClubInfo(stream grpcgate.GateSer_CSTransportClient, m map[string]string, clubid int64) error {
+func FRoleGetClubInfo(stream grpcgate.GGateSer_CSTransportClient, m map[string]string, clubid int64) error {
 	log.Println("Call.RoleGetClubInfo 获取社团信息...", clubid)
 	in := &pb.RoleGetClubInfo_Req{
 		ClubId: clubid,
@@ -98,7 +98,7 @@ func FRoleGetClubInfo(stream grpcgate.GateSer_CSTransportClient, m map[string]st
 	return nil
 }
 
-func FRoleCreateClub(stream grpcgate.GateSer_CSTransportClient, m map[string]string) (int64, error) {
+func FRoleCreateClub(stream grpcgate.GGateSer_CSTransportClient, m map[string]string) (int64, error) {
 	log.Println("Call.RoleCreateClub 创建社团...")
 	in := &pb.RoleCreateClub_Req{}
 	out := &pb.RoleCreateClub_Rsp{}
@@ -110,7 +110,7 @@ func FRoleCreateClub(stream grpcgate.GateSer_CSTransportClient, m map[string]str
 	return out.ClubId, nil
 }
 
-func FRoleJoinClub(stream grpcgate.GateSer_CSTransportClient, m map[string]string, clubid int64) error {
+func FRoleJoinClub(stream grpcgate.GGateSer_CSTransportClient, m map[string]string, clubid int64) error {
 	log.Println("Call.RoleJoinClub 加入社团...", clubid)
 	in := &pb.RoleJoinClub_Req{
 		ClubId: clubid,
@@ -124,7 +124,7 @@ func FRoleJoinClub(stream grpcgate.GateSer_CSTransportClient, m map[string]strin
 	return nil
 }
 
-func FRoleExitClub(stream grpcgate.GateSer_CSTransportClient, m map[string]string) error {
+func FRoleExitClub(stream grpcgate.GGateSer_CSTransportClient, m map[string]string) error {
 	log.Println("Call.RoleExitClub 退出社团...")
 	in := &pb.RoleExitClub_Req{}
 	out := &pb.RoleExitClub_Rsp{}
@@ -136,7 +136,7 @@ func FRoleExitClub(stream grpcgate.GateSer_CSTransportClient, m map[string]strin
 	return nil
 }
 
-func FRoleCancelClub(stream grpcgate.GateSer_CSTransportClient, m map[string]string) error {
+func FRoleCancelClub(stream grpcgate.GGateSer_CSTransportClient, m map[string]string) error {
 	log.Println("Call.RoleCancelClub 解散社团...")
 	in := &pb.RoleCancelClub_Req{}
 	out := &pb.RoleCancelClub_Rsp{}

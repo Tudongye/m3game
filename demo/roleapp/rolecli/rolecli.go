@@ -5,13 +5,12 @@ import (
 	"m3game/plugins/log"
 	"m3game/plugins/transport"
 	"m3game/runtime/client"
+	"m3game/runtime/mesh"
 	"m3game/runtime/rpc"
 
 	"m3game/demo/proto/pb"
 
 	"m3game/demo/proto"
-
-	"m3game/meta"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
@@ -27,11 +26,11 @@ func init() {
 	}
 }
 
-func New(srcapp meta.RouteApp, opts ...grpc.DialOption) (*Client, error) {
+func New(srcapp mesh.RouteApp, opts ...grpc.DialOption) (*Client, error) {
 	if _client != nil {
 		return _client, nil
 	}
-	dstsvc := meta.GenDstRouteSvc(srcapp, proto.RoleFuncID)
+	dstsvc := mesh.GenDstRouteSvc(srcapp, proto.RoleFuncID)
 	_client = &Client{
 		Client: client.New(srcapp, dstsvc),
 	}
@@ -55,7 +54,7 @@ type Client struct {
 	conn grpc.ClientConnInterface
 }
 
-func RoleKick(ctx context.Context, roleid int64, dstapp meta.RouteApp, opts ...grpc.CallOption) error {
+func RoleKick(ctx context.Context, roleid int64, dstapp mesh.RouteApp, opts ...grpc.CallOption) error {
 	var in pb.RoleKick_Req
 	in.RoleId = roleid
 	_, err := client.RPCCallP2P(_client, _client.RoleKick, ctx, &in, dstapp, opts...)

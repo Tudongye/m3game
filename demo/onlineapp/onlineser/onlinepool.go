@@ -12,6 +12,7 @@ import (
 	"m3game/plugins/db"
 	"m3game/plugins/log"
 	"m3game/plugins/router"
+	"m3game/runtime/mesh"
 	"sync"
 	"time"
 
@@ -205,7 +206,7 @@ func (u *OnlinePool) OnlineDelete(ctx context.Context, roleid int64, appid strin
 func (u *OnlinePool) LoadAppCache() error {
 	// 加载App在线信息
 	env, world, _ := config.GetWorldID().Parse()
-	rolesvcid := meta.GenRouteSvc(env, world, proto.RoleFuncID)
+	rolesvcid := mesh.GenRouteSvc(env, world, proto.RoleFuncID)
 	timenow := time.Now().Unix()
 	if inns, err := router.Instance().GetAllInstances(rolesvcid.String()); err != nil {
 		return err
@@ -215,7 +216,7 @@ func (u *OnlinePool) LoadAppCache() error {
 			if !ok {
 				continue
 			}
-			u.appcache.Store(ins.GetIDStr(), &AppCache{Ver: ver, LastUpdateTime: timenow})
+			u.appcache.Store(ins.GetAppID(), &AppCache{Ver: ver, LastUpdateTime: timenow})
 		}
 	}
 	return nil

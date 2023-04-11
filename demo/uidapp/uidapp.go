@@ -16,8 +16,8 @@ import (
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
 	_ "m3game/plugins/trace/jaeger"
+	_ "m3game/plugins/transport/http2trans"
 	_ "m3game/plugins/transport/natstrans"
-	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
 	"m3game/runtime/mesh"
@@ -115,7 +115,7 @@ func (a *UidApp) VoteMain(ctx context.Context) (bool, error) {
 	} else {
 		routehelper := mesh.NewRouteHelper()
 		for _, ins := range routeinss {
-			routehelper.Add(ins.GetIDStr())
+			routehelper.Add(ins.GetAppID())
 		}
 		routehelper.Compress()
 		if dstappid, err := routehelper.RouteSingle(); err != nil {
