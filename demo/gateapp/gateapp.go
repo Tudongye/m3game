@@ -22,10 +22,11 @@ import (
 	_ "m3game/plugins/router/consul"
 	_ "m3game/plugins/shape/sentinel"
 	_ "m3game/plugins/trace/jaeger"
+	_ "m3game/plugins/transport/http2trans"
 	_ "m3game/plugins/transport/natstrans"
-	_ "m3game/plugins/transport/tcptrans"
 	"m3game/runtime"
 	"m3game/runtime/app"
+	"m3game/runtime/mesh"
 	"m3game/runtime/rpc"
 	"m3game/runtime/server"
 	"strings"
@@ -102,18 +103,18 @@ func (d *GateApp) Start(ctx context.Context) {
 	}
 }
 
-func (d *GateApp) LogicCall(roleid string, in *metapb.CSMsg) (*metapb.CSMsg, error) {
+func (d *GateApp) LogicCall(roleid string, in *gate.CSMsg) (*gate.CSMsg, error) {
 	if !rpc.IsRPCClientMethod(in.Method) {
 		return nil, fmt.Errorf("Method %s invaild", in.Method)
 	}
 	// 路由参数
 	in.Metas = append(in.Metas,
-		&metapb.Meta{Key: meta.M3RouteType.String(), Value: meta.RouteTypeHash.String()},
+		&metapb.Meta{Key: meta.M3RouteType.String(), Value: mesh.RouteTypeHash.String()},
 		&metapb.Meta{Key: meta.M3RouteHashKey.String(), Value: roleid},
 		&metapb.Meta{Key: role.RoleIdMetaKey, Value: roleid},
 	)
 
-	var out *metapb.CSMsg
+	var out *gate.CSMsg
 	var err error
 	if strings.HasPrefix(in.Method, "/proto.RoleSer") {
 		out, err = gate.CallGrpcCli(context.Background(), rolecli.Conn(), in)
