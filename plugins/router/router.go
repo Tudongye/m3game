@@ -13,7 +13,7 @@ var (
 type Ins interface {
 	GetHost() string
 	GetPort() uint32
-	GetIDStr() string
+	GetAppID() string
 	GetMeta(string) (string, bool)
 }
 

@@ -1,20 +1,18 @@
 package client
 
-import (
-	"m3game/meta"
-)
+import "m3game/runtime/mesh"
 
 type Client interface {
-	SrcApp() meta.RouteApp
-	DstSvc() meta.RouteSvc
+	SrcApp() mesh.RouteApp
+	DstSvc() mesh.RouteSvc
 }
 
 type clientBase struct {
-	srcapp meta.RouteApp
-	dstsvc meta.RouteSvc
+	srcapp mesh.RouteApp
+	dstsvc mesh.RouteSvc
 }
 
-func New(srcapp meta.RouteApp, dstsvc meta.RouteSvc) Client {
+func New(srcapp mesh.RouteApp, dstsvc mesh.RouteSvc) Client {
 	m := &clientBase{
 		srcapp: srcapp,
 		dstsvc: dstsvc,
@@ -22,10 +20,10 @@ func New(srcapp meta.RouteApp, dstsvc meta.RouteSvc) Client {
 	return m
 }
 
-func (m *clientBase) SrcApp() meta.RouteApp {
+func (m *clientBase) SrcApp() mesh.RouteApp {
 	return m.srcapp
 }
 
-func (m *clientBase) DstSvc() meta.RouteSvc {
+func (m *clientBase) DstSvc() mesh.RouteSvc {
 	return m.dstsvc
 }

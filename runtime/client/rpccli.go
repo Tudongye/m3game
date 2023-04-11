@@ -6,8 +6,8 @@ package client
 
 import (
 	"context"
-	"m3game/meta"
 	"m3game/meta/errs"
+	"m3game/runtime/mesh"
 	"m3game/runtime/rpc"
 
 	"google.golang.org/protobuf/proto"
@@ -23,7 +23,7 @@ func RPCCallRandom[T1, T2 proto.Message](c Client, f func(context.Context, T1, .
 		var t2 T2
 		return t2, errs.RPCMethodNotRegister.New("Method not find %s", t1fullname)
 	}
-	ctx = FillRouteHeadRandom(ctx, c.SrcApp(), c.DstSvc(), meta.IsNtyFalse)
+	ctx = FillRouteHeadRandom(ctx, c.SrcApp(), c.DstSvc(), "0")
 	return rpcCall(method, f, ctx, t1, opts...)
 }
 
@@ -39,19 +39,19 @@ func RPCCallHash[T1, T2 proto.Message](c Client, f func(context.Context, T1, ...
 	if err != nil {
 		return t2, errs.RPCCantFindHashKey.Wrap(err, "RPCCallHash Get HashKey For %s", t1fullname)
 	}
-	ctx = FillRouteHeadHash(ctx, c.SrcApp(), c.DstSvc(), hashkey, meta.IsNtyFalse)
+	ctx = FillRouteHeadHash(ctx, c.SrcApp(), c.DstSvc(), hashkey, "0")
 	return rpcCall(method, f, ctx, t1, opts...)
 }
 
 // RPC P2P Route
-func RPCCallP2P[T1, T2 proto.Message](c Client, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, dstapp meta.RouteApp, opts ...grpc.CallOption) (T2, error) {
+func RPCCallP2P[T1, T2 proto.Message](c Client, f func(context.Context, T1, ...grpc.CallOption) (T2, error), ctx context.Context, t1 T1, dstapp mesh.RouteApp, opts ...grpc.CallOption) (T2, error) {
 	t1fullname := t1.ProtoReflect().Descriptor().FullName()
 	method := rpc.Meta(t1fullname)
 	var t2 T2
 	if method == nil {
 		return t2, errs.RPCMethodNotRegister.New("Method not find %s", t1fullname)
 	}
-	ctx = FillRouteHeadP2P(ctx, c.SrcApp(), c.DstSvc(), dstapp, meta.IsNtyFalse)
+	ctx = FillRouteHeadP2P(ctx, c.SrcApp(), c.DstSvc(), dstapp, "0")
 	return rpcCall(method, f, ctx, t1, opts...)
 }
 
@@ -63,7 +63,7 @@ func RPCCallSingle[T1, T2 proto.Message](c Client, f func(context.Context, T1, .
 	if method == nil {
 		return t2, errs.RPCMethodNotRegister.New("Method not find %s", t1fullname)
 	}
-	ctx = FillRouteHeadSingle(ctx, c.SrcApp(), c.DstSvc(), meta.IsNtyFalse)
+	ctx = FillRouteHeadSingle(ctx, c.SrcApp(), c.DstSvc(), "0")
 	return rpcCall(method, f, ctx, t1, opts...)
 }
 

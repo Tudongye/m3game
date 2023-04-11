@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+import "gatep.proto";
+
+option go_package = "m3game/plugins/gate/grpcgate";
+
+service GGateSer {
+    rpc CSTransport(stream CSMsg) returns (stream CSMsg) ;
+}

@@ -22,7 +22,6 @@ type Transport interface {
 	RegisterSer(f func(grpc.ServiceRegistrar) error) error                               // 注册业务Ser
 	RegisterServerInterceptor(f grpc.UnaryServerInterceptor)                             // 注册Server拦截器
 	RegisterClientInterceptor(f grpc.UnaryClientInterceptor)                             // 注册Client拦截器
-	ClientInterceptors() []grpc.UnaryClientInterceptor                                   // 获取Client拦截器
 	ClientConn(target string, opts ...grpc.DialOption) (grpc.ClientConnInterface, error) // 获取Client对象
 }
 

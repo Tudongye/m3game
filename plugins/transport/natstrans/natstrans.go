@@ -17,6 +17,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Jeffail/tunny"
 	"github.com/go-playground/validator/v10"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/mitchellh/mapstructure"
@@ -35,9 +36,11 @@ var (
 )
 
 const (
-	_name            = "trans_nats"
-	_maxserial       = 9999999999
-	_callbacktimeout = 30
+	_name             = "trans_nats"
+	_maxserial        = 9999999999
+	_callbacktimeout  = 30
+	_maxworker        = 300
+	_maxworkertimeout = 35
 )
 
 var gatecodec *gate.GateCodec
@@ -122,6 +125,7 @@ type NatsTrans struct {
 	mu                 sync.Mutex
 	callbackmap        sync.Map
 	balancermap        sync.Map
+	wp                 *tunny.Pool
 }
 
 type CallBack struct {
@@ -190,16 +194,19 @@ func (t *NatsTrans) Start(ctx context.Context) error {
 		}
 	}()
 
-	appTopic := appTopic(config.GetIDStr())
+	t.wp = tunny.NewFunc(_maxworker, func(payload interface{}) interface{} {
+		if err := t.recvbytes(payload.([]byte)); err != nil {
+			log.Error("broker subscribe %s handler err %s", appTopic, err.Error())
+		}
+		return nil
+	})
+
+	appTopic := appTopic(config.GetAppID().String())
 	log.Info("Sub %s", appTopic)
 	if sub, err := t.nc.Subscribe(appTopic, func(m *nats.Msg) {
-		go func() {
-			if err := t.recvbytes(m.Data); err != nil {
-				log.Error("broker subscribe %s handler err %s", appTopic, err.Error())
-			}
-		}()
+		go t.wp.ProcessTimed(m.Data, time.Second*_maxworkertimeout)
 	}); err != nil {
-		return errs.BrokerSerSetBrokerFail.Wrap(err, "Subscribe %s", appTopic)
+		return errs.NatsTransportSubTopicFail.Wrap(err, "Subscribe %s", appTopic)
 	} else {
 		t.subs[appTopic] = sub
 	}
@@ -207,13 +214,9 @@ func (t *NatsTrans) Start(ctx context.Context) error {
 	svcTopic := svcTopic(config.GetSvcID().String())
 	log.Info("Sub %s", svcTopic)
 	if sub, err := t.nc.Subscribe(svcTopic, func(m *nats.Msg) {
-		go func() {
-			if err := t.recvbytes(m.Data); err != nil {
-				log.Error("broker subscribe %s handler err %s", svcTopic, err.Error())
-			}
-		}()
+		go t.wp.ProcessTimed(m.Data, time.Second*_maxworkertimeout)
 	}); err != nil {
-		return errs.BrokerSerSetBrokerFail.Wrap(err, "Subscribe %s", svcTopic)
+		return errs.NatsTransportSubTopicFail.Wrap(err, "Subscribe %s", svcTopic)
 	} else {
 		t.subs[svcTopic] = sub
 	}
@@ -256,7 +259,7 @@ func (t *NatsTrans) ClientConn(target string, opts ...grpc.DialOption) (grpc.Cli
 	defer t.mu.Unlock()
 	opts = append(opts,
 		grpc.WithInsecure(),
-		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(transport.Instance().ClientInterceptors()...)),
+		grpc.WithUnaryInterceptor(grpc_middleware.ChainUnaryClient(t.ClientInterceptors()...)),
 		grpc.WithTimeout(time.Second*10),
 	)
 
@@ -324,7 +327,7 @@ func (t *NatsTrans) dispatch(msg *TransMsg) error {
 		}
 	}
 	if value, ok := t.handlermap.Load(msg.Method); !ok {
-		return errs.BrokerSerHandlerNotFind.New("not find method %s", msg.Method)
+		return errs.NatsTransportHandlerNotFind.New("not find method %s", msg.Method)
 	} else {
 		handlerfunc := value.(func(ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error))
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
@@ -383,7 +386,7 @@ func (t *NatsTrans) sendreq(ctx context.Context, topic string, method string, re
 	bmsg.Method = method
 	bmsg.Serial = t.allocSerial()
 	bmsg.Ack = false
-	bmsg.SrcApp = config.GetIDStr()
+	bmsg.SrcApp = config.GetAppID().String()
 	isgate := false
 	if md, ok := metadata.FromOutgoingContext(ctx); ok {
 		for k, vlist := range md {
@@ -437,7 +440,7 @@ func (t *NatsTrans) sendreq(ctx context.Context, topic string, method string, re
 func (t *NatsTrans) sendresp(msg *TransMsg, resp interface{}, resperr error) error {
 	bmsg := &TransMsg{}
 	bmsg.Method = msg.Method
-	bmsg.SrcApp = config.GetIDStr()
+	bmsg.SrcApp = config.GetAppID().String()
 	bmsg.Ack = true
 	bmsg.Serial = msg.Serial
 	if resp != nil {

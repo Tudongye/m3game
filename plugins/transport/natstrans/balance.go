@@ -41,7 +41,7 @@ func (b *NatsBalancer) Watch() error {
 			}
 			rh := mesh.NewRouteHelper()
 			for _, instance := range instances {
-				rh.Add(instance.GetIDStr())
+				rh.Add(instance.GetAppID())
 			}
 			rh.Compress()
 			b.mu.Lock()
@@ -66,15 +66,15 @@ func (b *NatsBalancer) Pick(ctx context.Context) (string, bool, error) {
 			return "", false, errs.NatsTransportBalanceErr.New("")
 		}
 		switch vlist[0] {
-		case meta.RouteTypeP2P.String():
+		case mesh.RouteTypeP2P.String():
 			return b.pickP2P(metad)
-		case meta.RouteTypeRandom.String():
+		case mesh.RouteTypeRandom.String():
 			return b.pickRandom(metad)
-		case meta.RouteTypeHash.String():
+		case mesh.RouteTypeHash.String():
 			return b.pickHash(metad)
-		case meta.RouteTypeSingle.String():
+		case mesh.RouteTypeSingle.String():
 			return b.pickSingle(metad)
-		case meta.RouteTypeBroad.String():
+		case mesh.RouteTypeBroad.String():
 			return b.pickBroad(metad)
 		default:
 			log.Error("Unknow RouteType %s", vlist[0])

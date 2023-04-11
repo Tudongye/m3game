@@ -74,7 +74,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 		gser: grpc.NewServer(),
 		no:   1,
 	}
-	RegisterGateSerServer(_grpcgate.gser, _grpcgate)
+	RegisterGGateSerServer(_grpcgate.gser, _grpcgate)
 	go func() {
 		log.Info("GrpcGate Listen %s", Addr)
 		if err := _grpcgate.gser.Serve(listener); err != nil {
@@ -104,7 +104,7 @@ func (f *Factory) CanUnload(p plugin.PluginIns) bool {
 type Gate struct {
 	conns sync.Map
 	gser  *grpc.Server
-	UnimplementedGateSerServer
+	UnimplementedGGateSerServer
 	mutex    sync.RWMutex
 	isstoped bool
 	no       int
@@ -126,7 +126,7 @@ func (g *Gate) GenConnID() int {
 	return g.no
 }
 
-func (g *Gate) CSTransport(srv GateSer_CSTransportServer) error {
+func (g *Gate) CSTransport(srv GGateSer_CSTransportServer) error {
 	log.Debug("Recv CSTransport")
 	// 连接鉴权
 	msg, err := srv.Recv()
@@ -152,7 +152,7 @@ func (g *Gate) CSTransport(srv GateSer_CSTransportServer) error {
 		csconn := &CSConn{
 			srv:      srv,
 			no:       n,
-			sendch:   make(chan *metapb.CSMsg, 10),
+			sendch:   make(chan *gate.CSMsg, 10),
 			isclosed: false,
 			connid:   connid,
 			ctx:      ctx,
@@ -177,8 +177,8 @@ func (g *Gate) CSTransport(srv GateSer_CSTransportServer) error {
 }
 
 type CSConn struct {
-	srv      GateSer_CSTransportServer
-	sendch   chan *metapb.CSMsg
+	srv      GGateSer_CSTransportServer
+	sendch   chan *gate.CSMsg
 	isclosed bool
 	no       int
 	connid   string
@@ -187,7 +187,7 @@ type CSConn struct {
 	cancel   context.CancelFunc
 }
 
-func (c *CSConn) Send(ctx context.Context, msg *metapb.CSMsg) error {
+func (c *CSConn) Send(ctx context.Context, msg *gate.CSMsg) error {
 	if c.isclosed {
 		return errs.GrpcGateConnClosed.New("CSConn closed")
 	}

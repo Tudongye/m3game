@@ -3,6 +3,7 @@ module m3game
 go 1.20
 
 require (
+	github.com/Jeffail/tunny v0.1.4
 	github.com/alibaba/sentinel-golang v1.0.4
 	github.com/bluele/gcache v0.0.2
 	github.com/deckarep/golang-set/v2 v2.3.0

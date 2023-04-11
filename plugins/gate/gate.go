@@ -4,7 +4,6 @@ import (
 	"context"
 	"m3game/meta"
 	"m3game/meta/errs"
-	"m3game/meta/metapb"
 	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 
@@ -23,13 +22,13 @@ type Gate interface {
 }
 
 type CSConn interface {
-	Send(ctx context.Context, msg *metapb.CSMsg) error
+	Send(ctx context.Context, msg *CSMsg) error
 	Kick()
 }
 
 type GateReciver interface {
 	AuthCall([]byte) (string, []byte, error)
-	LogicCall(string, *metapb.CSMsg) (*metapb.CSMsg, error)
+	LogicCall(string, *CSMsg) (*CSMsg, error)
 }
 
 func New(g Gate) (Gate, error) {
@@ -57,7 +56,7 @@ func SetReciver(g GateReciver) {
 	_gatereciver = g
 }
 
-func LogicCall(connid string, req *metapb.CSMsg) (*metapb.CSMsg, error) {
+func LogicCall(connid string, req *CSMsg) (*CSMsg, error) {
 	return _gatereciver.LogicCall(connid, req)
 }
 
@@ -65,7 +64,7 @@ func AuthCall(req []byte) (string, []byte, error) {
 	return _gatereciver.AuthCall(req)
 }
 
-func CallGrpcCli(ctx context.Context, c grpc.ClientConnInterface, in *metapb.CSMsg, opts ...grpc.CallOption) (*metapb.CSMsg, error) {
+func CallGrpcCli(ctx context.Context, c grpc.ClientConnInterface, in *CSMsg, opts ...grpc.CallOption) (*CSMsg, error) {
 	inmsg := &gateBuff{
 		buff: in.Content,
 	}
@@ -81,7 +80,7 @@ func CallGrpcCli(ctx context.Context, c grpc.ClientConnInterface, in *metapb.CSM
 	if err := c.Invoke(ctx, in.Method, inmsg, outmsg, opts...); err != nil {
 		return nil, err
 	}
-	out := &metapb.CSMsg{
+	out := &CSMsg{
 		Method:  in.Method,
 		Content: outmsg.buff,
 	}

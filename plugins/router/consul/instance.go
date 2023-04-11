@@ -32,7 +32,7 @@ func (i *Instance) GetPort() uint32 {
 	return i.port
 }
 
-func (i *Instance) GetIDStr() string {
+func (i *Instance) GetAppID() string {
 	return i.idstr
 }
 

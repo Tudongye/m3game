@@ -114,7 +114,7 @@ func (f *Factory) CanUnload(p plugin.PluginIns) bool {
 		return true
 	} else {
 		for _, ins := range inss {
-			if ins.GetIDStr() == string(config.GetAppID()) {
+			if ins.GetAppID() == string(config.GetAppID()) {
 				return false
 			}
 		}
