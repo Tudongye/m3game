@@ -113,14 +113,18 @@ func (d *RoleSer) RoleLogin(ctx context.Context, in *pb.RoleLogin_Req) (*pb.Role
 			}
 		}
 	}
-	out.RoleDB = role.DB()
+	out.RoleDB = role.Detail()
 	return out, nil
 }
 
 func (d *RoleSer) RoleGetInfo(ctx context.Context, in *pb.RoleGetInfo_Req) (*pb.RoleGetInfo_Rsp, error) {
 	out := new(pb.RoleGetInfo_Rsp)
 	return out, RoleLogic(ctx, func(role *role.Role) error {
-		out.RoleDB = role.DB()
+		if in.Detail {
+			out.RoleDB = role.Detail()
+		} else {
+			out.RoleDB = role.Brief()
+		}
 		if clubid := role.GetClubId(); clubid != 0 {
 			if clubroledb, err := clubcli.ClubRoleInfo(ctx, clubid, role.DB().RoleId); err != nil {
 				return err

@@ -28,9 +28,37 @@ service RoleSer {
 }
 
 message RoleDB {
-    int64 RoleId = 1 [(dbfield_option) = { flag: "RRoleId", primary: true }];
-    string Name  = 2 [(dbfield_option) = { flag: "RName" }];
-    int32 Power  = 3 [(dbfield_option) = { flag: "RPower" }];
+    int64 RoleId = 1 [
+        (dbfield_option)   = { flag: "RRoleId", primary: true },
+        (viewfield_option) = { wflag: "RVBrief,RVDetail" }
+    ];
+    string Name = 2 [
+        (dbfield_option)   = { flag: "RName" },
+        (viewfield_option) = { wflag: "RVBrief,RVDetail" }
+    ];
+    int32 Power = 3 [
+        (dbfield_option)   = { flag: "RPower" },
+        (viewfield_option) = { wflag: "RVBrief,RVDetail" }
+    ];
+    RoleFight Fight = 4 [(dbfield_option) = { flag: "RFight" }];  // 单局属性
+}
+
+message RoleFight {
+    RoleFightBase Base = 1 [(viewfield_option) = { wflag: "RVBrief,RVDetail" }];
+    RoleFightPlus Plus = 2 [
+        (viewfield_option) = { wflag: "RVDetail" }
+    ];  // 这个字段只会在Detail条件下过滤展示
+}
+
+message RoleFightBase {  // 基础属性
+    int64 Atk = 1;       // 攻
+    int64 Def = 2;       // 防
+    int64 Hp  = 3;       // 血
+}
+
+message RoleFightPlus {  // 附加属性
+    int64 Mp  = 1;       // 魔法
+    int64 Sta = 2;       // 耐力
 }
 
 enum RFlag {
@@ -38,6 +66,13 @@ enum RFlag {
     RRoleId  = 1;
     RName    = 2;
     RPower   = 3;
+    RFight   = 4;
+}
+
+enum RVFlag {
+    RVRoleMin = 0;
+    RVBrief   = 1;  // 简略
+    RVDetail  = 2;  // 详情
 }
 
 message RoleLogin {
@@ -52,7 +87,9 @@ message RoleLogin {
 message RoleGetInfo {
     option (rpc_option).cs    = true;
     option (rpc_option).trace = true;
-    message Req {}
+    message Req {
+        bool Detail = 1;
+    }
     message Rsp {
         RoleDB RoleDB         = 1;
         ClubRoleDB ClubRoleDB = 2;

@@ -43,9 +43,11 @@ func FRoleLogin(stream grpcgate.GGateSer_CSTransportClient, m map[string]string)
 	return nil
 }
 
-func FRoleGetInfo(stream grpcgate.GGateSer_CSTransportClient, m map[string]string) error {
-	log.Println("Call.RoleGetInfo 获取详情...")
-	in := &pb.RoleGetInfo_Req{}
+func FRoleGetInfo(stream grpcgate.GGateSer_CSTransportClient, m map[string]string, detail bool) error {
+	log.Println("Call.RoleGetInfo 获取详情...", detail)
+	in := &pb.RoleGetInfo_Req{
+		Detail: detail,
+	}
 	out := &pb.RoleGetInfo_Rsp{}
 	if err := CallGrpcGate(stream, method_RoleGetInfo, m, in, out); err != nil {
 		log.Printf("CallGrpcGate Fail %s", err.Error())

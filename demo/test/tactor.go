@@ -73,7 +73,12 @@ func TTest1(Token string) error {
 		return err
 	}
 	// 查询数据
-	if err := FRoleGetInfo(stream, m); err != nil {
+	if err := FRoleGetInfo(stream, m, false); err != nil {
+		log.Println(err)
+		return err
+	}
+	// 查询详细数据
+	if err := FRoleGetInfo(stream, m, true); err != nil {
 		log.Println(err)
 		return err
 	}
@@ -108,7 +113,7 @@ func TTest2(Token string) error {
 		return err
 	}
 	// 查询数据
-	if err := FRoleGetInfo(stream, m); err != nil {
+	if err := FRoleGetInfo(stream, m, false); err != nil {
 		log.Println(err)
 		return err
 	}
@@ -121,7 +126,7 @@ func TTest2(Token string) error {
 		clubid = c
 	}
 	// 查询数据
-	if err := FRoleGetInfo(stream, m); err != nil {
+	if err := FRoleGetInfo(stream, m, false); err != nil {
 		log.Println(err)
 		return err
 	}
@@ -136,7 +141,7 @@ func TTest2(Token string) error {
 		return err
 	}
 	// 查询数据
-	if err := FRoleGetInfo(stream, m); err != nil {
+	if err := FRoleGetInfo(stream, m, false); err != nil {
 		log.Println(err)
 		return err
 	}

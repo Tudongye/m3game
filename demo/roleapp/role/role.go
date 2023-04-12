@@ -131,6 +131,14 @@ func (a *Role) DB() *pb.RoleDB {
 	return a.wraper.Obj()
 }
 
+func (a *Role) Detail() *pb.RoleDB {
+	return _roleviewer.Filter(pb.RVFlag_RVDetail, a.wraper.Obj())
+}
+
+func (a *Role) Brief() *pb.RoleDB {
+	return _roleviewer.Filter(pb.RVFlag_RVBrief, a.wraper.Obj())
+}
+
 func (a *Role) ModifyName(name string) error {
 	log.DebugP(a.logp, "ModifyName %s", name)
 	if !a.ready {
@@ -185,10 +193,12 @@ func (a *Role) Login(ctx context.Context) error {
 	}
 	dbp := db.Instance()
 	if err := a.wraper.Read(ctx, dbp); err != nil {
+		log.Info("Register Role %d", a.DB().RoleId)
 		if errs.DBKeyNotFound.Is(err) {
 			// 未注册，
 			a.wraper.Set(pb.RFlag_RName, fmt.Sprintf("Role%d", a.DB().RoleId))
 			a.wraper.Set(pb.RFlag_RPower, int32(0))
+			a.wraper.Set(pb.RFlag_RFight, &pb.RoleFight{Base: &pb.RoleFightBase{}, Plus: &pb.RoleFightPlus{}})
 			// DB写入失败
 			if err := a.wraper.Create(ctx, dbp); err != nil {
 				log.Error("%s", err.Error())
