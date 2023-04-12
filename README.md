@@ -373,6 +373,8 @@ type DB interface {
 
 数据管理指对游戏实体数据的管理功能，M3的Wraper和Viewer提供了自动置脏 和 视图过滤功能。实现了一套类似重返帝国的属性系统。
 
+https://mp.weixin.qq.com/s/rKpHb9WNkYh7rN_DNqC5xw  天美干货分享：怎么解决大地图SLG的技术痛点？
+
 ### Wraper
 
 Wraper，对数据的ORM级封装，采用反射&泛型极大的简化了DB操作，同时封装了一套自动化的置脏管理。example/actorapp/actor是一个基于Wraper的实体样例
@@ -435,16 +437,26 @@ Viewer是一个按视图级别的数据过滤器。Viewer会自动读取pb结构
 
 pb定义
 ```
+
 message ActorDB {
-    string ActorID = 1 [(viewfield_option) = { wflag: "ViewDetail,ViewBrief,ViewCard" }];   // 所有视图都展示
-    string Name    = 2 [(viewfield_option) = { wflag: "ViewDetail,ViewBrief,ViewCard" }];   // 所有视图都展示
-    int32 Level    = 3 [(viewfield_option) = { wflag: "ViewDetail,ViewBrief" }];    // 只在详情和简要视图展示，其他视图为默认值0
-    ActorFight Fight = 4; 	// 没有视图标记，直接递归检查子结构体
+    string ActorID = 1 [
+        (viewfield_option) = { wflag: "ViewDetail,ViewBrief,ViewCard" }
+    ];  // 所有视图都展示
+    string Name = 2 [
+        (viewfield_option) = { wflag: "ViewDetail,ViewBrief,ViewCard" }
+    ];  // 所有视图都展示
+    int32 Level = 3 [
+        (viewfield_option) = { wflag: "ViewDetail,ViewBrief" }
+    ];  // 只在详情和简要视图展示，其他视图为默认值0
+    ActorFight Fight = 4;  // 没有视图标记，直接递归检查子结构体
 }
 
 message ActorFight {
-    ActorFightBase Base = 1 [(viewfield_option) = { wflag: "ViewDetail,ViewBrief" }];  // 只在详情和简要视图展示
-    ActorFightPlus Plus = 2 [(viewfield_option) = { wflag: "ViewDetail" }];   // 只在详情视图展示
+    ActorFightBase Base = 1 [
+        (viewfield_option) = { wflag: "ViewDetail,ViewBrief" }
+    ];  // 只在详情和简要视图展示
+    ActorFightPlus Plus = 2
+        [(viewfield_option) = { wflag: "ViewDetail" }];  // 只在详情视图展示
 }
 
 message ActorFightBase {
@@ -458,16 +470,36 @@ message ActorFightPlus {
 }
 
 enum ViewFlag {
-    ViewMin   = 0;
-    ViewDetail = 1;	// 详情
-    ViewBrief = 2;	// 简要
-    ViewCard = 3;	// 极简
+    ViewMin    = 0;
+    ViewDetail = 1;  // 详情
+    ViewBrief  = 2;  // 简要
+    ViewCard   = 3;  // 极简
 }
 ```
 
 ```
-actor := ActorDB{ActorID:"123", Name:"xiaoming", Level:10, Fight}
+actor := &pb.ActorDB{
+	ActorID: "1001",
+	Name:    "小明",
+	Level:   1,
+	Fight: &pb.ActorFight{
+		Base: &pb.ActorFightBase{
+			Atk: 1,
+			Def: 2,
+		},
+		Plus: &pb.ActorFightPlus{
+			Hp: 3,
+			Mp: 4,
+		},
+	},
+}
+v := db.NewViewer[*pb.ActorDB, pb.ViewFlag]()
+fmt.Println(v.Filter(pb.ViewFlag_ViewCard, actor))   // 极简视图
+fmt.Println(v.Filter(pb.ViewFlag_ViewBrief, actor))  // 简要视图
+fmt.Println(v.Filter(pb.ViewFlag_ViewDetail, actor)) // 详情视图
 ```
+
+![image](https://user-images.githubusercontent.com/16680818/231456215-45ec12bd-bc77-4022-b852-d19aafeff47a.png)
 
 
 ## 熔断限流
