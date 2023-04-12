@@ -19,12 +19,18 @@ message M3RpcOption {
 }
 
 extend google.protobuf.FieldOptions {
-    M3DBFieldOption dbfield_option = 60001;
+    M3DBFieldOption dbfield_option     = 60001;
+    M3ViewFieldOption viewfield_option = 60002;
 }
 
 message M3DBFieldOption {
     string flag  = 1;  // 字段标记
     bool primary = 2;  // 主键
+}
+
+message M3ViewFieldOption {
+    string wflag = 1;  // 视野白名单
+    string bflag = 2;  // 视野黑名单
 }
 
 message Meta {
