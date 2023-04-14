@@ -137,14 +137,12 @@ func FillViewObj(vflag int, vn *ViewNode, obj proto.Message) proto.Message {
 	refType := reflect.TypeOf(obj).Elem()
 	value := reflect.New(refType)
 	nobj := value.Interface().(proto.Message)
-	log.Debug("11  [%v] [%v] %v", obj, nobj, obj == nil)
 	// 继续检索子节点
 	for _, idex := range vn.views[vflag] {
 		subvn := vn.subs[idex]
 		// 子节点是message 继续检索
 		if subvn.field.Kind() == protoreflect.MessageKind {
 			if subobj := FillViewObj(vflag, subvn, obj.ProtoReflect().Get(subvn.field).Message().Interface()); subobj != nil {
-				log.Debug("22 %v %v", subobj, nobj)
 				nobj.ProtoReflect().Set(subvn.field, protoreflect.ValueOfMessage(subobj.ProtoReflect()))
 			}
 			continue
@@ -156,7 +154,6 @@ func FillViewObj(vflag int, vn *ViewNode, obj proto.Message) proto.Message {
 }
 
 func (vm *Viewer[TM, TV]) Filter(vflag TV, obj TM) TM {
-	log.Debug("Filter %v", vflag)
 	nobj := FillViewObj(int(vflag.Number()), vm.root, obj)
 	if nobj == nil {
 		var tm TM

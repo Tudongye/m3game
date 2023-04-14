@@ -16,16 +16,12 @@ import (
 )
 
 type Config struct {
-	ActiveTimeOut        int    `mapstructure:"ActiveTimeOut" validate:"gte=0"`
-	SaveTimeInter        int    `mapstructure:"SaveTimeInter" validate:"gte=0"`
-	TickTimeInter        int    `mapstructure:"TickTimeInter" validate:"gt=0"`
-	MaxReqChanSize       int    `mapstructure:"MaxReqChanSize" validate:"gt=0"`
-	MaxReqWaitTime       int    `mapstructure:"MaxReqWaitTime" validate:"gt=0"`
-	AutoCreate           int    `mapstructure:"AutoCreate" validate:"gte=0,lte=1"`
-	LeaseMode            int    `mapstructure:"LeaseMode" validate:"gte=0,lte=1"`
-	LeasePrefix          string `mapstructure:"LeasePrefix" validate:"required"`
-	AllocLeaseTimeOut    int    `mapstructure:"AllocLeaseTimeOut" validate:"gt=0"`
-	WaitFreeLeaseTimeOut int    `mapstructure:"WaitFreeLeaseTimeOut" validate:"gt=0"`
+	ActiveTimeOut  int `mapstructure:"ActiveTimeOut" validate:"gte=0"`
+	SaveTimeInter  int `mapstructure:"SaveTimeInter" validate:"gte=0"`
+	TickTimeInter  int `mapstructure:"TickTimeInter" validate:"gt=0"`
+	MaxReqChanSize int `mapstructure:"MaxReqChanSize" validate:"gt=0"`
+	MaxReqWaitTime int `mapstructure:"MaxReqWaitTime" validate:"gt=0"`
+	AutoCreate     int `mapstructure:"AutoCreate" validate:"gte=0,lte=1"`
 }
 
 func New(name string, creater ActorCreater, actoridmetakey string) *Server {

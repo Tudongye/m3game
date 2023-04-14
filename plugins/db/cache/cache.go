@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"m3game/meta/errs"
 	"m3game/plugins/db"
-	"m3game/plugins/log"
 	"m3game/runtime/plugin"
 	"sync"
 
@@ -80,7 +79,6 @@ func (c *CacheDB) Read(ctx context.Context, meta db.DBMetaInter, key interface{}
 
 	obj := meta.New()
 	fieldname := genCacheKey(key, meta.Table(), meta.FlagName(meta.KeyFlag()))
-	log.Debug("Read %v", fieldname)
 	if _, ok := c.cache[fieldname]; !ok {
 		return nil, errs.DBKeyNotFound.New("Key %v", key)
 	}
@@ -91,7 +89,6 @@ func (c *CacheDB) Read(ctx context.Context, meta db.DBMetaInter, key interface{}
 		fieldname := genCacheKey(key, meta.Table(), meta.FlagName(flag))
 		if v, ok := c.cache[fieldname]; ok {
 			value, _ := _codec.Decode(meta.FlagKind(flag), v)
-			log.Debug("Read %v", value)
 			meta.Setter(obj, flag, value)
 		}
 	}
@@ -102,7 +99,6 @@ func (c *CacheDB) Update(ctx context.Context, meta db.DBMetaInter, key interface
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	fieldname := genCacheKey(key, meta.Table(), meta.FlagName(meta.KeyFlag()))
-	log.Debug("Update %v", fieldname)
 	if _, ok := c.cache[fieldname]; !ok {
 		return errs.DBKeyNotFound.New("Key %v", key)
 	}

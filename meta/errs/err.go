@@ -72,6 +72,7 @@ const (
 	GrpcGateSendFailChanFull         Code = 5205 // GrpcGate 发送消息失败队列已满
 	LeaseInsIsNill                   Code = 5301 // Lease实例不存在
 	LeaseInsHasNewed                 Code = 5302 // Lease实例已创建
+	LeaseMetaNotFindLease            Code = 5303 // LeaseMeta未找到Lease
 	EtcdSetupFail                    Code = 5303 // Etcd创建实例失败
 	EtcdIsClosed                     Code = 5304 // Etcd已关闭
 	EtcdAllocLeaseFail               Code = 5305 // Etcd申请Lease失败

@@ -101,11 +101,6 @@ func (am *ActorMgr) CallFunc(actorid string, ctx context.Context, req interface{
 	}
 }
 
-func (am *ActorMgr) KickLease(leaseid string) error {
-	actorid := parseLeaseId(am.cfg.LeasePrefix, leaseid)
-	return am.KickOne(actorid)
-}
-
 func (am *ActorMgr) KickOne(actorid string) error {
 	if actorruntime, ok := am.GetActor(actorid); !ok {
 		return errs.ActorKickNoFindActor.New("Not find Actor %s", actorid)

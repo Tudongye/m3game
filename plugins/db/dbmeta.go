@@ -110,9 +110,7 @@ func (d *DBMeta[TM]) AllFlags() []int32 {
 }
 
 func (d *DBMeta[TM]) Setter(msg proto.Message, flag int32, data interface{}) {
-	log.Debug("%s %d %s", msg, flag, data)
 	msg.ProtoReflect().Set(d.fieldds[flag], getReflectValue(d.FlagKind(flag), data))
-	log.Debug("%v", msg)
 }
 
 func (d *DBMeta[TM]) Getter(msg proto.Message, flag int32) interface{} {

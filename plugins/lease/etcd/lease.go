@@ -61,9 +61,7 @@ func (f *Factory) Setup(ctx context.Context, c map[string]interface{}) (plugin.P
 		Endpoints:   cfg.EndpointsList,
 		DialTimeout: time.Duration(cfg.DialTimeout) * time.Second,
 	}
-	_etcdlease = &Lease{
-		leasemap: make(map[string]lease.LeaseMoveOutFunc),
-	}
+	_etcdlease = &Lease{}
 	var err error
 	if _etcdlease.client, err = clientv3.New(config); err != nil {
 		return nil, errs.EtcdSetupFail.Wrap(err, "")
@@ -128,7 +126,6 @@ type Lease struct {
 	leaseId  clientv3.LeaseID
 	kv       clientv3.KV
 	timeout  int64
-	leasemap map[string]lease.LeaseMoveOutFunc
 	isstoped bool
 	mutex    sync.Mutex
 	cancel   context.CancelFunc
@@ -144,21 +141,15 @@ func (r *Lease) safecancel(ctx context.Context) {
 	if r.isstoped {
 		return
 	}
-	for _, f := range r.leasemap {
-		f(ctx)
-	}
 	r.isstoped = true
 	r.cancel()
 }
 
-func (r *Lease) AllocLease(ctx context.Context, id string, f lease.LeaseMoveOutFunc) error {
+func (r *Lease) AllocLease(ctx context.Context, id string) error {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 	if r.isstoped {
 		return errs.EtcdIsClosed.New("Lease Closed")
-	}
-	if _, ok := r.leasemap[id]; ok {
-		return errs.EtcdAllocLeaseFail.New("Lease %s alloced", id)
 	}
 	txn := r.kv.Txn(ctx)
 	txn.If(clientv3.Compare(clientv3.CreateRevision(id), "=", 0)).
@@ -169,7 +160,6 @@ func (r *Lease) AllocLease(ctx context.Context, id string, f lease.LeaseMoveOutF
 	} else if !txnResp.Succeeded {
 		return errs.EtcdAllocLeaseFail.New("Lease %s Value %s", id, string(txnResp.Responses[0].GetResponseRange().Kvs[0].Value))
 	}
-	r.leasemap[id] = f
 	return nil
 }
 
@@ -182,49 +172,15 @@ func (r *Lease) FreeLease(ctx context.Context, id string) error {
 	if _, err := r.kv.Delete(context.Background(), id); err != nil {
 		return err
 	}
-	if _, ok := r.leasemap[id]; ok {
-		delete(r.leasemap, id)
-	}
 	return nil
 }
 
-func (r *Lease) RecvKickLease(ctx context.Context, id string) ([]byte, error) {
-	f := func() lease.LeaseMoveOutFunc {
-		r.mutex.Lock()
-		defer r.mutex.Unlock()
-		if r.isstoped {
-			return nil
-		}
-		if f, ok := r.leasemap[id]; !ok {
-			return func(ctx context.Context) ([]byte, error) {
-				return nil, r.FreeLease(ctx, id)
-			}
-		} else {
-			return f
-		}
-	}()
-	if f == nil {
-		return nil, nil
-	}
-	return f(ctx)
-}
-
-func (r *Lease) KickLease(ctx context.Context, id string) ([]byte, error) {
+func (r *Lease) WhereIsLease(ctx context.Context, id string) (string, error) {
 	if getrsp, err := r.kv.Get(context.Background(), id); err != nil {
-		return nil, err
+		return "", err
 	} else if getrsp.Count == 0 {
-		return nil, nil
+		return "", nil
 	} else {
-		return lease.GetReciver().SendKickLease(ctx, id, string(getrsp.Kvs[0].Value))
-	}
-}
-
-func (r *Lease) GetLease(ctx context.Context, id string) ([]byte, error) {
-	if getrsp, err := r.kv.Get(context.Background(), id); err != nil {
-		return nil, err
-	} else if getrsp.Count == 0 {
-		return nil, nil
-	} else {
-		return getrsp.Kvs[0].Value, nil
+		return string(getrsp.Kvs[0].Value), nil
 	}
 }

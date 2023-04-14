@@ -15,8 +15,6 @@ type Actor interface {
 	OnTick() error         // 触发定时任务时
 	OnExit() error         // 退出时触发
 	OnSave() error         // 写回
-	OnMoveIn([]byte) error // 数据自动迁出
-	OnMoveOut() []byte     // 数据自动迁入
 	ExitCh() chan struct{} // 退出标记
 }
 
