@@ -197,6 +197,14 @@ go build .
 ```
 ![image](https://user-images.githubusercontent.com/16680818/230610348-20fb07fb-ec5d-41d1-a2a6-bfe1e4450a6e.png)
 
+## TODO
+
+1、重新梳理第三方包依赖
+
+2、重写Actor-Server
+
+3、优化租约组件的使用
+
 # 单实例开发方案(已完成)
 
 ## RPC驱动
