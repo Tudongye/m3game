@@ -9,6 +9,7 @@ import (
 	"m3game/plugins/log"
 	"m3game/runtime/mesh"
 	"m3game/runtime/server/actor"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -70,6 +71,28 @@ func (a *Actor) ActorID() string {
 
 func (a *Actor) OnInit() error {
 	log.InfoP(a.logp, "OnInit")
+	// 申请租约
+	f := func(context.Context) ([]byte, error) {
+		select {
+		case a.ExitCh() <- struct{}{}:
+			break
+		default:
+			break
+		}
+		// 先睡1秒等数据回写吧，后面看怎么优化  TODO
+		time.Sleep(time.Second)
+		return nil, nil
+	}
+	if err := LeaseMeta().AllocLease(context.TODO(), a.ActorID(), f); err != nil {
+		// 申请失败 尝试踢出
+		if _, err := LeaseMeta().KickLease(context.TODO(), a.ActorID()); err != nil {
+			return err
+		}
+		// 重新申请
+		if err := LeaseMeta().AllocLease(context.TODO(), a.ActorID(), f); err != nil {
+			return err
+		}
+	}
 	a.wraper = actorwrapermeata.New(a.ID())
 	return nil
 }
@@ -82,6 +105,10 @@ func (a *Actor) OnExit() error {
 	log.InfoP(a.logp, "OnExit")
 	if err := gatecli.SendToCli(context.Background(), a.playerid, "Exited", mesh.RouteApp(a.gateapp)); err != nil {
 		log.ErrorP(a.logp, "SendCli fail %s", err.Error())
+	}
+	// 释放租约
+	if _, err := LeaseMeta().FreeLease(context.TODO(), a.ActorID()); err != nil {
+		log.ErrorP(a.logp, err.Error())
 	}
 	return nil
 }

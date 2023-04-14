@@ -3,6 +3,7 @@ package actorapp
 import (
 	"context"
 	"m3game/config"
+	"m3game/example/actorapp/actor"
 	"m3game/example/actorapp/actorregcli"
 	"m3game/example/actorapp/actorregser"
 	"m3game/example/actorapp/actorser"
@@ -67,7 +68,14 @@ func (d *ActorApp) Prepare(ctx context.Context) error {
 	} else if _, err := actorregcli.New(config.GetAppID()); err != nil {
 		return err
 	}
-	lease.SetReciver(d)
+	actor.NewLeaseMeta(
+		lease.NewLeaseMeta(
+			"actor",
+			func(ctx context.Context, id string, app string) ([]byte, error) {
+				return actorregcli.Kick(ctx, id, app)
+			},
+		),
+	)
 	return nil
 }
 
@@ -97,10 +105,6 @@ func (d *ActorApp) Start(ctx context.Context) {
 
 func (d *ActorApp) Alive(app string, svc string) bool {
 	return true
-}
-
-func (d *ActorApp) PreExitLease(ctx context.Context, id string) ([]byte, error) {
-	return nil, actorser.Ser().ActorMgr().KickLease(id)
 }
 
 func (d *ActorApp) SendKickLease(ctx context.Context, id string, app string) ([]byte, error) {

@@ -4,11 +4,14 @@ import (
 	"context"
 	"m3game/example/proto/pb"
 	"m3game/plugins/db"
+	"m3game/plugins/lease"
 )
 
 var (
 	actordbmeta      *db.DBMeta[*pb.ActorDB]
 	actorwrapermeata *db.WraperMeta[*pb.ActorDB, pb.AcFlag]
+
+	actorleasemeta *lease.LeaseMeta
 )
 
 func init() {
@@ -26,4 +29,12 @@ func Register(ctx context.Context, playerid string, name string) (string, error)
 	w.Set(pb.AcFlag_FActorName, name)
 	w.Set(pb.AcFlag_FActorLevel, int32(0))
 	return playerid, w.Create(ctx, dbplugin)
+}
+
+func NewLeaseMeta(lm *lease.LeaseMeta) {
+	actorleasemeta = lm
+}
+
+func LeaseMeta() *lease.LeaseMeta {
+	return actorleasemeta
 }
