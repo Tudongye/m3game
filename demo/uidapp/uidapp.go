@@ -103,7 +103,7 @@ func (a *UidApp) VoteMain(ctx context.Context) (bool, error) {
 	svcid := config.GetSvcID().String()
 	// 获取实际主备
 	leaseAppId := ""
-	if lv, err := lease.GetLease(ctx, a.cfg.VoteLease); err != nil {
+	if lv, err := lease.Instance().WhereIsLease(ctx, a.cfg.VoteLease); err != nil {
 		return false, errors.Wrapf(err, "Vote GetLease %s", a.cfg.VoteLease)
 	} else {
 		leaseAppId = string(lv)
@@ -135,7 +135,7 @@ func (a *UidApp) VoteMain(ctx context.Context) (bool, error) {
 	log.Info("LeaseAppId %s , LogicAppId %s, local %s", leaseAppId, logicAppId, appid)
 	if leaseAppId == appid {
 		log.Info("Local is LeaseAppId %s, Free Lease %s...", leaseAppId, a.cfg.VoteLease)
-		if err := lease.FreeLease(ctx, a.cfg.VoteLease); err != nil {
+		if err := lease.Instance().FreeLease(ctx, a.cfg.VoteLease); err != nil {
 			log.Error("Local %s Free Lease %s Fail %s", appid, a.cfg.VoteLease, err.Error())
 		}
 		return false, nil
@@ -144,7 +144,7 @@ func (a *UidApp) VoteMain(ctx context.Context) (bool, error) {
 		if uidser.Pool().IsOpen() {
 			uidser.Pool().Close()
 		}
-		if err := lease.AllocLease(ctx, a.cfg.VoteLease, lease.DefaultLeaseMoveOutFunc); err != nil {
+		if err := lease.Instance().AllocLease(ctx, a.cfg.VoteLease); err != nil {
 			log.Error("Local %s Alloc Lease %s Fail %s", appid, a.cfg.VoteLease, err.Error())
 			return false, nil
 		}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"m3game/demo/proto/pb"
 	"m3game/plugins/db"
+	"m3game/plugins/lease"
 )
 
 var (
@@ -11,6 +12,8 @@ var (
 	_clubroledbmeta     *db.DBMeta[*pb.ClubRoleDB]
 	_clubwrapermeta     *db.WraperMeta[*pb.ClubDB, pb.CFlag]
 	_clubrolewrapermeta *db.WraperMeta[*pb.ClubRoleDB, pb.CRFlag]
+
+	_clubleasemeta *lease.LeaseMeta
 )
 
 func init() {
@@ -34,4 +37,12 @@ func newClubRoleDB(ctx context.Context, roleid int64, clubid int64) error {
 	w.Set(pb.CRFlag_CRRoleId, roleid)
 	w.Set(pb.CRFlag_CRClubId, clubid)
 	return w.Create(ctx, dbplugin)
+}
+
+func NewLeaseMeta(lm *lease.LeaseMeta) {
+	_clubleasemeta = lm
+}
+
+func LeaseMeta() *lease.LeaseMeta {
+	return _clubleasemeta
 }

@@ -64,10 +64,17 @@ func (a *ClubApp) Init(c map[string]interface{}) error {
 }
 
 func (d *ClubApp) Prepare(ctx context.Context) error {
-	lease.SetReciver(d)
 	if _, err := clubdcli.New(config.GetAppID()); err != nil {
 		return err
 	}
+	club.NewLeaseMeta(
+		lease.NewLeaseMeta(
+			"clubslot",
+			func(ctx context.Context, id string, app string) ([]byte, error) {
+				return clubdcli.Kick(ctx, id, app)
+			},
+		),
+	)
 	return nil
 }
 
@@ -132,14 +139,6 @@ func (d *ClubApp) VoteSlots(ctx context.Context) ([]string, error) {
 
 func (d *ClubApp) Alive(app string, svc string) bool {
 	return true
-}
-
-func (d *ClubApp) PreExitLease(ctx context.Context, id string) ([]byte, error) {
-	return nil, clubser.Ser().ActorMgr().KickLease(id)
-}
-
-func (d *ClubApp) SendKickLease(ctx context.Context, id string, app string) ([]byte, error) {
-	return clubdcli.Kick(ctx, id, app)
 }
 
 func Run(ctx context.Context) error {

@@ -2,8 +2,8 @@ package clubdser
 
 import (
 	"context"
+	"m3game/demo/clubapp/club"
 	"m3game/demo/proto/pb"
-	"m3game/plugins/lease"
 	"m3game/plugins/log"
 	"m3game/runtime/rpc"
 	"m3game/runtime/server/async"
@@ -31,7 +31,7 @@ type ClubDSer struct {
 func (d *ClubDSer) ClubKick(ctx context.Context, in *pb.ClubKick_Req) (*pb.ClubKick_Rsp, error) {
 	out := new(pb.ClubKick_Rsp)
 	log.Info("Kick")
-	if _, err := lease.RecvKickLease(ctx, in.LeaseId); err != nil {
+	if _, err := club.LeaseMeta().RecvKickLease(ctx, in.LeaseId); err != nil {
 		return out, err
 	}
 	return out, nil

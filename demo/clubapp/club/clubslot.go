@@ -10,6 +10,7 @@ import (
 	"m3game/plugins/log"
 	"m3game/runtime/server/actor"
 	"strconv"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -43,6 +44,29 @@ type Slot struct {
 
 func (a *Slot) OnInit() error {
 	log.InfoP(a.logp, "OnInit")
+	// 申请租约
+	f := func(context.Context) ([]byte, error) {
+		select {
+		case a.ExitCh() <- struct{}{}:
+			break
+		default:
+			break
+		}
+		// 先睡1秒等数据回写吧，后面看怎么优化  TODO
+		time.Sleep(time.Second)
+		return nil, nil
+	}
+	if err := LeaseMeta().AllocLease(context.TODO(), a.ID(), f); err != nil {
+		// 申请失败 尝试踢出
+		if _, err := LeaseMeta().KickLease(context.TODO(), a.ID()); err != nil {
+			return err
+		}
+		// 重新申请
+		if err := LeaseMeta().AllocLease(context.TODO(), a.ID(), f); err != nil {
+			return err
+		}
+	}
+
 	// 加载slot数据
 	if slotid, err := strconv.ParseInt(a.ID(), 10, 64); err != nil {
 		return err
@@ -70,6 +94,9 @@ func (a *Slot) OnTick() error {
 
 func (a *Slot) OnExit() error {
 	log.InfoP(a.logp, "OnExit")
+	if _, err := LeaseMeta().FreeLease(context.TODO(), a.ID()); err != nil {
+		log.ErrorP(a.logp, err.Error())
+	}
 	return nil
 }
 
