@@ -1,0 +1,30 @@
+[Options]
+[[Options.Mesh]]
+WatcherInterSecond = 1
+[[Options.Resource]]
+CfgPath = "../../resource"
+[[Options.Shape]]
+RuleConfigFile = "../../resource/rules.toml"
+
+[Plugin]
+[[Plugin.Router.router_consul]]
+ConsulHost = "127.0.0.1:8500"
+AliveHost = "127.0.0.1"
+AlivePort = 20062
+
+[[Plugin.Broker.broker_nats]]
+URL = "127.0.0.1:4222"
+
+[[Plugin.Shape.shape_sentinel]]
+ConfigFile = "../../resource/sentinel.yml"
+
+[[Plugin.Log.log_zap]]
+LogLevel = "DEBUG"
+Encoding = "console"
+
+[[Plugin.Trans.trans_http2]]
+Host = "127.0.0.1"
+Port = 20061
+
+[App]
+PrePareTime = 10 # 启动前准备时长

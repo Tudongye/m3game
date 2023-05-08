@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package proto;
+
+import "options.proto";
+
+option go_package = "proto/pb";
+
+service WorldSer {
+    rpc CreateEntity(CreateEntity.Req) returns (CreateEntity.Rsp);
+    rpc MoveEntity(MoveEntity.Req) returns (MoveEntity.Rsp);
+    rpc ViewEntity(ViewEntity.Req) returns (ViewEntity.Rsp);
+    rpc ViewPosition(ViewPosition.Req) returns (ViewPosition.Rsp);
+}
+
+message Position {
+    int32 X = 1;
+    int32 Y = 2;
+}
+
+message Entity {
+    string Name    = 1;
+    Position SrcPos = 2;    // 出发地
+    Position DstPos = 3;    // 目的地 
+    Position CurPos = 4;    // 当前位置
+    int64 MoveTime = 5; // 出发时间
+    int32 Moved = 6;// 已经行进路程
+}
+
+message CreateEntity {
+    option (rpc_option).route_key = "";
+    option (rpc_option).cs        = true;
+    message Req {
+        string Name = 1;
+        Position SrcPos = 2;
+    }
+    message Rsp {
+        Entity Entity = 1;
+    }
+}
+
+message MoveEntity {
+    option (rpc_option).route_key = "";
+    option (rpc_option).cs        = true;
+    message Req {
+        string Name = 1;
+        Position DstPos = 2;
+    }
+    message Rsp {
+        Entity Entity = 1;
+    }
+}
+
+message ViewEntity {
+    option (rpc_option).route_key = "";
+    option (rpc_option).cs        = true;
+    message Req {
+        string Name = 1;
+    }
+    message Rsp {
+        Entity Entity = 1;
+    }
+}
+
+message ViewPosition {
+    option (rpc_option).route_key = "";
+    option (rpc_option).cs        = true;
+    message Req {
+        Position Pos = 1;
+    }
+    message Rsp {
+        repeated Entity Entitys = 1;
+    }
+}

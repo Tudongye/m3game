@@ -1,0 +1,1 @@
+./main -idstr example.world1.world.1 -conf ../../config/worldapp.toml
