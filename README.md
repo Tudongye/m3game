@@ -64,6 +64,8 @@ Lease-Plugin：租约管理组件，当前有一个etcd实现
 
 Transport-Plugin：Grpc传输层组件，当前有一个http2（原生） 和 一个Nats的实现。
 
+GamePlay: 一组走状态同步的大地图Gameplay框架，当前有一个单机版的World实现
+
 ## 集群化部署架构
 
 ![未命名文件 (15)](https://user-images.githubusercontent.com/16680818/230932844-7a46e390-a5e8-49ff-93d4-1f62624ba6f8.png)
